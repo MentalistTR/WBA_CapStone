@@ -145,8 +145,25 @@ module notary::assets_operation {
 
     // =================== Functions ===================
 
-    public fun create_House(
-        house: &House, 
+     /// Users has to create an account. 
+     /// # Arguments
+     /// 
+     /// * `debt` -  Defines the user debt 
+     /// * `balance` - Defines the user balance
+    public fun new_account(ctx: &mut TxContext): Account {
+        Account {
+          id: object::new(ctx),
+          debt: 0,
+          balance: balance::zero()
+        }
+  }
+    
+     /// Users can create a house . 
+     /// # Arguments
+     /// 
+     /// * `location, area, year ` -  are the property of house  
+     /// * `price` - Defines the house price.
+    public fun create_House( 
         asset: &mut Asset,
         account: &mut Account, 
         location: String,
@@ -169,15 +186,18 @@ module notary::assets_operation {
             approve: false
         };
         // calculate the notary fee
-        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
         transfer::public_transfer(house, tx_context::sender(ctx));
     }
-
-     public fun create_shop(
-        house: &Shop, 
+     /// Users can create shop . 
+     /// # Arguments
+     /// 
+     /// * `location, area, year ` -  are the property of shop 
+     /// * `price` - Defines the shop price.
+     public fun create_shop( 
         asset: &mut Asset,
         account: &mut Account, 
         location: String,
@@ -201,16 +221,19 @@ module notary::assets_operation {
             approve: false
         };
         // calculate the notary fee
-        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
         transfer::public_transfer(shop, tx_context::sender(ctx));
 
     }
-
+     /// Users can create a land . 
+     /// # Arguments
+     /// 
+     /// * `location, area ` -  are the property of land  
+     /// * `price` - Defines the land price.
      public fun create_land(
-        land: &Land, 
         asset: &mut Asset,
         account: &mut Account, 
         location: String,
@@ -231,16 +254,19 @@ module notary::assets_operation {
             approve: false
         };
         // calculate the notary fee
-        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
         transfer::public_transfer(land, tx_context::sender(ctx));
 
     }
-
+     /// Users can create a house . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
      public fun create_car(
-        house: &Land, 
         asset: &mut Asset,
         account: &mut Account, 
         model: String,
@@ -265,7 +291,7 @@ module notary::assets_operation {
             approve: false
         };
         // calculate the notary fee
-        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
