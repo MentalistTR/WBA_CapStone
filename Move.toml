@@ -7,3 +7,5 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 
 [addresses]
 notary = "0x0"
+std = "0x1"
+sui="0x2"

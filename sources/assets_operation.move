@@ -3,8 +3,11 @@ module notary::assets_operation {
     use sui::object::{Self,UID,ID};
     use sui::transfer;
 
+    use notary::lira_stable_coin::{TR_LIRA};
 
-     // =================== Errors ===================
+
+    // =================== Errors ===================
+
 
 
 

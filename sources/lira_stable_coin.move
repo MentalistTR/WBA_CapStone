@@ -1,4 +1,4 @@
-module notary::TR_LIRA_stable_coin {
+module notary::lira_stable_coin {
   use std::option;
 
   use sui::transfer;
@@ -6,6 +6,10 @@ module notary::TR_LIRA_stable_coin {
   use sui::tx_context::TxContext;
   use sui::coin::{Self, Coin, TreasuryCap};
 
+  // === Friends ===
+
+  friend notary::assets_operation;
+ 
   // === Structs ===  
 
   struct TR_LIRA has drop {}
