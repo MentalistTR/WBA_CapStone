@@ -325,7 +325,12 @@ module notary::assets_operation {
 
     // === Test Functions ===
     #[test_only]
-
+    // get user Account balance 
+    public fun user_account_balance(account: &Account): u64 {
+        balance::value(&account.balance)
+    }
+    #[test_only]
+    // get init function 
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }

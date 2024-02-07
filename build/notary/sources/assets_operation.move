@@ -299,7 +299,7 @@ module notary::assets_operation {
         transfer::public_transfer(car, tx_context::sender(ctx));
     }
 
-    public fun deposit(account: &mut Account ,coin: Coin<LIRA_STABLE_COIN>) {
+    public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
 
@@ -325,7 +325,12 @@ module notary::assets_operation {
 
     // === Test Functions ===
     #[test_only]
-
+    // get user Account balance 
+    public fun user_account_balance(account: &Account): u64 {
+        balance::value(&account.balance)
+    }
+    #[test_only]
+    // get init function 
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }
