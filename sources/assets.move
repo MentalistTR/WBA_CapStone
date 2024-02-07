@@ -1,4 +1,5 @@
 module notary::assets {
+    use std::string::{Self,String};
 
     // object that people can sell, buy or rent 
     struct House has key {
@@ -18,10 +19,10 @@ module notary::assets {
     }
  
     // object that event for keep in Data Share object 
-    struct Sales<T> has copy, drop {
+    struct Sales has copy, drop {
         seller: address,
         buyer: address,
-        item: T,
+        item: String,
         time: u64,
     }
 

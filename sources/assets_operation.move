@@ -16,20 +16,21 @@ module notary::assets_operation {
 
     // =================== Errors ===================
 
+    // =================== Constants ===================
 
-
+    const FEE: u64 = 5;
 
     /// Defines the share object for keep transactions(approve) 
     /// 
     /// # Arguments
     /// 
     /// There are 4 structures event that notary should keep events. 
-    struct Data<T> has key {
+    struct Data has key {
         id: UID,
-        house: Table<address, VecMap<address,Sales<T>>>,
-        shop: Table<address, VecMap<address,Sales<T>>>,
-        car: Table<address, VecMap<address,Sales<T>>>,
-        land: Table<address, VecMap<address,Sales<T>>>,
+        house: Table<address, VecMap<address,Sales>>,
+        shop: Table<address, VecMap<address,Sales>>,
+        car: Table<address, VecMap<address,Sales>>,
+        land: Table<address, VecMap<address,Sales>>,
     }
     /// Defines the share object for keep assets to rent or sales
     /// 
@@ -51,9 +52,14 @@ module notary::assets_operation {
 
     // =================== Initializer ===================
 
-    fun init() {
+    // fun init(ctx: &mut TxContext) {
+    //     transfer::share_object(
+    //     Data {
 
-    }
+    //         }
+    //     )
+
+    // }
 
     // =================== Functions ===================
 
