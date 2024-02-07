@@ -158,7 +158,7 @@ module notary::assets_operation {
         // create an house
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
-        let house1 = House {
+        let house = House {
             id:id,
             inner: inner,
             owner: tx_context::sender(ctx),
@@ -173,7 +173,105 @@ module notary::assets_operation {
         // transfer the notary_fee to notary balance 
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
-        transfer::public_transfer(house1, tx_context::sender(ctx));
+        transfer::public_transfer(house, tx_context::sender(ctx));
+    }
+
+     public fun create_shop(
+        house: &Shop, 
+        asset: &mut Asset,
+        account: &mut Account, 
+        location: String,
+        area: u64,
+        year: u64,
+        price: u64,
+        ctx :&mut TxContext,
+
+     ) {
+        // create an Shop
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let shop = Shop {
+            id:id,
+            inner: inner,
+            owner: tx_context::sender(ctx),
+            location: location,
+            area_meter: area,
+            year: year,
+            price: price,
+            approve: false
+        };
+        // calculate the notary fee
+        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        // transfer the notary_fee to notary balance 
+        balance::join(&mut asset.admin_fee, notary_fee);
+        // transfer the object to sender
+        transfer::public_transfer(shop, tx_context::sender(ctx));
+
+    }
+
+     public fun create_land(
+        land: &Land, 
+        asset: &mut Asset,
+        account: &mut Account, 
+        location: String,
+        area: u64,
+        price: u64,
+        ctx :&mut TxContext,
+     ) {
+        // create an Land
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let land = Land {
+            id:id,
+            inner: inner,
+            owner: tx_context::sender(ctx),
+            location: location,
+            area_meter: area,
+            price: price,
+            approve: false
+        };
+        // calculate the notary fee
+        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        // transfer the notary_fee to notary balance 
+        balance::join(&mut asset.admin_fee, notary_fee);
+        // transfer the object to sender
+        transfer::public_transfer(land, tx_context::sender(ctx));
+
+    }
+
+     public fun create_car(
+        house: &Land, 
+        asset: &mut Asset,
+        account: &mut Account, 
+        model: String,
+        year: u64,
+        color: String,
+        distance: u64,
+        price: u64,
+        ctx :&mut TxContext,
+     ) {
+        // create an car
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let car = Car {
+            id:id,
+            inner: inner,
+            owner: tx_context::sender(ctx),
+            model: model,
+            year: year,
+            color:color,
+            distance: distance,
+            price: price,
+            approve: false
+        };
+        // calculate the notary fee
+        let notary_fee = balance::split(&mut asset.admin_fee, FEE / 1000);
+        // transfer the notary_fee to notary balance 
+        balance::join(&mut asset.admin_fee, notary_fee);
+        // transfer the object to sender
+        transfer::public_transfer(car, tx_context::sender(ctx));
+
+
     }
 
     public fun approve() {
