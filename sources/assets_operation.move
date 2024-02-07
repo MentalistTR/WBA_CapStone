@@ -36,6 +36,8 @@ module notary::assets_operation {
     /// 
     /// 
     struct Asset has key {
+        id: UID,
+
 
     }
     // object that people can sell, buy or rent 
@@ -59,7 +61,6 @@ module notary::assets_operation {
 
     }
     // object that event for keep in Data Share object 
-
     struct Sales<T> has copy, drop {
         seller: address,
         buyer: address,
