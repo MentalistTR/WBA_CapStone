@@ -1,7 +1,12 @@
 module notary::assets_operation {
+    use std::string::{Self,String};
+    use std::vector;
+    use std::debug;
+
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self,UID,ID};
     use sui::transfer;
+    use sui::table::{Self, Table};
 
     use notary::lira_stable_coin::{TR_LIRA};
 
@@ -15,9 +20,15 @@ module notary::assets_operation {
     /// 
     /// # Arguments
     /// 
-    /// 
-    struct Data has key {
-        
+    /// There are 4 structures event that notary should keep events. 
+    struct Data<T> has key {
+        id: UID,
+        house: Table<address, vector<Sales<T>>>,
+        shop: Table<address, vector<Sales<T>>>,
+        car: Table<address, vector<Sales<T>>>,
+        land: Table<address, vector<Sales<T>>>,
+        //user_operations:Table<address,Table<String, String>>,
+ 
     }
     /// Defines the share object for keep assets to rent or sales
     /// 
@@ -46,6 +57,14 @@ module notary::assets_operation {
     // Only owner of this module can access it.
     struct AdminCap has key {
 
+    }
+    // object that event for keep in Data Share object 
+
+    struct Sales<T> has copy, drop {
+        seller: address,
+        buyer: address,
+        item: T,
+        time: u64,
     }
 
     // =================== Initializer ===================
