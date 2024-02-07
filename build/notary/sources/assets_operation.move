@@ -8,7 +8,8 @@ module notary::assets_operation {
     use sui::transfer;
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
-    use sui::balance::{Balance};
+    use sui::balance::{Self, Balance};
+    use sui::object_table::{ObjectTable};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
     use notary::assets::{House, Shop, Land, Car, Sales};
@@ -39,10 +40,10 @@ module notary::assets_operation {
     /// 
     struct Asset has key, store {
         id: UID,
-        house: Table<address, VecMap<address, House>>,
-        shop: Table<address, VecMap<address, Shop>>,
-        car: Table<address, VecMap<address, Car>>,
-        land: Table<address, VecMap<address, Land>>,
+        house: Table<address, ObjectTable<String, House>>,
+        shop: Table<address, ObjectTable<String, Shop>>,
+        car: Table<address, ObjectTable<String, Car>>,
+        land: Table<address, ObjectTable<String, Land>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
     }
     // Only owner of this module can access it.
@@ -52,16 +53,34 @@ module notary::assets_operation {
 
     // =================== Initializer ===================
 
-    // fun init(ctx: &mut TxContext) {
-    //     transfer::share_object(
-    //         Data {
-    //             id: UID,
+    fun init(ctx: &mut TxContext) {
+        // create and transfer Data share object
+        transfer::share_object(
+            Data {
+                id: object::new(ctx),
+                house:table::new(ctx),
+                shop: table::new(ctx),
+                car: table::new(ctx),
+                land: table::new(ctx)
+            }
+        );
+        // create and transfer Asset share object
+        transfer::share_object(
+            Asset {
+                id: object::new(ctx),
+                house:table::new(ctx),
+                shop: table::new(ctx),
+                car: table::new(ctx),
+                land: table::new(ctx),
+                admin_fee: balance::zero()
+            }
+        );
+        // transfer AdminCap object to owner 
+        transfer::transfer(AdminCap 
+        { id: object::new(ctx),}, tx_context::sender(ctx) );
 
-    //         }
-        
-    //     )
 
-    // }
+    }
 
     // =================== Functions ===================
 
