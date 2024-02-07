@@ -156,7 +156,7 @@ module notary::assets_operation {
           debt: 0,
           balance: balance::zero()
         }
-  }
+    }
     
      /// Users can create a house . 
      /// # Arguments
@@ -318,4 +318,10 @@ module notary::assets_operation {
 
     }
 
+    // === Test Functions ===
+    #[test_only]
+
+    public fun test_init(ctx: &mut TxContext) {
+        init(ctx);
+    }
 }
