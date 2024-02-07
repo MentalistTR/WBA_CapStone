@@ -9,6 +9,7 @@ module notary::assets_operation {
     use sui::table::{Self, Table};
 
     use notary::lira_stable_coin::{TR_LIRA};
+    use notary::assets::{House, Shop, Land, Car, Sales};
 
 
     // =================== Errors ===================
@@ -40,32 +41,9 @@ module notary::assets_operation {
 
 
     }
-    // object that people can sell, buy or rent 
-    struct House has key {
-
-    }  
-    // object that people can sell, buy or rent 
-    struct Shop has key {
-
-    }
-    // object that people can sell, buy or rent 
-    struct Car has key {
-
-    }
-    // object that people can sell, buy or rent 
-    struct Land has key {
-
-    }
     // Only owner of this module can access it.
     struct AdminCap has key {
 
-    }
-    // object that event for keep in Data Share object 
-    struct Sales<T> has copy, drop {
-        seller: address,
-        buyer: address,
-        item: T,
-        time: u64,
     }
 
     // =================== Initializer ===================
