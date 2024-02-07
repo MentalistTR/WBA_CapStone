@@ -4,7 +4,13 @@ module notary::assets {
 
     // object that people can sell, buy or rent 
     struct House has key, store {
-        id:UID
+        id: UID,
+        name: String,
+        owner: address,
+        
+        location: String,
+        
+
 
     }  
     // object that people can sell, buy or rent 

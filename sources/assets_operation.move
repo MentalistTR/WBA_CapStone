@@ -9,7 +9,7 @@ module notary::assets_operation {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
-    use sui::object_table::{ObjectTable};
+    use sui::table_vec::{Self, TableVec};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
     use notary::assets::{House, Shop, Land, Car, Sales};
@@ -30,10 +30,10 @@ module notary::assets_operation {
     /// There are 4 structures event that notary should keep events. 
     struct Data has key, store {
         id: UID,
-        house: Table<address, VecMap<address,Sales>>,
-        shop: Table<address, VecMap<address,Sales>>,
-        car: Table<address, VecMap<address,Sales>>,
-        land: Table<address, VecMap<address,Sales>>,
+        house: VecMap<address, Sales>,
+        shop: VecMap<address, Sales>,
+        car: VecMap<address, Sales>,
+        land: VecMap<address, Sales>,
     }
     /// Defines the share object for keep assets to rent or sales
     /// 
@@ -43,10 +43,10 @@ module notary::assets_operation {
     /// notary fee will be keep in this object
     struct Asset has key, store {
         id: UID,
-        house: Table<address, ObjectTable<String, House>>,
-        shop: Table<address, ObjectTable<String, Shop>>,
-        car: Table<address, ObjectTable<String, Car>>,
-        land: Table<address, ObjectTable<String, Land>>,
+        house: Table<address,TableVec<House>>,
+        shop: Table<address,TableVec<Shop>>,
+        car: Table<address,TableVec<Car>>,
+        land: Table<address,TableVec<Land>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
     }
     // Only owner of this module can access it.
@@ -61,10 +61,10 @@ module notary::assets_operation {
         transfer::share_object(
             Data {
                 id: object::new(ctx),
-                house:table::new(ctx),
-                shop: table::new(ctx),
-                car: table::new(ctx),
-                land: table::new(ctx)
+                house: vec_map::empty(),
+                shop: vec_map::empty(),
+                car:  vec_map::empty(),
+                land: vec_map::empty()
             }
         );
         // create and transfer Asset share object
