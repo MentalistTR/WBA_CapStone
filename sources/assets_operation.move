@@ -8,6 +8,7 @@ module notary::assets_operation {
     use sui::transfer;
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
+    use sui::balance::{Balance};
 
     use notary::lira_stable_coin::{TR_LIRA};
     use notary::assets::{House, Shop, Land, Car, Sales};
@@ -37,7 +38,11 @@ module notary::assets_operation {
     /// 
     struct Asset has key {
         id: UID,
-
+        house: Table<address, VecMap<address, House>>,
+        shop: Table<address, VecMap<address, Shop>>,
+        car: Table<address, VecMap<address, Car>>,
+        land: Table<address, VecMap<address, Land>>,
+        admin_fee: Balance<TR_LIRA>,
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
