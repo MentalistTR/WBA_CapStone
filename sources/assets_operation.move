@@ -10,6 +10,7 @@ module notary::assets_operation {
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
     use sui::table_vec::{Self, TableVec};
+    use sui::coin::{Self, Coin};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
   
@@ -296,6 +297,10 @@ module notary::assets_operation {
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
         transfer::public_transfer(car, tx_context::sender(ctx));
+    }
+
+    public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
+        balance::join(&mut account.balance, coin::into_balance(coin));
     }
 
     public fun approve() {

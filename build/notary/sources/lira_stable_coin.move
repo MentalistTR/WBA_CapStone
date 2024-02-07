@@ -52,7 +52,7 @@ module notary::lira_stable_coin {
   // === Test Functions ===  
 
   #[test_only]
-  public fun return_init_sui_dollar(ctx: &mut TxContext) {
+  public fun return_init_lira(ctx: &mut TxContext) {
     init(LIRA_STABLE_COIN {}, ctx);
   }
 }

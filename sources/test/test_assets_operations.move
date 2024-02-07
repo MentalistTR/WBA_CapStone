@@ -18,6 +18,19 @@ module notary::test_assets_operations {
     const TEST_ADDRESS3: address = @0xD;
     const TEST_ADDRESS4: address = @0xE;
 
+    public fun test_create() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        next_tx(scenario, ADMIN);
+        {
+
+        }
+
+
+
+
+    }
 
 
 
