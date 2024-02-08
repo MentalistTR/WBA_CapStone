@@ -6,7 +6,7 @@ module notary::assets_operation {
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self,UID,ID};
     use sui::transfer;
-    use sui::table::{Self, Table};
+    use sui::object_table::{Self as ot, ObjectTable};
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
     use sui::table_vec::{Self, TableVec};
@@ -16,7 +16,8 @@ module notary::assets_operation {
     use notary::assets::{
         House, Car, Land, Shop, 
         Sales, return_house, return_shop, return_land, return_car, house_bool,
-        car_bool, land_bool, shop_bool,
+        car_bool, land_bool, shop_bool, return_house_id, return_car_id, return_land_id,
+        return_shop_id,
         return_house_bool, return_car_bool, return_land_bool, return_shop_bool
         };
   
@@ -49,10 +50,10 @@ module notary::assets_operation {
     /// notary fee will be keep in this object
     struct Asset has key, store {
         id: UID,
-        house: Table<address,TableVec<House>>,
-        shop: Table<address,TableVec<Shop>>,
-        car: Table<address,TableVec<Car>>,
-        land: Table<address,TableVec<Land>>,
+        house: ObjectTable<address, ObjectTable<ID, House>>,
+        shop: ObjectTable<address, ObjectTable<ID, Shop>>,
+        car: ObjectTable<address, ObjectTable<ID, Car>>,
+        land: ObjectTable<address, ObjectTable<ID, Land>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
     }
     // Only owner of this module can access it.
@@ -83,10 +84,10 @@ module notary::assets_operation {
         transfer::share_object(
             Asset {
                 id: object::new(ctx),
-                house:table::new(ctx),
-                shop: table::new(ctx),
-                car: table::new(ctx),
-                land: table::new(ctx),
+                house:ot::new(ctx),
+                shop: ot::new(ctx),
+                car: ot::new(ctx),
+                land: ot::new(ctx),
                 admin_fee: balance::zero()
             }
         );
@@ -232,8 +233,87 @@ module notary::assets_operation {
         shop_bool(self);
     }
 
-    public fun add_table() {
+     /// Users has to add assets to table Adds to the table  . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_house_table(
+        asset: &mut Asset,
+        item: House,
+        ctx: &mut TxContext
+    ) {
+        // check that asset approved by admin
+        assert!(return_house_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        // get object ID from asset module
+        let object_id = return_house_id(&item);
+        // get user table 
+        let user_object_table = ot::borrow_mut(
+            &mut asset.house, tx_context::sender(ctx));
+        // add the object to the objecttable
+        ot::add(user_object_table, object_id, item);
+    }
 
+     /// Users has to add assets to table Adds to the table  . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_car_table(
+        asset: &mut Asset,
+        item: Car,
+        ctx: &mut TxContext
+    ) {
+        // check that asset approved by admin
+        assert!(return_car_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        // get object ID from asset module
+        let object_id = return_car_id(&item);
+        // get user table 
+        let user_object_table = ot::borrow_mut(
+            &mut asset.car, tx_context::sender(ctx));
+        // add the object to the objecttable
+        ot::add(user_object_table, object_id, item);
+    }
+     /// Users has to add assets to table Adds to the table  . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_land_table(
+        asset: &mut Asset,
+        item: Land,
+        ctx: &mut TxContext
+    ) {
+        // check that asset approved by admin
+        assert!(return_land_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        // get object ID from asset module
+        let object_id = return_land_id(&item);
+        // get user table 
+        let user_object_table = ot::borrow_mut(
+            &mut asset.land, tx_context::sender(ctx));
+        // add the object to the objecttable
+        ot::add(user_object_table, object_id, item);
+    }
+
+     /// Users has to add assets to table Adds to the table  . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_land_shop(
+        asset: &mut Asset,
+        item: Shop,
+        ctx: &mut TxContext
+    ) {
+        // check that asset approved by admin
+        assert!(return_shop_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        // get object ID from asset module
+        let object_id = return_shop_id(&item);
+        // get user table 
+        let user_object_table = ot::borrow_mut(
+            &mut asset.shop, tx_context::sender(ctx));
+        // add the object to the objecttable
+        ot::add(user_object_table, object_id, item);
     }
 
     public fun remove_table() {

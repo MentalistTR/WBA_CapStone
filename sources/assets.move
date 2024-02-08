@@ -16,6 +16,7 @@ module notary::assets {
         area_meter: u64,
         year: u64,
         price: u64,
+        on_rent: bool,
         approve: bool
     }  
     // object that people can sell, buy or rent 
@@ -27,6 +28,7 @@ module notary::assets {
         area_meter: u64,
         year: u64,
         price: u64,
+        on_rent: bool,
         approve: bool
     }
     // object that people can sell, buy or rent 
@@ -78,6 +80,7 @@ module notary::assets {
             area_meter: area,
             year: year,
             price: price,
+            on_rent: false,
             approve: false
         };
         house
@@ -144,6 +147,7 @@ module notary::assets {
             area_meter: area,
             year: year,
             price: price,
+            on_rent: false,
             approve: false
         };
         shop
@@ -183,5 +187,23 @@ module notary::assets {
     public fun return_shop_bool(self: &Shop) : bool {
         self.approve
     }
+    // return House object ID for add table 
+    public fun return_house_id(self:&House) : ID {
+        self.inner
+    }
+    // return Car object ID for add table 
+    public fun return_car_id(self:&Car) : ID {
+        self.inner
+    }
+    // return Land object ID for add table 
+    public fun return_land_id(self:&Land) : ID {
+        self.inner
+    }
+    // return Shop object ID for add table 
+    public fun return_shop_id(self:&Shop) : ID {
+        self.inner
+    }
+
+   
 
 }
