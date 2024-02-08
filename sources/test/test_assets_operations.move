@@ -9,7 +9,8 @@ module notary::test_assets_operations {
 
     use notary::helpers::{
         init_test_helper, helper_create_account, helper_create_land, helper_create_house, 
-        helper_create_car, helper_create_shop
+        helper_create_car, helper_create_shop, helper_create_all, helper_approve_all,
+        helper_approve_house, helper_add_table_house, helper_add_all_table
         };
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
@@ -79,6 +80,19 @@ module notary::test_assets_operations {
             ts::return_to_sender(scenario, house);
         };
         
+        ts::end(scenario_test);
+    }
+    // We are expecting error. Admin didint approve the asset. 
+    #[test]
+    #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
+    public fun test_error_not_approved() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_add_table_house(scenario);
+
         ts::end(scenario_test);
     }
 
@@ -229,5 +243,68 @@ module notary::test_assets_operations {
 
         ts::end(scenario_test);
     }
+    // Admin already approved the asset. We are expecting error
+    #[test]
+    #[expected_failure(abort_code = ao::ERROR_ALREADY_APPROVED)]
+    public fun test_error_already_approved() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_approve_all(scenario);
+        helper_approve_house(scenario);
+
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_add_table() {
+
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_approve_all(scenario);
+
+        //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let house = ts::take_from_sender<House>(scenario);
+            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+        //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let car = ts::take_from_sender<Car>(scenario);
+            ao::add_car_table(&mut asset_shared, car, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+         //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let land = ts::take_from_sender<Land>(scenario);
+            ao::add_land_table(&mut asset_shared, land, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+        //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let shop = ts::take_from_sender<Shop>(scenario);
+            ao::add_shop_table(&mut asset_shared, shop, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+    
+         ts::end(scenario_test);
+    }
 }

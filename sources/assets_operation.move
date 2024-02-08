@@ -24,6 +24,7 @@ module notary::assets_operation {
 
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
+    const ERROR_ASSET_NOT_APPROVED: u64 = 2;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -244,10 +245,14 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that asset approved by admin
-        assert!(return_house_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from asset module
         let object_id = return_house_id(&item);
-        // get user table 
+        // check that if user doesnt has any table add it. 
+        if (!ot::contains(&mut asset.house, tx_context::sender(ctx))) {
+            let user_table = ot::new(ctx);
+                 ot::add(&mut asset.house,tx_context::sender(ctx), user_table);
+                 }; 
         let user_object_table = ot::borrow_mut(
             &mut asset.house, tx_context::sender(ctx));
         // add the object to the objecttable
@@ -265,10 +270,14 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that asset approved by admin
-        assert!(return_car_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        assert!(return_car_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from asset module
         let object_id = return_car_id(&item);
-        // get user table 
+        // check that if user doesnt has any table add it. 
+        if (!ot::contains(&mut asset.car, tx_context::sender(ctx))) {
+            let user_table = ot::new(ctx);
+                 ot::add(&mut asset.car,tx_context::sender(ctx), user_table);
+                 }; 
         let user_object_table = ot::borrow_mut(
             &mut asset.car, tx_context::sender(ctx));
         // add the object to the objecttable
@@ -285,10 +294,14 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that asset approved by admin
-        assert!(return_land_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        assert!(return_land_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from asset module
         let object_id = return_land_id(&item);
-        // get user table 
+        // check that if user doesnt has any table add it. 
+        if (!ot::contains(&mut asset.land, tx_context::sender(ctx))) {
+            let user_table = ot::new(ctx);
+                 ot::add(&mut asset.land,tx_context::sender(ctx), user_table);
+                 }; 
         let user_object_table = ot::borrow_mut(
             &mut asset.land, tx_context::sender(ctx));
         // add the object to the objecttable
@@ -300,16 +313,20 @@ module notary::assets_operation {
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
-    public fun add_land_shop(
+    public fun add_shop_table(
         asset: &mut Asset,
         item: Shop,
         ctx: &mut TxContext
     ) {
         // check that asset approved by admin
-        assert!(return_shop_bool(&item) == true, ERROR_ALREADY_APPROVED);
+        assert!(return_shop_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from asset module
         let object_id = return_shop_id(&item);
-        // get user table 
+        // check that if user doesnt has any table add it. 
+        if (!ot::contains(&mut asset.shop, tx_context::sender(ctx))) {
+            let user_table = ot::new(ctx);
+                 ot::add(&mut asset.shop,tx_context::sender(ctx), user_table);
+                 };  
         let user_object_table = ot::borrow_mut(
             &mut asset.shop, tx_context::sender(ctx));
         // add the object to the objecttable
@@ -339,5 +356,7 @@ module notary::assets_operation {
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }
+
+   
 }
 

@@ -9,7 +9,7 @@ module notary::helpers {
     
 
 
-    use notary::assets_operation::{Self as ao, test_init, Account, Asset};
+    use notary::assets_operation::{Self as ao, test_init, Account, Asset, AdminCap};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
@@ -207,79 +207,179 @@ module notary::helpers {
         };
     }
 
+    public fun helper_create_all(scenario: &mut Scenario) {
+
+        let location = b"ankara";
+        let model = b"focus";
+        let color = b"red";
+        let area : u64 = 144;
+        let year : u64 = 10;
+        let price: u64 = 1000;
+        let distance: u64 = 50000;
+
+        // create a house for test_address1
+        helper_create_house(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            year,
+            price
+            );
+        // create a land for test_address1
+        helper_create_land(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            price
+        );
+        // create a shop for test_address1
+        helper_create_shop(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            year,
+            price
+        );
+        // create a car for test_address1
+        helper_create_car(
+            scenario,
+            TEST_ADDRESS1,
+            model,
+            year,
+            color,
+            distance,
+            price
+        );
+    }
     public fun helper_approve_house(
         scenario: &mut Scenario
     ) {
-
-        next_tx(scenario, TEST_ADDRESS1);
+        next_tx(scenario, ADMIN);
         {   
-            let asset = ts::take_from_sender<House>(scenario);
-            // lets call house bool 
-            let approve = return_house_bool(&mut asset);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-            ts::return_to_sender(scenario, asset);
+            let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
+
+            ao::approve_house(&admincap, &mut house);
+
+            ts::return_to_address(TEST_ADDRESS1, house);
+            ts::return_to_sender(scenario, admincap);
         };
     }
 
     public fun helper_approve_car(
         scenario: &mut Scenario
     ) {
-
-        next_tx(scenario, TEST_ADDRESS1);
+       // owner must approve that Car
+        next_tx(scenario, ADMIN);
         {   
-            let asset = ts::take_from_sender<Car>(scenario);
-            // lets call house bool 
-            let approve = return_car_bool(&mut asset);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-            ts::return_to_sender(scenario, asset);
+            let car = ts::take_from_address<Car>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
+
+            ao::approve_car(&admincap, &mut car);
+
+            ts::return_to_address(TEST_ADDRESS1, car);
+            ts::return_to_sender(scenario, admincap);
         };
     }
 
     public fun helper_approve_shop(
         scenario: &mut Scenario
     ) {
-
-        next_tx(scenario, TEST_ADDRESS1);
+        // owner must approve that Land
+        next_tx(scenario, ADMIN);
         {   
-            let asset = ts::take_from_sender<Shop>(scenario);
-            // lets call house bool 
-            let approve = return_shop_bool(&mut asset);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-            ts::return_to_sender(scenario, asset);
+            let land = ts::take_from_address<Land>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
+
+            ao::approve_land(&admincap, &mut land);
+
+            ts::return_to_address(TEST_ADDRESS1, land);
+            ts::return_to_sender(scenario, admincap);
         };
     }
     
     public fun helper_approve_land(
         scenario: &mut Scenario
     ) {
+        // owner must approve that Shop
+        next_tx(scenario, ADMIN);
+        {   
+            let shop = ts::take_from_address<Shop>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
 
+            ao::approve_shop(&admincap, &mut shop);
+
+            ts::return_to_address(TEST_ADDRESS1, shop);
+            ts::return_to_sender(scenario, admincap);
+        };
+    }
+
+    public fun helper_approve_all(scenario: &mut Scenario) {
+        helper_approve_car(scenario);
+        helper_approve_house(scenario);
+        helper_approve_land(scenario);
+        helper_approve_shop(scenario);
+    }
+
+    public fun helper_add_table_house(scenario: &mut Scenario) {
+        //Add asset to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset = ts::take_from_sender<Land>(scenario);
-            // lets call house bool 
-            let approve = return_land_bool(&mut asset);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-            ts::return_to_sender(scenario, asset);
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let house = ts::take_from_sender<House>(scenario);
+            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
         };
     }
     
+    public fun helper_add_all_table(scenario: &mut Scenario) {
+
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let house = ts::take_from_sender<House>(scenario);
+            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+        //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let car = ts::take_from_sender<Car>(scenario);
+            ao::add_car_table(&mut asset_shared, car, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+         //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let land = ts::take_from_sender<Land>(scenario);
+            ao::add_land_table(&mut asset_shared, land, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+        //Add asset to table
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset_shared = ts::take_shared<Asset>(scenario);
+            let shop = ts::take_from_sender<Shop>(scenario);
+            ao::add_shop_table(&mut asset_shared, shop, ts::ctx(scenario));
+
+            ts::return_shared(asset_shared);
+        };
+    }
+
+    
     
 
 
 
-
-
-
-
-
-
-
-
-    
     public fun init_test_helper() : ts::Scenario{
 
        let owner: address = @0xA;
