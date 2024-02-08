@@ -4,7 +4,7 @@ module notary::helpers {
     use sui::transfer;
     use sui::coin::{mint_for_testing};
 
-    use std::string;
+    use std::string::{Self, String};
 
 
     use notary::assets_operation::{Self as ao, test_init, Account, Asset};
@@ -70,13 +70,14 @@ module notary::helpers {
 
     public fun helper_create_house(
         scenario: &mut Scenario,
+        sender: address,
         test_location: vector<u8>,
         test_area: u64,
         test_year: u64,
         test_price: u64
         ) {
 
-        next_tx(scenario, TEST_ADDRESS1);
+        next_tx(scenario, sender);
         {   
             // define variables for create house object
             let asset_share = ts::take_shared<Asset>(scenario);
@@ -86,7 +87,7 @@ module notary::helpers {
             let year: u64 = test_year;
             let price: u64 = test_price;
 
-            ao::create_House(
+            ao::create_house(
                 &mut asset_share,
                 &mut account,
                 location,
@@ -100,6 +101,104 @@ module notary::helpers {
         };
     }
 
+     public fun helper_create_shop(
+        scenario: &mut Scenario,
+        sender: address,
+        test_location: vector<u8>,
+        test_area: u64,
+        test_year: u64,
+        test_price: u64
+        ) {
+
+        next_tx(scenario, sender);
+        {   
+            // define variables for create house object
+            let asset_share = ts::take_shared<Asset>(scenario);
+            let account = ts::take_from_sender<Account>(scenario);
+            let location = string::utf8(test_location);
+            let area: u64 = test_area;
+            let year: u64 = test_year;
+            let price: u64 = test_price;
+
+            ao::create_shop(
+                &mut asset_share,
+                &mut account,
+                location,
+                area,
+                year,
+                price,
+                ts::ctx(scenario)
+             );
+            ts::return_to_sender(scenario, account);
+            ts::return_shared(asset_share);
+        }; 
+    }
+
+    public fun helper_create_land(
+        scenario: &mut Scenario,
+        sender: address,
+        test_location: vector<u8>,
+        test_area: u64,
+        test_price: u64
+        ) {
+
+        next_tx(scenario, sender);
+        {   
+            // define variables for create house object
+            let asset_share = ts::take_shared<Asset>(scenario);
+            let account = ts::take_from_sender<Account>(scenario);
+            let location = string::utf8(test_location);
+            let area: u64 = test_area;
+            let price: u64 = test_price;
+
+            ao::create_land(
+                &mut asset_share,
+                &mut account,
+                location,
+                area,
+                price,
+                ts::ctx(scenario)
+             );
+            ts::return_to_sender(scenario, account);
+            ts::return_shared(asset_share);
+        };
+    }
+
+    public fun helper_create_car(
+        scenario: &mut Scenario,
+        sender: address,
+        test_model: vector<u8>,
+        test_year: u64,
+        test_color: vector<u8>,
+        test_distance: u64,
+        test_price: u64
+        ) {
+
+        next_tx(scenario, sender);
+        {   
+            // define variables for create house object
+            let asset_share = ts::take_shared<Asset>(scenario);
+            let account = ts::take_from_sender<Account>(scenario);
+            let test_model = string::utf8(test_model);
+            let test_color = string::utf8(test_color);
+         
+        
+            let price: u64 = test_price;
+
+            ao::create_car(
+                &mut asset_share,
+                &mut account,
+                test_model,
+                test_year,
+                test_color,
+                test_distance,
+                test_price,
+                ts::ctx(scenario)
+             );
+            ts::return_to_sender(scenario, account);
+            ts::return_shared(asset_share);
+        };
+    }
 
 
 

@@ -15,12 +15,14 @@ module notary::assets_operation {
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
     use notary::assets::{
         House, Car, Land, Shop, 
-        Sales, return_house, return_shop, return_land, return_car
+        Sales, return_house, return_shop, return_land, return_car, house_bool,
+        car_bool, land_bool, shop_bool,
+        return_house_bool, return_car_bool, return_land_bool, return_shop_bool
         };
   
 
     // =================== Errors ===================
-
+    const ERROR_ALREADY_APPROVED: u64 = 1;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -113,7 +115,7 @@ module notary::assets_operation {
      /// 
      /// * `location, area, year ` -  are the property of house  
      /// * `price` - Defines the house price.
-    public fun create_House( 
+    public fun create_house( 
         asset: &mut Asset,
         account: &mut Account, 
         location: String,
@@ -205,13 +207,29 @@ module notary::assets_operation {
         // transfer the object to sender
         transfer::public_transfer(car, tx_context::sender(ctx));
     }
-
+    // users can deposit lira_stable_coin to theirs account balance 
     public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
-
-    public fun approve() {
-
+    // only admin can approve object approve 
+    public fun approve_house(_: &AdminCap, self: &mut House) {
+        assert!(return_house_bool(self) == false, ERROR_ALREADY_APPROVED);
+        house_bool(self);
+    }
+    // only admin can approve object approve 
+    public fun approve_car(_: &AdminCap, self: &mut Car) {
+        assert!(return_car_bool(self) == false, ERROR_ALREADY_APPROVED);
+        car_bool(self);
+    }
+    // only admin can approve object approve 
+    public fun approve_land(_: &AdminCap, self: &mut Land) {
+        assert!(return_land_bool(self) == false, ERROR_ALREADY_APPROVED);
+        land_bool(self);
+    }
+    // only admin can approve object approve 
+    public fun approve_shop(_: &AdminCap, self: &mut Shop) {
+        assert!(return_shop_bool(self) == false, ERROR_ALREADY_APPROVED);
+        shop_bool(self);
     }
 
     public fun add_table() {

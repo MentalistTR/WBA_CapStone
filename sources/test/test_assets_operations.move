@@ -7,13 +7,16 @@ module notary::test_assets_operations {
 
     use std::string::{Self,String};
 
-    use notary::helpers::{init_test_helper, helper_create_account};
+    use notary::helpers::{
+        init_test_helper, helper_create_account, helper_create_land, helper_create_house, 
+        helper_create_car, helper_create_shop
+        };
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    use notary::assets::{Self, House, Land, Car, Shop, Sales};
+    use notary::assets::{Self, House, Land, Car, Shop, Sales, return_house_bool};
     
-    use notary::assets_operation::{Self as ao, Data, Asset, Account};
+    use notary::assets_operation::{Self as ao, Data, Asset, Account, AdminCap};
     
 
     const ADMIN: address = @0xA;
@@ -54,14 +57,14 @@ module notary::test_assets_operations {
             let year: u64 = 10;
             let price: u64 = 500;
 
-            ao::create_House(
-                &mut asset_share,
-                &mut account,
-                location,
-                area,
-                year,
-                price,
-                ts::ctx(scenario)
+            ao::create_house(
+             &mut asset_share,
+           &mut account,
+                    location,
+                    area,
+                    year,
+                    price,
+               ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
             ts::return_shared(asset_share);
@@ -73,33 +76,79 @@ module notary::test_assets_operations {
             ts::return_to_sender(scenario, house);
         };
         
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_approve() {
+
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        // create 3 account and send them 1000 stabil coin
+        helper_create_account(scenario);
+
+        let location = b"ankara";
+        let area : u64 = 144;
+        let year : u64 = 10;
+        let price: u64 = 1000;
+
+        // create an house for test_address1
+        helper_create_house(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            year,
+            price
+            );
+
+        // owner must approve that asset
+        next_tx(scenario, ADMIN);
+        {   
+            let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
+
+            ao::approve_house(&admincap, &mut house);
+
+            ts::return_to_address(TEST_ADDRESS1, house);
+            ts::return_to_sender(scenario, admincap);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let house = ts::take_from_sender<House>(scenario);
+            // lets call house bool 
+            let approve = return_house_bool(&mut house);
+
+            assert_eq(approve, true);
+
+            ts::return_to_sender(scenario, house);
+        };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
         ts::end(scenario_test);
-    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 }

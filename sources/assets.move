@@ -148,6 +148,40 @@ module notary::assets {
         };
         shop
     }
- 
+    // change the house object approve bool to true 
+    public(friend) fun house_bool(self: &mut House)  {
+         self.approve = true;
+    }
+    // helper function that check house.approve equal to false
+    public fun return_house_bool(self: &House) : bool {
+        self.approve
+    }
+
+      // change the house object approve bool to true 
+    public(friend) fun car_bool(self: &mut Car)  {
+         self.approve = true;
+    }
+    // helper function that check house.approve equal to false
+    public fun return_car_bool(self: &Car) : bool {
+        self.approve
+    }
+
+      // change the house object approve bool to true 
+    public(friend) fun land_bool(self: &mut Land)  {
+         self.approve = true;
+    }
+    // helper function that check house.approve equal to false
+    public fun return_land_bool(self: &Land) : bool {
+        self.approve
+    }
+
+      // change the house object approve bool to true 
+    public(friend) fun shop_bool(self: &mut Shop)  {
+         self.approve = true;
+    }
+    // helper function that check house.approve equal to false
+    public fun return_shop_bool(self: &Shop) : bool {
+        self.approve
+    }
 
 }
