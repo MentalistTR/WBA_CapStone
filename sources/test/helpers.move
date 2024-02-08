@@ -3,13 +3,20 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
+    use sui::test_utils::{assert_eq};
 
     use std::string::{Self, String};
+    
 
 
     use notary::assets_operation::{Self as ao, test_init, Account, Asset};
-    use notary::lira_stable_coin::{return_init_lira};
-    use notary::lira_stable_coin::{LIRA_STABLE_COIN};
+
+    use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
+
+    use notary::assets::{
+        Self, House, Land, Car, Shop, Sales, return_house_bool, return_car_bool,
+        return_land_bool, return_shop_bool
+        };
 
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
@@ -199,6 +206,68 @@ module notary::helpers {
             ts::return_shared(asset_share);
         };
     }
+
+    public fun helper_approve_house(
+        scenario: &mut Scenario
+    ) {
+
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset = ts::take_from_sender<House>(scenario);
+            // lets call house bool 
+            let approve = return_house_bool(&mut asset);
+            // bool must be equal to true 
+            assert_eq(approve, true);
+            ts::return_to_sender(scenario, asset);
+        };
+    }
+
+    public fun helper_approve_car(
+        scenario: &mut Scenario
+    ) {
+
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset = ts::take_from_sender<Car>(scenario);
+            // lets call house bool 
+            let approve = return_car_bool(&mut asset);
+            // bool must be equal to true 
+            assert_eq(approve, true);
+            ts::return_to_sender(scenario, asset);
+        };
+    }
+
+    public fun helper_approve_shop(
+        scenario: &mut Scenario
+    ) {
+
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset = ts::take_from_sender<Shop>(scenario);
+            // lets call house bool 
+            let approve = return_shop_bool(&mut asset);
+            // bool must be equal to true 
+            assert_eq(approve, true);
+            ts::return_to_sender(scenario, asset);
+        };
+    }
+    
+    public fun helper_approve_land(
+        scenario: &mut Scenario
+    ) {
+
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset = ts::take_from_sender<Land>(scenario);
+            // lets call house bool 
+            let approve = return_land_bool(&mut asset);
+            // bool must be equal to true 
+            assert_eq(approve, true);
+            ts::return_to_sender(scenario, asset);
+        };
+    }
+    
+    
 
 
 

@@ -14,7 +14,10 @@ module notary::test_assets_operations {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    use notary::assets::{Self, House, Land, Car, Shop, Sales, return_house_bool};
+    use notary::assets::{
+        Self, House, Land, Car, Shop, Sales, return_house_bool, return_car_bool,
+        return_land_bool, return_shop_bool
+        };
     
     use notary::assets_operation::{Self as ao, Data, Asset, Account, AdminCap};
     
@@ -89,11 +92,14 @@ module notary::test_assets_operations {
         helper_create_account(scenario);
 
         let location = b"ankara";
+        let model = b"focus";
+        let color = b"red";
         let area : u64 = 144;
         let year : u64 = 10;
         let price: u64 = 1000;
+        let distance: u64 = 50000;
 
-        // create an house for test_address1
+        // create a house for test_address1
         helper_create_house(
             scenario,
             TEST_ADDRESS1,
@@ -102,8 +108,34 @@ module notary::test_assets_operations {
             year,
             price
             );
+        // create a shop for test_address1
+        helper_create_land(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            price
+        );
+        // create a shop for test_address1
+        helper_create_shop(
+            scenario,
+            TEST_ADDRESS1,
+            location,
+            area,
+            year,
+            price
+        );
+        helper_create_car(
+            scenario,
+            TEST_ADDRESS1,
+            model,
+            year,
+            color,
+            distance,
+            price
+        );
 
-        // owner must approve that asset
+        // owner must approve that House 
         next_tx(scenario, ADMIN);
         {   
             let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
@@ -120,35 +152,82 @@ module notary::test_assets_operations {
             let house = ts::take_from_sender<House>(scenario);
             // lets call house bool 
             let approve = return_house_bool(&mut house);
-
+            // bool must be equal to true 
             assert_eq(approve, true);
 
             ts::return_to_sender(scenario, house);
         };
 
+         // owner must approve that Car
+        next_tx(scenario, ADMIN);
+        {   
+            let car = ts::take_from_address<Car>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
 
+            ao::approve_car(&admincap, &mut car);
 
+            ts::return_to_address(TEST_ADDRESS1, car);
+            ts::return_to_sender(scenario, admincap);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let car = ts::take_from_sender<Car>(scenario);
+            // lets call house bool 
+            let approve = return_car_bool(&mut car);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
+            ts::return_to_sender(scenario, car);
+        };
 
+        // owner must approve that Land
+        next_tx(scenario, ADMIN);
+        {   
+            let land = ts::take_from_address<Land>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
 
+            ao::approve_land(&admincap, &mut land);
 
+            ts::return_to_address(TEST_ADDRESS1, land);
+            ts::return_to_sender(scenario, admincap);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let land = ts::take_from_sender<Land>(scenario);
+            // lets call house bool 
+            let approve = return_land_bool(&mut land);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
+            ts::return_to_sender(scenario, land);
+        };
 
+         // owner must approve that Shop
+        next_tx(scenario, ADMIN);
+        {   
+            let shop = ts::take_from_address<Shop>(scenario, TEST_ADDRESS1);
+            let admincap = ts::take_from_sender<AdminCap>(scenario);
 
+            ao::approve_shop(&admincap, &mut shop);
 
+            ts::return_to_address(TEST_ADDRESS1, shop);
+            ts::return_to_sender(scenario, admincap);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let shop = ts::take_from_sender<Shop>(scenario);
+            // lets call house bool 
+            let approve = return_shop_bool(&mut shop);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
-
-
-
-
-
-
-
-
-
+            ts::return_to_sender(scenario, shop);
+        };
 
         ts::end(scenario_test);
-
-}
+    }
 
 }
