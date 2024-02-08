@@ -13,9 +13,12 @@ module notary::assets_operation {
     use sui::coin::{Self, Coin};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
-    use notary::assets::{House, Car, Land, Shop, Sales};
+    use notary::assets::{
+        House, Car, Land, Shop, 
+        Sales, return_house, return_shop, return_land, return_car};
   
    // =================== Friends ===================
+  
 
     // =================== Errors ===================
 
@@ -121,18 +124,7 @@ module notary::assets_operation {
         ctx :&mut TxContext,
         ) {
         // create an house
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let house = House {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            year: year,
-            price: price,
-            approve: false
-        };
+        let house = return_house(location, area, year, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -156,18 +148,7 @@ module notary::assets_operation {
 
      ) {
         // create an Shop
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let shop = Shop {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            year: year,
-            price: price,
-            approve: false
-        };
+        let shop = return_shop(location, area, year, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -190,17 +171,9 @@ module notary::assets_operation {
         ctx :&mut TxContext,
      ) {
         // create an Land
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let land = Land {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            price: price,
-            approve: false
-        };
+    
+        let land = return_land(location, area, price, ctx);
+     
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -225,19 +198,7 @@ module notary::assets_operation {
         ctx :&mut TxContext,
      ) {
         // create an car
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let car = Car {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            model: model,
-            year: year,
-            color:color,
-            distance: distance,
-            price: price,
-            approve: false
-        };
+        let car = return_car(model, year, color, distance, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -282,3 +243,4 @@ module notary::assets_operation {
         init(ctx);
     }
 }
+

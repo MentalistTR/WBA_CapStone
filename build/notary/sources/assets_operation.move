@@ -13,8 +13,12 @@ module notary::assets_operation {
     use sui::coin::{Self, Coin};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
+    use notary::assets::{
+        House, Car, Land, Shop, 
+        Sales, return_house, return_shop, return_land, return_car};
   
    // =================== Friends ===================
+  
 
     // =================== Errors ===================
 
@@ -60,60 +64,6 @@ module notary::assets_operation {
         debt: u64,
         balance: Balance<LIRA_STABLE_COIN>
     }
-
-    // object that people can sell, buy or rent 
-    struct House has key, store {
-        id: UID,
-        inner: ID,
-        owner: address,
-        location: String,
-        area_meter: u64,
-        year: u64,
-        price: u64,
-        approve: bool
-    }  
-    // object that people can sell, buy or rent 
-    struct Shop has key, store {
-        id: UID,
-        inner: ID,
-        owner: address,
-        location: String,
-        area_meter: u64,
-        year: u64,
-        price: u64,
-        approve: bool
-    }
-    // object that people can sell, buy or rent 
-    struct Car has key, store {
-        id: UID,
-        inner: ID,
-        owner: address,
-        model: String,
-        year: u64,
-        color: String,
-        distance: u64,
-        price: u64,
-        approve: bool
-
-    }
-    // object that people can sell, buy or rent 
-    struct Land has key, store {
-        id: UID,
-        inner: ID,
-        owner: address,
-        location: String,
-        area_meter: u64,
-        price: u64,
-        approve: bool
-    }
- 
-    // object that event for keep in Data Share object 
-    struct Sales has copy, drop, store {
-        seller: address,
-        buyer: address,
-        item: String,
-        time: u64,
-    }  
 
     // =================== Initializer ===================
 
@@ -174,18 +124,7 @@ module notary::assets_operation {
         ctx :&mut TxContext,
         ) {
         // create an house
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let house = House {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            year: year,
-            price: price,
-            approve: false
-        };
+        let house = return_house(location, area, year, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -209,18 +148,7 @@ module notary::assets_operation {
 
      ) {
         // create an Shop
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let shop = Shop {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            year: year,
-            price: price,
-            approve: false
-        };
+        let shop = return_shop(location, area, year, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -243,17 +171,9 @@ module notary::assets_operation {
         ctx :&mut TxContext,
      ) {
         // create an Land
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let land = Land {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            location: location,
-            area_meter: area,
-            price: price,
-            approve: false
-        };
+    
+        let land = return_land(location, area, price, ctx);
+     
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -278,19 +198,7 @@ module notary::assets_operation {
         ctx :&mut TxContext,
      ) {
         // create an car
-        let id = object::new(ctx);
-        let inner = object::uid_to_inner(&id);
-        let car = Car {
-            id:id,
-            inner: inner,
-            owner: tx_context::sender(ctx),
-            model: model,
-            year: year,
-            color:color,
-            distance: distance,
-            price: price,
-            approve: false
-        };
+        let car = return_car(model, year, color, distance, price, ctx);
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
@@ -335,3 +243,4 @@ module notary::assets_operation {
         init(ctx);
     }
 }
+
