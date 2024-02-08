@@ -83,7 +83,7 @@ module notary::assets {
         house
     }
 
-        public fun return_car(
+    public fun return_car(
         model: String,
         year: u64,
         color: String,
@@ -107,7 +107,7 @@ module notary::assets {
         car
     }
 
-        public fun return_land(
+    public fun return_land(
         location: String,
         area: u64,
         price: u64,
@@ -127,7 +127,7 @@ module notary::assets {
         land
     }
 
-        public fun return_shop(
+    public fun return_shop(
         location: String,
         area: u64,
         year: u64,
@@ -150,9 +150,4 @@ module notary::assets {
     }
  
 
-
-
-
-
- 
 }

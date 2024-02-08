@@ -15,9 +15,8 @@ module notary::assets_operation {
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
     use notary::assets::{
         House, Car, Land, Shop, 
-        Sales, return_house, return_shop, return_land, return_car};
-  
-   // =================== Friends ===================
+        Sales, return_house, return_shop, return_land, return_car
+        };
   
 
     // =================== Errors ===================
