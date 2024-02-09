@@ -70,6 +70,7 @@ module notary::assets_operation {
         car: ObjectTable<address, ObjectTable<ID, Car>>,
         land: ObjectTable<address, ObjectTable<ID, Land>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
+        house_id: vector<ID> // FIXME: DELETE
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
@@ -103,7 +104,8 @@ module notary::assets_operation {
                 shop: ot::new(ctx),
                 car: ot::new(ctx),
                 land: ot::new(ctx),
-                admin_fee: balance::zero()
+                admin_fee: balance::zero(),
+                house_id: vector::empty()
             }
         );
        // transfer AdminCap object to owner 
@@ -247,7 +249,7 @@ module notary::assets_operation {
         shop_bool(self);
     }
 
-     /// Users has to add ListedAssetss to table Adds to the table  . 
+     /// Users have to add theirs assets into the ObjectTable . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
@@ -269,10 +271,11 @@ module notary::assets_operation {
         let user_object_table = ot::borrow_mut(
             &mut asset.house, tx_context::sender(ctx));
         // add the object to the objecttable
+        vector::push_back(&mut asset.house_id, object_id); // FIXME: DELETE 
         ot::add(user_object_table, object_id, item);
     }
 
-     /// Users has to add ListedAssetss to table Adds to the table  . 
+     /// Users have to add theirs assets into the ObjectTable . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
@@ -296,7 +299,7 @@ module notary::assets_operation {
         // add the object to the objecttable
         ot::add(user_object_table, object_id, item);
     }
-     /// Users has to add ListedAssetss to table Adds to the table  . 
+     /// Users have to add theirs assets into the ObjectTable . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
@@ -321,7 +324,7 @@ module notary::assets_operation {
         ot::add(user_object_table, object_id, item);
     }
 
-     /// Users has to add ListedAssetss to table Adds to the table  . 
+     /// Users have to add theirs assets into the ObjectTable . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
@@ -345,7 +348,10 @@ module notary::assets_operation {
         // add the object to the objecttable
         ot::add(user_object_table, object_id, item);
     }
-
+     /// Users can remove theirs assets from table  . 
+     /// # Arguments
+     /// 
+     /// * `ID ` -  is the ID of the object 
     public fun remove_house_table(
         asset: &mut ListedAssets,
         item_id: ID,
@@ -360,7 +366,10 @@ module notary::assets_operation {
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
-
+     /// Users can remove theirs assets from table  . 
+     /// # Arguments
+     /// 
+     /// * `ID ` -  is the ID of the object 
     public fun remove_shop_table(
         asset: &mut ListedAssets,
         item_id: ID,
@@ -375,7 +384,10 @@ module notary::assets_operation {
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
-
+     /// Users can remove theirs assets from table  . 
+     /// # Arguments
+     /// 
+     /// * `ID ` -  is the ID of the object
     public fun remove_land_table(
         asset: &mut ListedAssets,
         item_id: ID,
@@ -390,7 +402,10 @@ module notary::assets_operation {
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
-
+     /// Users can remove theirs assets from table  . 
+     /// # Arguments
+     /// 
+     /// * `ID ` -  is the ID of the object
     public fun remove_car_table(
         asset: &mut ListedAssets,
         item_id: ID,
@@ -405,7 +420,6 @@ module notary::assets_operation {
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
-
 
     public fun buy() {
 
