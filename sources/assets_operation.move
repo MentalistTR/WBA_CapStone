@@ -348,70 +348,62 @@ module notary::assets_operation {
 
     public fun remove_house_table(
         asset: &mut ListedAssets,
-        item: &House,
+        item_id: ID,
         ctx: &mut TxContext
     ) {
-        // check that asset owner is the sender 
-        assert!(return_house_owner(item) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // take sender table from share object 
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-        // return the item ID
-        let house_id = return_house_id(item);
         // remove asset from table
-        let asset =  ot::remove(sender_table, house_id);
+        let asset =  ot::remove(sender_table, item_id);
+        // check the owner of asset 
+        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
 
     public fun remove_shop_table(
         asset: &mut ListedAssets,
-        item: &Shop,
+        item_id: ID,
         ctx: &mut TxContext
     ) {
-        // check that asset owner is the sender 
-        assert!(return_shop_owner(item) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
-        // take sender table from share object 
+         // take sender table from share object 
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-        // return the item ID
-        let house_id = return_shop_id(item);
         // remove asset from table
-        let asset =  ot::remove(sender_table, house_id);
+        let asset =  ot::remove(sender_table, item_id);
+        // check the owner of asset 
+        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
 
     public fun remove_land_table(
         asset: &mut ListedAssets,
-        item: &Land,
+        item_id: ID,
         ctx: &mut TxContext
     ) {
-        // check that asset owner is the sender 
-        assert!(return_land_owner(item) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // take sender table from share object 
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-        // return the item ID
-        let house_id = return_land_id(item);
         // remove asset from table
-        let asset =  ot::remove(sender_table, house_id);
+        let asset =  ot::remove(sender_table, item_id);
+        // check the owner of asset 
+        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
-        transfer::public_transfer(asset, tx_context::sender(ctx)); 
+        transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
 
     public fun remove_car_table(
         asset: &mut ListedAssets,
-        item: &Car,
+        item_id: ID,
         ctx: &mut TxContext
     ) {
-        // check that asset owner is the sender 
-        assert!(return_car_owner(item) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // take sender table from share object 
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-        // return the item ID
-        let house_id = return_car_id(item);
         // remove asset from table
-        let asset =  ot::remove(sender_table, house_id);
+        let asset =  ot::remove(sender_table, item_id);
+        // check the owner of asset 
+        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
-        transfer::public_transfer(asset, tx_context::sender(ctx)); 
+        transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
 
 
@@ -443,6 +435,4 @@ module notary::assets_operation {
         house
     }
 
-   
 }
-
