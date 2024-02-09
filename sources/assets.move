@@ -55,7 +55,7 @@ module notary::assets {
         approve: bool
     }
  
-    // object that event for keep in Data Share object 
+    // object that event for keep in NotaryData Share object 
     struct Sales has copy, drop, store {
         seller: address,
         buyer: address,

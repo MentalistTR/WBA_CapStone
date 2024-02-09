@@ -1,5 +1,5 @@
 #[test_only]
-module notary::test_assets_operations {
+module notary::test_ListedAssetss_operations {
     use sui::transfer;
     use sui::coin::{Self, mint_for_testing};
     use sui::test_scenario::{Self as ts, next_tx};
@@ -20,7 +20,7 @@ module notary::test_assets_operations {
         return_land_bool, return_shop_bool
         };
     
-    use notary::assets_operation::{Self as ao, Data, Asset, Account, AdminCap};
+    use notary::assets_operation::{Self as ao, NotaryData, ListedAssets, Account, AdminCap};
     
 
     const ADMIN: address = @0xA;
@@ -54,7 +54,7 @@ module notary::test_assets_operations {
         next_tx(scenario, TEST_ADDRESS1);
         {   
             // define variables for create house object
-            let asset_share = ts::take_shared<Asset>(scenario);
+            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let location = string::utf8(b"ankara");
             let area: u64 = 144;
@@ -62,7 +62,7 @@ module notary::test_assets_operations {
             let price: u64 = 500;
 
             ao::create_house(
-             &mut asset_share,
+             &mut listedsasset_share,
            &mut account,
                     location,
                     area,
@@ -71,7 +71,7 @@ module notary::test_assets_operations {
                ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
-            ts::return_shared(asset_share);
+            ts::return_shared(listedsasset_share);
         };
         // check the house object
         next_tx(scenario, TEST_ADDRESS1);
@@ -82,9 +82,9 @@ module notary::test_assets_operations {
         
         ts::end(scenario_test);
     }
-    // We are expecting error. Admin didint approve the asset. 
+    // We are expecting error. Admin didint approve the ListedAssets. 
     #[test]
-    #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
+    #[expected_failure(abort_code = ao::ERROR_ListedAssets_NOT_APPROVED)]
     public fun test_error_not_approved() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
@@ -243,7 +243,7 @@ module notary::test_assets_operations {
 
         ts::end(scenario_test);
     }
-    // Admin already approved the asset. We are expecting error
+    // Admin already approved the ListedAssets. We are expecting error
     #[test]
     #[expected_failure(abort_code = ao::ERROR_ALREADY_APPROVED)]
     public fun test_error_already_approved() {
@@ -268,41 +268,41 @@ module notary::test_assets_operations {
         helper_create_all(scenario);
         helper_approve_all(scenario);
 
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let house = ts::take_from_sender<House>(scenario);
-            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+            ao::add_house_table(&mut listedsasset_shared, house, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let car = ts::take_from_sender<Car>(scenario);
-            ao::add_car_table(&mut asset_shared, car, ts::ctx(scenario));
+            ao::add_car_table(&mut listedsasset_shared, car, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-         //Add asset to table
+         //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let land = ts::take_from_sender<Land>(scenario);
-            ao::add_land_table(&mut asset_shared, land, ts::ctx(scenario));
+            ao::add_land_table(&mut listedsasset_shared, land, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let shop = ts::take_from_sender<Shop>(scenario);
-            ao::add_shop_table(&mut asset_shared, shop, ts::ctx(scenario));
+            ao::add_shop_table(&mut listedsasset_shared, shop, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
     
          ts::end(scenario_test);

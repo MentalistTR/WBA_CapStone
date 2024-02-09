@@ -1,3 +1,20 @@
+/// ListedAssetss_operation module is responsible for managing ListedAssetss and their operations
+/// 
+/// # Related Modules
+/// 
+/// * `Kasa Storage` - `Kasa Manager` calls `Kasa Storage` to manipulate the Kasas and protocol balances
+/// * `Kasa Operations` - `Kasa Operations` module calls the methods in this module for executing Kasa operations
+/// * `Sorted Kasas` - `Kasa Manager` calls `Sorted Kasas` to manipulate and get the Kasas in order
+/// * `Stability Pool` - `Kasa Manager` calls `Stability Pool` during liquidations
+/// * `RUSD Stable Coin` - `Kasa Manager` calls `RUSD Stable Coin` to mint and burn stable coins
+///
+/// 
+/// There are three main operations in this module:
+/// 
+/// 1. Creates and manipulates the Kasa objects
+/// 2. Liquidates Kasas that are below the minimum collateral ratio
+/// 3. Redeems stable coins for collateral from Kasas
+/// 
 module notary::assets_operation {
     use std::string::{Self,String};
     use std::vector;
@@ -24,7 +41,7 @@ module notary::assets_operation {
 
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
-    const ERROR_ASSET_NOT_APPROVED: u64 = 2;
+    const ERROR_ListedAssets_NOT_APPROVED: u64 = 2;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -36,20 +53,20 @@ module notary::assets_operation {
     /// # Arguments
     /// 
     /// There are 4 structures event that notary should keep events. 
-    struct Data has key, store {
+    struct NotaryData has key, store {
         id: UID,
         house: VecMap<address, Sales>,
         shop: VecMap<address, Sales>,
         car: VecMap<address, Sales>,
         land: VecMap<address, Sales>,
     }
-    /// Defines the share object for keep assets to rent or sales
+    /// Defines the share object for keep ListedAssetss to or sales
     /// 
     /// # Arguments
     /// 
-    /// Users can keep store assets in ObjectTable
+    /// Users can keep store ListedAssetss in ObjectTable
     /// notary fee will be keep in this object
-    struct Asset has key, store {
+    struct ListedAssets has key, store {
         id: UID,
         house: ObjectTable<address, ObjectTable<ID, House>>,
         shop: ObjectTable<address, ObjectTable<ID, Shop>>,
@@ -71,9 +88,9 @@ module notary::assets_operation {
     // =================== Initializer ===================
 
     fun init(ctx: &mut TxContext) {
-        // create and transfer Data share object
+        // create and transfer NotaryData share object
         transfer::share_object(
-            Data {
+            NotaryData {
                 id: object::new(ctx),
                 house: vec_map::empty(),
                 shop: vec_map::empty(),
@@ -81,9 +98,9 @@ module notary::assets_operation {
                 land: vec_map::empty()
             }
         );
-        //create and transfer Asset share object
+        //create and transfer ListedAssets share object
         transfer::share_object(
-            Asset {
+            ListedAssets {
                 id: object::new(ctx),
                 house:ot::new(ctx),
                 shop: ot::new(ctx),
@@ -118,7 +135,7 @@ module notary::assets_operation {
      /// * `location, area, year ` -  are the property of house  
      /// * `price` - Defines the house price.
     public fun create_house( 
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         account: &mut Account, 
         location: String,
         area: u64,
@@ -141,7 +158,7 @@ module notary::assets_operation {
      /// * `location, area, year ` -  are the property of shop 
      /// * `price` - Defines the shop price.
      public fun create_shop( 
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         account: &mut Account, 
         location: String,
         area: u64,
@@ -166,7 +183,7 @@ module notary::assets_operation {
      /// * `location, area ` -  are the property of land  
      /// * `price` - Defines the land price.
      public fun create_land(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         account: &mut Account, 
         location: String,
         area: u64,
@@ -191,7 +208,7 @@ module notary::assets_operation {
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
      public fun create_car(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         account: &mut Account, 
         model: String,
         year: u64,
@@ -234,19 +251,19 @@ module notary::assets_operation {
         shop_bool(self);
     }
 
-     /// Users has to add assets to table Adds to the table  . 
+     /// Users has to add ListedAssetss to table Adds to the table  . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
     public fun add_house_table(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         item: House,
         ctx: &mut TxContext
     ) {
-        // check that asset approved by admin
-        assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-        // get object ID from asset module
+        // check that ListedAssets approved by admin
+        assert!(return_house_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        // get object ID from ListedAssets module
         let object_id = return_house_id(&item);
         // check that if user doesnt has any table add it. 
         if (!ot::contains(&mut asset.house, tx_context::sender(ctx))) {
@@ -259,19 +276,19 @@ module notary::assets_operation {
         ot::add(user_object_table, object_id, item);
     }
 
-     /// Users has to add assets to table Adds to the table  . 
+     /// Users has to add ListedAssetss to table Adds to the table  . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
     public fun add_car_table(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         item: Car,
         ctx: &mut TxContext
     ) {
-        // check that asset approved by admin
-        assert!(return_car_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-        // get object ID from asset module
+        // check that ListedAssets approved by admin
+        assert!(return_car_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        // get object ID from ListedAssets module
         let object_id = return_car_id(&item);
         // check that if user doesnt has any table add it. 
         if (!ot::contains(&mut asset.car, tx_context::sender(ctx))) {
@@ -283,19 +300,19 @@ module notary::assets_operation {
         // add the object to the objecttable
         ot::add(user_object_table, object_id, item);
     }
-     /// Users has to add assets to table Adds to the table  . 
+     /// Users has to add ListedAssetss to table Adds to the table  . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
     public fun add_land_table(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         item: Land,
         ctx: &mut TxContext
     ) {
-        // check that asset approved by admin
-        assert!(return_land_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-        // get object ID from asset module
+        // check that ListedAssets approved by admin
+        assert!(return_land_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        // get object ID from ListedAssets module
         let object_id = return_land_id(&item);
         // check that if user doesnt has any table add it. 
         if (!ot::contains(&mut asset.land, tx_context::sender(ctx))) {
@@ -308,19 +325,19 @@ module notary::assets_operation {
         ot::add(user_object_table, object_id, item);
     }
 
-     /// Users has to add assets to table Adds to the table  . 
+     /// Users has to add ListedAssetss to table Adds to the table  . 
      /// # Arguments
      /// 
      /// * `model, year, color, distance ` -  are the property of car   
      /// * `price` - Defines the car price.
     public fun add_shop_table(
-        asset: &mut Asset,
+        asset: &mut ListedAssets,
         item: Shop,
         ctx: &mut TxContext
     ) {
-        // check that asset approved by admin
-        assert!(return_shop_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-        // get object ID from asset module
+        // check that ListedAssets approved by admin
+        assert!(return_shop_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        // get object ID from ListedAssets module
         let object_id = return_shop_id(&item);
         // check that if user doesnt has any table add it. 
         if (!ot::contains(&mut asset.shop, tx_context::sender(ctx))) {

@@ -9,7 +9,7 @@ module notary::helpers {
     
 
 
-    use notary::assets_operation::{Self as ao, test_init, Account, Asset, AdminCap};
+    use notary::assets_operation::{Self as ao, test_init, Account, ListedAssets, AdminCap};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
@@ -87,7 +87,7 @@ module notary::helpers {
         next_tx(scenario, sender);
         {   
             // define variables for create house object
-            let asset_share = ts::take_shared<Asset>(scenario);
+            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let location = string::utf8(test_location);
             let area: u64 = test_area;
@@ -95,7 +95,7 @@ module notary::helpers {
             let price: u64 = test_price;
 
             ao::create_house(
-                &mut asset_share,
+                &mut listedsasset_share,
                 &mut account,
                 location,
                 area,
@@ -104,7 +104,7 @@ module notary::helpers {
                 ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
-            ts::return_shared(asset_share);
+            ts::return_shared(listedsasset_share);
         };
     }
 
@@ -120,7 +120,7 @@ module notary::helpers {
         next_tx(scenario, sender);
         {   
             // define variables for create house object
-            let asset_share = ts::take_shared<Asset>(scenario);
+            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let location = string::utf8(test_location);
             let area: u64 = test_area;
@@ -128,7 +128,7 @@ module notary::helpers {
             let price: u64 = test_price;
 
             ao::create_shop(
-                &mut asset_share,
+                &mut listedsasset_share,
                 &mut account,
                 location,
                 area,
@@ -137,7 +137,7 @@ module notary::helpers {
                 ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
-            ts::return_shared(asset_share);
+            ts::return_shared(listedsasset_share);
         }; 
     }
 
@@ -152,14 +152,14 @@ module notary::helpers {
         next_tx(scenario, sender);
         {   
             // define variables for create house object
-            let asset_share = ts::take_shared<Asset>(scenario);
+            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let location = string::utf8(test_location);
             let area: u64 = test_area;
             let price: u64 = test_price;
 
             ao::create_land(
-                &mut asset_share,
+                &mut listedsasset_share,
                 &mut account,
                 location,
                 area,
@@ -167,7 +167,7 @@ module notary::helpers {
                 ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
-            ts::return_shared(asset_share);
+            ts::return_shared(listedsasset_share);
         };
     }
 
@@ -184,7 +184,7 @@ module notary::helpers {
         next_tx(scenario, sender);
         {   
             // define variables for create house object
-            let asset_share = ts::take_shared<Asset>(scenario);
+            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let test_model = string::utf8(test_model);
             let test_color = string::utf8(test_color);
@@ -193,7 +193,7 @@ module notary::helpers {
             let price: u64 = test_price;
 
             ao::create_car(
-                &mut asset_share,
+                &mut listedsasset_share,
                 &mut account,
                 test_model,
                 test_year,
@@ -203,7 +203,7 @@ module notary::helpers {
                 ts::ctx(scenario)
              );
             ts::return_to_sender(scenario, account);
-            ts::return_shared(asset_share);
+            ts::return_shared(listedsasset_share);
         };
     }
 
@@ -325,14 +325,14 @@ module notary::helpers {
     }
 
     public fun helper_add_table_house(scenario: &mut Scenario) {
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let house = ts::take_from_sender<House>(scenario);
-            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+            ao::add_house_table(&mut listedsasset_shared, house, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
     }
     
@@ -340,38 +340,38 @@ module notary::helpers {
 
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let house = ts::take_from_sender<House>(scenario);
-            ao::add_house_table(&mut asset_shared, house, ts::ctx(scenario));
+            ao::add_house_table(&mut listedsasset_shared, house, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let car = ts::take_from_sender<Car>(scenario);
-            ao::add_car_table(&mut asset_shared, car, ts::ctx(scenario));
+            ao::add_car_table(&mut listedsasset_shared, car, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-         //Add asset to table
+         //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let land = ts::take_from_sender<Land>(scenario);
-            ao::add_land_table(&mut asset_shared, land, ts::ctx(scenario));
+            ao::add_land_table(&mut listedsasset_shared, land, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
-        //Add asset to table
+        //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let asset_shared = ts::take_shared<Asset>(scenario);
+            let listedsasset_shared = ts::take_shared<ListedAssets>(scenario);
             let shop = ts::take_from_sender<Shop>(scenario);
-            ao::add_shop_table(&mut asset_shared, shop, ts::ctx(scenario));
+            ao::add_shop_table(&mut listedsasset_shared, shop, ts::ctx(scenario));
 
-            ts::return_shared(asset_shared);
+            ts::return_shared(listedsasset_shared);
         };
     }
 

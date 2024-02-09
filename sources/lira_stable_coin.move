@@ -23,7 +23,7 @@ module notary::lira_stable_coin {
 
   #[lint_allow(share_owned)]
   fun init(witness: LIRA_STABLE_COIN, ctx: &mut TxContext) {
-      let (treasury_cap, metadata) = coin::create_currency<LIRA_STABLE_COIN>(
+      let (treasury_cap, metaNotaryData) = coin::create_currency<LIRA_STABLE_COIN>(
             witness, 
             9, 
             b"LIRA",
@@ -34,7 +34,7 @@ module notary::lira_stable_coin {
         );
 
       transfer::share_object(CapWrapper { id: object::new(ctx), cap: treasury_cap });
-      transfer::public_share_object(metadata);
+      transfer::public_share_object(metaNotaryData);
   }
 
   // === Public-Mutative Functions ===  
