@@ -434,6 +434,14 @@ module notary::assets_operation {
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }
+    // get house object 
+    #[test_only]
+    // get init function 
+    public fun get_house_table(asset: &ListedAssets, id: ID, ctx: &mut TxContext) : &House {
+        let user_table = ot::borrow(&asset.house, tx_context::sender(ctx));
+        let house = ot::borrow(user_table, id);
+        house
+    }
 
    
 }
