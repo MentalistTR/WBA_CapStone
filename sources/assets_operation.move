@@ -37,7 +37,7 @@ module notary::assets_operation {
 
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
-    const ERROR_ListedAssets_NOT_APPROVED: u64 = 2;
+    const ERROR_ASSET_NOT_APPROVED: u64 = 2;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -259,7 +259,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        assert!(return_house_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from ListedAssets module
         let object_id = return_house_id(&item);
         // check that if user doesnt has any table add it. 
@@ -285,7 +285,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        assert!(return_car_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        assert!(return_car_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from ListedAssets module
         let object_id = return_car_id(&item);
         // check that if user doesnt has any table add it. 
@@ -309,7 +309,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        assert!(return_land_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        assert!(return_land_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from ListedAssets module
         let object_id = return_land_id(&item);
         // check that if user doesnt has any table add it. 
@@ -334,7 +334,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        assert!(return_shop_bool(&item) == true, ERROR_ListedAssets_NOT_APPROVED);
+        assert!(return_shop_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // get object ID from ListedAssets module
         let object_id = return_shop_id(&item);
         // check that if user doesnt has any table add it. 

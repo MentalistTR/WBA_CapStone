@@ -84,7 +84,7 @@ module notary::test_ListedAssetss_operations {
     }
     // We are expecting error. Admin didint approve the ListedAssets. 
     #[test]
-    #[expected_failure(abort_code = ao::ERROR_ListedAssets_NOT_APPROVED)]
+    #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
     public fun test_error_not_approved() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
