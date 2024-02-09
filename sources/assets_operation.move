@@ -38,7 +38,6 @@ module notary::assets_operation {
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
     const ERROR_ListedAssets_NOT_APPROVED: u64 = 2;
-    const ERROR_NOT_OWNER_ASSET : u64 = 3;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -361,8 +360,6 @@ module notary::assets_operation {
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
         // remove asset from table
         let asset =  ot::remove(sender_table, item_id);
-        // check the owner of asset 
-        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
@@ -379,8 +376,6 @@ module notary::assets_operation {
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
         // remove asset from table
         let asset =  ot::remove(sender_table, item_id);
-        // check the owner of asset 
-        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx)); 
     }
@@ -397,8 +392,6 @@ module notary::assets_operation {
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
         // remove asset from table
         let asset =  ot::remove(sender_table, item_id);
-        // check the owner of asset 
-        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
@@ -415,8 +408,6 @@ module notary::assets_operation {
         let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
         // remove asset from table
         let asset =  ot::remove(sender_table, item_id);
-        // check the owner of asset 
-        assert!(return_house_owner(&asset) == tx_context::sender(ctx), ERROR_NOT_OWNER_ASSET);
         // sent it to sender 
         transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
@@ -440,13 +431,18 @@ module notary::assets_operation {
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }
-    // get house object 
+    // get house object from table 
     #[test_only]
-    // get init function 
     public fun get_house_table(asset: &ListedAssets, id: ID, ctx: &mut TxContext) : &House {
         let user_table = ot::borrow(&asset.house, tx_context::sender(ctx));
         let house = ot::borrow(user_table, id);
         house
+    }
+    #[test_only] // FIXME: DELETE 
+    // get house ID 
+    public fun get_house_id(asset: &ListedAssets, number: u64) : ID {
+        let id = vector::borrow(&asset.house_id, number);
+        *id
     }
 
 }

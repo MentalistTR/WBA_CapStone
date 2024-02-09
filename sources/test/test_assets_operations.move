@@ -338,6 +338,31 @@ module notary::test_ListedAssetss_operations {
         };
 
         ts::end(scenario_test);
+    }
+    #[test]
+    #[expected_failure(abort_code = 0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::EFieldDoesNotExist)]
+    public fun test_error_remove_object() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_approve_all(scenario);
+        helper_add_all_table(scenario);
+        
+        // lets check that test_address2 try to remove another person object. 
+        next_tx(scenario, TEST_ADDRESS2);
+        {   
+            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+            let house_id = ao::get_house_id(&listed_asset_shared, 0);
+
+            ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
+
+            ts::return_shared(listed_asset_shared);
+
+        };
+
+        ts::end(scenario_test);
 
     }
 
