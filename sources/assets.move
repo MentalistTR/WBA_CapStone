@@ -1,3 +1,13 @@
+/// ListedAssetss_operation module is responsible for managing structs (Assets) and their operations
+/// 
+/// # Related Modules
+/// 
+/// * `Assets_operation` - to call structs and create the objects
+///
+/// There are two main operations in this module:
+/// 
+/// 1. Define structures
+/// 2. Return structs variables
 module notary::assets {
     use std::string::{Self,String};
 

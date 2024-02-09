@@ -1,20 +1,16 @@
-/// ListedAssetss_operation module is responsible for managing ListedAssetss and their operations
+/// asset_operation module is responsible for managing ListedAssetss and their operations
 /// 
 /// # Related Modules
 /// 
-/// * `Kasa Storage` - `Kasa Manager` calls `Kasa Storage` to manipulate the Kasas and protocol balances
-/// * `Kasa Operations` - `Kasa Operations` module calls the methods in this module for executing Kasa operations
-/// * `Sorted Kasas` - `Kasa Manager` calls `Sorted Kasas` to manipulate and get the Kasas in order
-/// * `Stability Pool` - `Kasa Manager` calls `Stability Pool` during liquidations
-/// * `RUSD Stable Coin` - `Kasa Manager` calls `RUSD Stable Coin` to mint and burn stable coins
+/// * `Assets` - to call objects for create to system
+/// * `Lira_Stable_Coin` - calls `LIRA_STABLE_COIN` to mint and burn stable coins
 ///
+/// There are four main operations in this module:
 /// 
-/// There are three main operations in this module:
-/// 
-/// 1. Creates and manipulates the Kasa objects
-/// 2. Liquidates Kasas that are below the minimum collateral ratio
-/// 3. Redeems stable coins for collateral from Kasas
-/// 
+/// 1. Creates and approve objects 
+/// 2. Buy assets from seller
+/// 3. Create an account for keep balance or debt
+/// 4. Keep Sales events in Data share object
 module notary::assets_operation {
     use std::string::{Self,String};
     use std::vector;
@@ -128,7 +124,6 @@ module notary::assets_operation {
           balance: balance::zero()
         }
     }
-    
      /// Users can create a house . 
      /// # Arguments
      /// 
