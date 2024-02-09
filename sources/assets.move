@@ -198,20 +198,36 @@ module notary::assets {
         self.approve
     }
     // return House object ID for add table 
-    public fun return_house_id(self:&House) : ID {
+    public fun return_house_id(self: &House) : ID {
         self.inner
     }
     // return Car object ID for add table 
-    public fun return_car_id(self:&Car) : ID {
+    public fun return_car_id(self: &Car) : ID {
         self.inner
     }
     // return Land object ID for add table 
-    public fun return_land_id(self:&Land) : ID {
+    public fun return_land_id(self: &Land) : ID {
         self.inner
     }
     // return Shop object ID for add table 
-    public fun return_shop_id(self:&Shop) : ID {
+    public fun return_shop_id(self: &Shop) : ID {
         self.inner
+    }
+    // return House object owner
+    public fun return_house_owner(self: &House): address {
+        self.owner
+    }
+     // return Land object owner
+    public fun return_land_owner(self: &Land): address {
+        self.owner
+    }
+     // return House object owner
+    public fun return_car_owner(self: &Car): address {
+        self.owner
+    }
+     // return House object owner
+    public fun return_shop_owner(self: &Shop): address {
+        self.owner
     }
 
    

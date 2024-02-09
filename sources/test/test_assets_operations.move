@@ -304,6 +304,12 @@ module notary::test_ListedAssetss_operations {
 
             ts::return_shared(listedsasset_shared);
         };
+        // Check that asset in ListedAsset Field.
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            
+
+        };
     
          ts::end(scenario_test);
     }
