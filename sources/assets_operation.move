@@ -248,19 +248,58 @@ module notary::assets_operation {
         } 
     }
     // only admin can approve object approve 
-    public fun approve_car(_: &AdminCap, self: &mut Car) {
-        assert!(return_car_bool(self) == false, ERROR_ALREADY_APPROVED);
-        car_bool(self);
+    public fun approve_car(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
+        // take the sender linkedTable
+        let sender_table = lt::borrow_mut(&mut asset.car, recipient);
+        // return the sender Table length
+        let table_length = lt::length(sender_table);
+        // loop until the table empty
+        while(table_length > 0) {
+            // remove the item from table
+            let item = lt::remove(sender_table, table_length);
+            // change the approve boolean
+            let new_item = car_bool( item);
+            // transfer the item to sender
+            assets::transfer_car(new_item, recipient);
+            // decrease the length 1
+            table_length = table_length - 1;
+        } 
     }
     // only admin can approve object approve 
-    public fun approve_land(_: &AdminCap, self: &mut Land) {
-        assert!(return_land_bool(self) == false, ERROR_ALREADY_APPROVED);
-        land_bool(self);
+    public fun approve_land(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
+        // take the sender linkedTable
+        let sender_table = lt::borrow_mut(&mut asset.land, recipient);
+        // return the sender Table length
+        let table_length = lt::length(sender_table);
+        // loop until the table empty
+        while(table_length > 0) {
+            // remove the item from table
+            let item = lt::remove(sender_table, table_length);
+            // change the approve boolean
+            let new_item = land_bool( item);
+            // transfer the item to sender
+            assets::transfer_land(new_item, recipient);
+            // decrease the length 1
+            table_length = table_length - 1;
+        } 
     }
     // only admin can approve object approve 
-    public fun approve_shop(_: &AdminCap, self: &mut Shop) {
-        assert!(return_shop_bool(self) == false, ERROR_ALREADY_APPROVED);
-        shop_bool(self);
+     public fun approve_shop(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
+        // take the sender linkedTable
+        let sender_table = lt::borrow_mut(&mut asset.shop, recipient);
+        // return the sender Table length
+        let table_length = lt::length(sender_table);
+        // loop until the table empty
+        while(table_length > 0) {
+            // remove the item from table
+            let item = lt::remove(sender_table, table_length);
+            // change the approve boolean
+            let new_item = shop_bool( item);
+            // transfer the item to sender
+            assets::transfer_shop(new_item, recipient);
+            // decrease the length 1
+            table_length = table_length - 1;
+        } 
     }
 
      /// Users have to add theirs assets into the ObjectTable . 

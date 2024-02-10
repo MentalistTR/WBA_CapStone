@@ -128,7 +128,6 @@ module notary::test_ListedAssetss_operations {
         ts::end(scenario_test);
     }
 
-
     #[test]
     public fun test_approve() {
         let scenario_test = init_test_helper();
@@ -158,35 +157,6 @@ module notary::test_ListedAssetss_operations {
         };
         ts::end(scenario_test);
     }
-
-    // lets test linked list method now 
-    // #[test]
-    // public fun test_linked_add() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     helper_create_all(scenario);
-
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-
-
-            
-    //     }
-
-
-
-
-
-
-
-
-    //     ts::end(scenario_test);
-
-    // }
-
-
-
 
     // We are expecting error. Admin didint approve the ListedAssets. 
     // #[test]

@@ -254,34 +254,32 @@ module notary::helpers {
             price
         );
     }
-    // public fun helper_approve_house(
-    //     scenario: &mut Scenario
-    // ) {
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
-    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
+    public fun helper_approve_house(
+        scenario: &mut Scenario
+    ) {
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let asset_share = ts::take_shared<ListedAssets>(scenario); 
+            ao::approve_house(&admin_cap, &mut asset_share, TEST_ADDRESS1);
 
-    //         ao::approve_house(&admincap, &mut house);
-
-    //         ts::return_to_address(TEST_ADDRESS1, house);
-    //         ts::return_to_sender(scenario, admincap);
-    //     };
-    // }
+            ts::return_shared(asset_share);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+    }
 
     public fun helper_approve_car(
         scenario: &mut Scenario
     ) {
        // owner must approve that Car
         next_tx(scenario, ADMIN);
-        {   
-            let car = ts::take_from_address<Car>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let asset_share = ts::take_shared<ListedAssets>(scenario); 
+            ao::approve_car(&admin_cap, &mut asset_share, TEST_ADDRESS1);
 
-            ao::approve_car(&admincap, &mut car);
-
-            ts::return_to_address(TEST_ADDRESS1, car);
-            ts::return_to_sender(scenario, admincap);
+            ts::return_shared(asset_share);
+            ts::return_to_sender(scenario, admin_cap);
         };
     }
 
@@ -290,14 +288,13 @@ module notary::helpers {
     ) {
         // owner must approve that Land
         next_tx(scenario, ADMIN);
-        {   
-            let land = ts::take_from_address<Land>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let asset_share = ts::take_shared<ListedAssets>(scenario); 
+            ao::approve_land(&admin_cap, &mut asset_share, TEST_ADDRESS1);
 
-            ao::approve_land(&admincap, &mut land);
-
-            ts::return_to_address(TEST_ADDRESS1, land);
-            ts::return_to_sender(scenario, admincap);
+            ts::return_shared(asset_share);
+            ts::return_to_sender(scenario, admin_cap);
         };
     }
     
@@ -306,23 +303,22 @@ module notary::helpers {
     ) {
         // owner must approve that Shop
         next_tx(scenario, ADMIN);
-        {   
-            let shop = ts::take_from_address<Shop>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let asset_share = ts::take_shared<ListedAssets>(scenario); 
+            ao::approve_shop(&admin_cap, &mut asset_share, TEST_ADDRESS1);
 
-            ao::approve_shop(&admincap, &mut shop);
-
-            ts::return_to_address(TEST_ADDRESS1, shop);
-            ts::return_to_sender(scenario, admincap);
+            ts::return_shared(asset_share);
+            ts::return_to_sender(scenario, admin_cap);
         };
     }
 
-    // public fun helper_approve_all(scenario: &mut Scenario) {
-    //     helper_approve_car(scenario);
-    //     helper_approve_house(scenario);
-    //     helper_approve_land(scenario);
-    //     helper_approve_shop(scenario);
-    // }
+    public fun helper_approve_all(scenario: &mut Scenario) {
+        helper_approve_car(scenario);
+        helper_approve_house(scenario);
+        helper_approve_land(scenario);
+        helper_approve_shop(scenario);
+    }
 
     public fun helper_add_table_house(scenario: &mut Scenario) {
         //Add ListedAssets to table

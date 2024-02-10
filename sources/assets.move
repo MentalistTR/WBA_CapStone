@@ -172,27 +172,26 @@ module notary::assets {
     public fun return_house_bool(self: &House) : bool {
         self.approve
     }
-
     // change the house object approve bool to true 
-    public(friend) fun car_bool(self: &mut Car)  {
+    public(friend) fun car_bool(self: Car) : Car  {
          self.approve = true;
+         self
+    }
+    public(friend) fun land_bool(self: Land) : Land  {
+         self.approve = true;
+         self
+    }
+    public(friend) fun shop_bool(self: Shop) : Shop  {
+         self.approve = true;
+         self
     }
     // helper function that check house.approve equal to false
     public fun return_car_bool(self: &Car) : bool {
         self.approve
     }
-
-    // change the house object approve bool to true 
-    public(friend) fun land_bool(self: &mut Land)  {
-         self.approve = true;
-    }
     // helper function that check house.approve equal to false
     public fun return_land_bool(self: &Land) : bool {
         self.approve
-    }
-    // change the house object approve bool to true 
-    public(friend) fun shop_bool(self: &mut Shop)  {
-         self.approve = true;
     }
     // helper function that check house.approve equal to false
     public fun return_shop_bool(self: &Shop) : bool {
@@ -234,6 +233,15 @@ module notary::assets {
         self.price
     }
     public fun transfer_house(self: House, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    public fun transfer_car(self: Car, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    public fun transfer_land(self: Land, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    public fun transfer_shop(self: Shop, recipient: address) {
         transfer::public_transfer(self, recipient);
     }
     public fun change_house_owner(self: House, recipient: address) : House {
