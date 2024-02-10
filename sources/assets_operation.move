@@ -66,8 +66,8 @@ module notary::assets_operation {
     /// 
     /// # Arguments
     /// 
-    /// Users can keep store ListedAssetss in ObjectTable
-    /// notary fee will be keep in this object
+    /// * `house, shop, car, land` - Users must add the assets to linkedtable for approve by admin  
+    /// * `admin_fee` -  Defines the procol fee revenue
     struct ListedAssets has key, store {
         id: UID,
         house: LinkedTable<address, LinkedTable<u64, House>>,
@@ -75,13 +75,16 @@ module notary::assets_operation {
         car: LinkedTable<address, LinkedTable<u64, Car>>,
         land: LinkedTable<address, LinkedTable<u64, Land>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
-        house_id: vector<ID> // FIXME: DELETE
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
         id: UID,
     }
-    // Create an account for each user 
+    /// Create an account for each user
+    /// # Arguments
+    /// 
+    /// * `debt` - Defines the user debt to protocol  
+    /// * `balance` -  Defines the user balance in this protocol 
     struct Account has key, store {
         id: UID,
         debt: u64,
@@ -110,7 +113,6 @@ module notary::assets_operation {
                 car: lt::new(ctx),
                 land: lt::new(ctx),
                 admin_fee: balance::zero(),
-                house_id: vector::empty()
             }
         );
        // transfer AdminCap object to owner 
@@ -472,12 +474,6 @@ module notary::assets_operation {
         let user_table = lt::borrow(&asset.house, tx_context::sender(ctx));
         let house = lt::borrow(user_table, id);
         house
-    }
-    #[test_only] // FIXME: DELETE 
-    // get house ID 
-    public fun get_house_id(asset: &ListedAssets, number: u64) : ID {
-        let id = vector::borrow(&asset.house_id, number);
-        *id
     }
 
 }
