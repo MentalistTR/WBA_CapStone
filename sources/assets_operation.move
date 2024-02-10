@@ -40,8 +40,7 @@ module notary::assets_operation {
     const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
     // User price is not equal to asset price 
     const ERROR_INVALID_PRICE: u64 = 2;
-    // admin can not approve empty table. There must be at least 1 object to approve. 
-    const ERROR_EMPTY_TABLE: u64 = 3;
+
     // =================== Constants ===================
 
     // Fee is  the protocol receives whenever a sales transaction occurs
@@ -276,7 +275,7 @@ module notary::assets_operation {
      /// 
      /// * `asset` -  share object for keep assets to approve  
      /// * `item` -   Defines the type 
-      public fun add_house_land(
+      public fun add_land_table(
         asset: &mut ListedAssets,
         item: Land,
     ) {
@@ -339,7 +338,6 @@ module notary::assets_operation {
         // remove the asset from table 
         let asset = lt::remove(&mut asset.car, id);
         // check the asset is not approved
-        assert!(return_car_bool(&asset) == false, ERROR_ASSET_ALREADY_APPROVED) ;
         if(approve == true) {
             // set the bool to approve variable 
             let new_asset = car_bool(asset);
@@ -362,8 +360,6 @@ module notary::assets_operation {
     public fun approve_land(_: &AdminCap, asset: &mut ListedAssets, id: ID, approve: bool) {
         // remove the asset from table 
         let asset = lt::remove(&mut asset.land, id);
-        // check the asset is not approved
-        assert!(return_land_bool(&asset) == false, ERROR_ASSET_ALREADY_APPROVED) ;
         if(approve == true) {
             // set the bool to approve variable 
             let new_asset = land_bool(asset);
@@ -386,8 +382,6 @@ module notary::assets_operation {
     public fun approve_shop(_: &AdminCap, asset: &mut ListedAssets, id: ID, approve: bool) {
         // remove the asset from table 
         let asset = lt::remove(&mut asset.shop, id);
-        // check the asset is not approved
-        assert!(return_shop_bool(&asset) == false, ERROR_ASSET_ALREADY_APPROVED) ;
         if(approve == true) {
             // set the bool to approve variable 
             let new_asset = shop_bool(asset);
@@ -449,6 +443,12 @@ module notary::assets_operation {
     //     let house = lt::borrow(user_table, id);
     //     house
     // }
+    #[test_only]
+    // get id for local test 
+    public fun test_get_house_id(asset: &ListedAssets, number: u64) : ID {
+        let id = vector::borrow(&asset.house_id, number);
+        *id
+    }
 
 }
 
