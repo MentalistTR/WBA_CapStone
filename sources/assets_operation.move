@@ -229,7 +229,103 @@ module notary::assets_operation {
     public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
-    // only admin can approve object approve 
+   
+     /// Users have to add theirs assets into the ObjectTable . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_house_table(
+        asset: &mut ListedAssets,
+        item: House,
+        ctx: &mut TxContext
+    ) {
+        // check that ListedAssets approved by admin
+        assert!(return_house_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        // check that if user doesnt has any table add it. 
+        if (!lt::contains(&mut asset.house, tx_context::sender(ctx))) {
+            let user_table = lt::new<u64, House>(ctx);
+                 lt::push_back(&mut asset.house, tx_context::sender(ctx), user_table);
+                 }; 
+        let user_object_table = lt::borrow_mut(
+            &mut asset.house, tx_context::sender(ctx));
+        let table_length = lt::length(user_object_table);
+        // add the object to the objecttable
+        lt::push_back(user_object_table, table_length + 1, item);
+    }
+
+    //  / Users have to add theirs assets into the ObjectTable . 
+    //  / # Arguments
+    //  / 
+    //  / * `model, year, color, distance ` -  are the property of car   
+    //  / * `price` - Defines the car price.
+    public fun add_car_table(
+        asset: &mut ListedAssets,
+        item: Car,
+        ctx: &mut TxContext
+    ) {
+        // check that ListedAssets approved by admin
+        assert!(return_car_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        // check that if user doesnt has any table add it. 
+        if (!lt::contains(&mut asset.car, tx_context::sender(ctx))) {
+            let user_table = lt::new<u64, Car>(ctx);
+                 lt::push_back(&mut asset.car, tx_context::sender(ctx), user_table);
+                 }; 
+        let user_object_table = lt::borrow_mut(
+            &mut asset.car, tx_context::sender(ctx));
+        let table_length = lt::length(user_object_table);
+        // add the object to the objecttable
+        lt::push_back(user_object_table, table_length + 1, item);
+    }
+     /// Users have to add theirs assets into the ObjectTable . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_land_table(
+        asset: &mut ListedAssets,
+        item: Land,
+        ctx: &mut TxContext
+    ) {
+        // check that ListedAssets approved by admin
+        assert!(return_land_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        // check that if user doesnt has any table add it. 
+        if (!lt::contains(&mut asset.car, tx_context::sender(ctx))) {
+            let user_table = lt::new<u64, Land>(ctx);
+                 lt::push_back(&mut asset.land, tx_context::sender(ctx), user_table);
+                 }; 
+        let user_object_table = lt::borrow_mut(
+            &mut asset.land, tx_context::sender(ctx));
+        let table_length = lt::length(user_object_table);
+        // add the object to the objecttable
+        lt::push_back(user_object_table, table_length + 1, item);
+    }
+
+     /// Users have to add theirs assets into the ObjectTable . 
+     /// # Arguments
+     /// 
+     /// * `model, year, color, distance ` -  are the property of car   
+     /// * `price` - Defines the car price.
+    public fun add_shop_table(
+        asset: &mut ListedAssets,
+        item: Shop,
+        ctx: &mut TxContext
+    ) {
+        // check that ListedAssets approved by admin
+        assert!(return_shop_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        // check that if user doesnt has any table add it. 
+        if (!lt::contains(&mut asset.shop, tx_context::sender(ctx))) {
+            let user_table = lt::new<u64, Shop>(ctx);
+                 lt::push_back(&mut asset.shop, tx_context::sender(ctx), user_table);
+                 }; 
+        let user_object_table = lt::borrow_mut(
+            &mut asset.shop, tx_context::sender(ctx));
+        let table_length = lt::length(user_object_table);
+        // add the object to the objecttable
+        lt::push_back(user_object_table, table_length + 1, item);
+    }
+
+     // only admin can approve object approve 
     public fun approve_house(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
         let sender_table = lt::borrow_mut(&mut asset.house, recipient);
@@ -301,168 +397,7 @@ module notary::assets_operation {
             table_length = table_length - 1;
         } 
     }
-
-     /// Users have to add theirs assets into the ObjectTable . 
-     /// # Arguments
-     /// 
-     /// * `model, year, color, distance ` -  are the property of car   
-     /// * `price` - Defines the car price.
-    public fun add_house_table(
-        asset: &mut ListedAssets,
-        item: House,
-        ctx: &mut TxContext
-    ) {
-        // check that ListedAssets approved by admin
-        assert!(return_house_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
-        // check that if user doesnt has any table add it. 
-        if (!lt::contains(&mut asset.house, tx_context::sender(ctx))) {
-            let user_table = lt::new<u64, House>(ctx);
-                 lt::push_back(&mut asset.house, tx_context::sender(ctx), user_table);
-                 }; 
-        let user_object_table = lt::borrow_mut(
-            &mut asset.house, tx_context::sender(ctx));
-        let table_length = lt::length(user_object_table);
-        // add the object to the objecttable
-        lt::push_back(user_object_table, table_length + 1, item);
-    }
-
-     /// Users have to add theirs assets into the ObjectTable . 
-     /// # Arguments
-     /// 
-     /// * `model, year, color, distance ` -  are the property of car   
-     /// * `price` - Defines the car price.
-    // public fun add_car_table(
-    //     asset: &mut ListedAssets,
-    //     item: Car,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_car_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-    //     // get object ID from ListedAssets module
-    //     let object_id = return_car_id(&item);
-    //     // check that if user doesnt has any table add it. 
-    //     if (!ot::contains(&mut asset.car, tx_context::sender(ctx))) {
-    //         let user_table = ot::new(ctx);
-    //              ot::add(&mut asset.car,tx_context::sender(ctx), user_table);
-    //              }; 
-    //     let user_object_table = ot::borrow_mut(
-    //         &mut asset.car, tx_context::sender(ctx));
-    //     // add the object to the objecttable
-    //     ot::add(user_object_table, object_id, item);
-    // }
-    //  /// Users have to add theirs assets into the ObjectTable . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `model, year, color, distance ` -  are the property of car   
-    //  /// * `price` - Defines the car price.
-    // public fun add_land_table(
-    //     asset: &mut ListedAssets,
-    //     item: Land,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_land_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-    //     // get object ID from ListedAssets module
-    //     let object_id = return_land_id(&item);
-    //     // check that if user doesnt has any table add it. 
-    //     if (!ot::contains(&mut asset.land, tx_context::sender(ctx))) {
-    //         let user_table = ot::new(ctx);
-    //              ot::add(&mut asset.land,tx_context::sender(ctx), user_table);
-    //              }; 
-    //     let user_object_table = ot::borrow_mut(
-    //         &mut asset.land, tx_context::sender(ctx));
-    //     // add the object to the objecttable
-    //     ot::add(user_object_table, object_id, item);
-    // }
-
-    //  /// Users have to add theirs assets into the ObjectTable . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `model, year, color, distance ` -  are the property of car   
-    //  /// * `price` - Defines the car price.
-    // public fun add_shop_table(
-    //     asset: &mut ListedAssets,
-    //     item: Shop,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_shop_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-    //     // get object ID from ListedAssets module
-    //     let object_id = return_shop_id(&item);
-    //     // check that if user doesnt has any table add it. 
-    //     if (!ot::contains(&mut asset.shop, tx_context::sender(ctx))) {
-    //         let user_table = ot::new(ctx);
-    //              ot::add(&mut asset.shop,tx_context::sender(ctx), user_table);
-    //              };  
-    //     let user_object_table = ot::borrow_mut(
-    //         &mut asset.shop, tx_context::sender(ctx));
-    //     // add the object to the objecttable
-    //     ot::add(user_object_table, object_id, item);
-    // }
-    //  /// Users can remove theirs assets from table  . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `ID ` -  is the ID of the object 
-    // public fun remove_house_table(
-    //     asset: &mut ListedAssets,
-    //     item_id: ID,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // take sender table from share object 
-    //     let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-    //     // remove asset from table
-    //     let asset =  ot::remove(sender_table, item_id);
-    //     // sent it to sender 
-    //     transfer::public_transfer(asset, tx_context::sender(ctx)); 
-    // }
-    //  /// Users can remove theirs assets from table  . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `ID ` -  is the ID of the object 
-    // public fun remove_shop_table(
-    //     asset: &mut ListedAssets,
-    //     item_id: ID,
-    //     ctx: &mut TxContext
-    // ) {
-    //      // take sender table from share object 
-    //     let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-    //     // remove asset from table
-    //     let asset =  ot::remove(sender_table, item_id);
-    //     // sent it to sender 
-    //     transfer::public_transfer(asset, tx_context::sender(ctx)); 
-    // }
-    //  /// Users can remove theirs assets from table  . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `ID ` -  is the ID of the object
-    // public fun remove_land_table(
-    //     asset: &mut ListedAssets,
-    //     item_id: ID,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // take sender table from share object 
-    //     let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-    //     // remove asset from table
-    //     let asset =  ot::remove(sender_table, item_id);
-    //     // sent it to sender 
-    //     transfer::public_transfer(asset, tx_context::sender(ctx));  
-    // }
-    //  /// Users can remove theirs assets from table  . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `ID ` -  is the ID of the object
-    // public fun remove_car_table(
-    //     asset: &mut ListedAssets,
-    //     item_id: ID,
-    //     ctx: &mut TxContext
-    // ) {
-    //     // take sender table from share object 
-    //     let sender_table = ot::borrow_mut(&mut asset.house, tx_context::sender(ctx));
-    //     // remove asset from table
-    //     let asset =  ot::remove(sender_table, item_id);
-    //     // sent it to sender 
-    //     transfer::public_transfer(asset, tx_context::sender(ctx));  
-    // }
+   
 
     // public fun buy_house(
     //     assets: &mut ListedAssets,
