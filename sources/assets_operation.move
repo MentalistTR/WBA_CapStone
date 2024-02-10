@@ -75,6 +75,7 @@ module notary::assets_operation {
         car: LinkedTable<ID, Car>,
         land: LinkedTable<ID, Land>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
+        house_id: vector<ID> // FIXME: DELETE 
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
@@ -113,6 +114,7 @@ module notary::assets_operation {
                 car: lt::new(ctx),
                 land: lt::new(ctx),
                 admin_fee: balance::zero(),
+                house_id: vector::empty()
             }
         );
        // transfer AdminCap object to owner 
@@ -150,6 +152,7 @@ module notary::assets_operation {
         ) {
         // create an house
         let house = return_house(location, area, year, price, ctx);
+        vector::push_back(&mut asset.house_id, return_house_id(&house)); // FIXME : DELETE 
         // calculate the notary fee
         let notary_fee = balance::split(&mut account.balance, FEE / 1000);
         // transfer the notary_fee to notary balance 
