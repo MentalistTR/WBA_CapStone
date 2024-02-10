@@ -160,65 +160,7 @@ module notary::test_ListedAssetss_operations {
         ts::end(scenario_test);
     }
 
-    // #[test]
-    // public fun test_approve2() {
-
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     // create 3 account and send them 1000 stabil coin
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_add_all_table(scenario);
-    //     helper_approve_all(scenario);
     
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let house = ts::take_from_sender<House>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_house_bool(&mut house);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, house);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let car = ts::take_from_sender<Car>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_car_bool(&mut car);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, car);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let land = ts::take_from_sender<Land>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_land_bool(&mut land);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, land);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let shop = ts::take_from_sender<Shop>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_shop_bool(&mut shop);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, shop);
-    //     };
-
-    //     ts::end(scenario_test);
-    // }
 
 
 
