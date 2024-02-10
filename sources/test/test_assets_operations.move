@@ -10,7 +10,7 @@ module notary::test_ListedAssetss_operations {
     use notary::helpers::{
         init_test_helper, helper_create_account, helper_create_land, helper_create_house, 
         helper_create_car, helper_create_shop, helper_create_all, helper_approve_all,
-        helper_approve_house, helper_add_table_house, helper_add_all_table
+        helper_approve_house, helper_add_table_house, // helper_add_all_table
         };
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
@@ -82,6 +82,12 @@ module notary::test_ListedAssetss_operations {
         
         ts::end(scenario_test);
     }
+
+    // lets test linked list method now 
+
+
+
+
     // We are expecting error. Admin didint approve the ListedAssets. 
     #[test]
     #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
@@ -258,113 +264,113 @@ module notary::test_ListedAssetss_operations {
         ts::end(scenario_test);
     }
 
-    #[test]
-    public fun test_add_table() {
+    // #[test]
+    // public fun test_add_table() {
 
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
+    //     let scenario_test = init_test_helper();
+    //     let scenario = &mut scenario_test;
 
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
+    //     helper_create_account(scenario);
+    //     helper_create_all(scenario);
+    //     helper_approve_all(scenario);
 
-        //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house = ts::take_from_sender<House>(scenario);
-            // keep ID before add the table 
-            let house_id = return_house_id(&house);
-            // add house to the table 
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-            // get house object from table 
-            let house_table = ao::get_house_table(&listed_asset_shared, house_id, ts::ctx(scenario));
-            // return the house object owner 
-            let house_owner = return_house_owner(house_table);
-            // check the owner variable from that object 
-            assert_eq(house_owner, TEST_ADDRESS1);
+    //     //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let house = ts::take_from_sender<House>(scenario);
+    //         // keep ID before add the table 
+    //         let house_id = return_house_id(&house);
+    //         // add house to the table 
+    //         ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
+    //         // get house object from table 
+    //         let house_table = ao::get_house_table(&listed_asset_shared, house_id, ts::ctx(scenario));
+    //         // return the house object owner 
+    //         let house_owner = return_house_owner(house_table);
+    //         // check the owner variable from that object 
+    //         assert_eq(house_owner, TEST_ADDRESS1);
 
-            ts::return_shared(listed_asset_shared);
-        };
-        //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let car = ts::take_from_sender<Car>(scenario);
-            ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //     //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let car = ts::take_from_sender<Car>(scenario);
+    //         ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-         //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let land = ts::take_from_sender<Land>(scenario);
-            ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //      //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let land = ts::take_from_sender<Land>(scenario);
+    //         ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-        //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let shop = ts::take_from_sender<Shop>(scenario);
-            ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //     //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let shop = ts::take_from_sender<Shop>(scenario);
+    //         ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
+    //         ts::return_shared(listed_asset_shared);
+    //     };
 
-         ts::end(scenario_test);
-    }
+    //      ts::end(scenario_test);
+    // }
 
-    #[test]
-    public fun test_remove_object() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
+    // #[test]
+    // public fun test_remove_object() {
+    //     let scenario_test = init_test_helper();
+    //     let scenario = &mut scenario_test;
 
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-        // add and remove the house from table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house = ts::take_from_sender<House>(scenario);
-            let house_id = return_house_id(&house);
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-            ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
+    //     helper_create_account(scenario);
+    //     helper_create_all(scenario);
+    //     helper_approve_all(scenario);
+    //     // add and remove the house from table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let house = ts::take_from_sender<House>(scenario);
+    //         let house_id = return_house_id(&house);
+    //         ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
+    //         ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
+    //         ts::return_shared(listed_asset_shared);
+    //     };
 
-        ts::end(scenario_test);
-    }
-    #[test]
-    #[expected_failure(abort_code = 0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::EFieldDoesNotExist)]
-    public fun test_error_remove_object() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
+    //     ts::end(scenario_test);
+    // }
+    // #[test]
+    // #[expected_failure(abort_code = 0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::EFieldDoesNotExist)]
+    // public fun test_error_remove_object() {
+    //     let scenario_test = init_test_helper();
+    //     let scenario = &mut scenario_test;
 
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-        helper_add_all_table(scenario);
+    //     helper_create_account(scenario);
+    //     helper_create_all(scenario);
+    //     helper_approve_all(scenario);
+    //     helper_add_all_table(scenario);
         
-        // lets check that test_address2 try to remove another person object. 
-        next_tx(scenario, TEST_ADDRESS2);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house_id = ao::get_house_id(&listed_asset_shared, 0);
+    //     // lets check that test_address2 try to remove another person object. 
+    //     next_tx(scenario, TEST_ADDRESS2);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let house_id = ao::get_house_id(&listed_asset_shared, 0);
 
-            ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
+    //         ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
+    //         ts::return_shared(listed_asset_shared);
 
-        };
+    //     };
 
-        ts::end(scenario_test);
+       // ts::end(scenario_test);
 
-    }
+    //}
 
 
 

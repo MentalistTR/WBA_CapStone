@@ -336,44 +336,44 @@ module notary::helpers {
         };
     }
     
-    public fun helper_add_all_table(scenario: &mut Scenario) {
+    // public fun helper_add_all_table(scenario: &mut Scenario) {
 
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house = ts::take_from_sender<House>(scenario);
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let house = ts::take_from_sender<House>(scenario);
+    //         ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-        //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let car = ts::take_from_sender<Car>(scenario);
-            ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //     //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let car = ts::take_from_sender<Car>(scenario);
+    //         ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-         //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let land = ts::take_from_sender<Land>(scenario);
-            ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //      //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let land = ts::take_from_sender<Land>(scenario);
+    //         ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-        //Add ListedAssets to table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let shop = ts::take_from_sender<Shop>(scenario);
-            ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    //     //Add ListedAssets to table
+    //     next_tx(scenario, TEST_ADDRESS1);
+    //     {   
+    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+    //         let shop = ts::take_from_sender<Shop>(scenario);
+    //         ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
-        };
-    }
+    //         ts::return_shared(listed_asset_shared);
+    //     };
+    // }
 
     
     
