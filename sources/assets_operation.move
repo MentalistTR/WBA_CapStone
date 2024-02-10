@@ -27,17 +27,18 @@ module notary::assets_operation {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
     use notary::assets::{
-        House, Car, Land, Shop, 
+        Self, House, Car, Land, Shop, 
         Sales, return_house, return_shop, return_land, return_car, house_bool,
         car_bool, land_bool, shop_bool, return_house_id, return_car_id, return_land_id,
         return_shop_id, return_house_bool, return_car_bool, return_land_bool, return_shop_bool,
-        return_house_owner, return_car_owner, return_land_owner, return_shop_owner
+        return_house_owner, return_car_owner, return_land_owner, return_shop_owner, return_house_price
         };
   
 
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
     const ERROR_ASSET_NOT_APPROVED: u64 = 2;
+    const ERROR_INVALID_PRICE: u64 = 3;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -412,8 +413,30 @@ module notary::assets_operation {
         transfer::public_transfer(asset, tx_context::sender(ctx));  
     }
 
-    public fun buy() {
-
+    public fun buy_house(
+        assets: &mut ListedAssets,
+        account: &mut Account,
+        asset: ID, 
+        asset_owner: address,
+        amount: u64, 
+        ctx: &mut TxContext
+    ) { 
+        // get seller table
+        let user_table = ot::borrow_mut(&mut assets.house, asset_owner);
+        // get the house
+        let user_house = ot::remove( user_table, asset);
+        // check the price 
+        assert!(return_house_price(&user_house) == amount, ERROR_INVALID_PRICE); 
+        // get balance from user account object 
+        let price = balance::split(&mut account.balance, amount);
+        // convert the balance to coin for transfer 
+        let coin_price = coin::from_balance(price, ctx);
+        // transfer the coin to owner 
+        transfer::public_transfer(coin_price, asset_owner);
+        // change the asset's owner 
+        let new_asset =  assets::change_house_owner(user_house, tx_context::sender(ctx));
+        //transfer the new object 
+        assets::transfer_house(new_asset, tx_context::sender(ctx));
     }
 
     public fun burn() {

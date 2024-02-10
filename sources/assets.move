@@ -13,6 +13,7 @@ module notary::assets {
 
     use sui::object::{Self,UID,ID};
     use sui::tx_context::{Self,TxContext};
+    use sui::transfer;
 
 
     friend notary::assets_operation;
@@ -171,7 +172,7 @@ module notary::assets {
         self.approve
     }
 
-      // change the house object approve bool to true 
+    // change the house object approve bool to true 
     public(friend) fun car_bool(self: &mut Car)  {
          self.approve = true;
     }
@@ -180,7 +181,7 @@ module notary::assets {
         self.approve
     }
 
-      // change the house object approve bool to true 
+    // change the house object approve bool to true 
     public(friend) fun land_bool(self: &mut Land)  {
          self.approve = true;
     }
@@ -188,8 +189,7 @@ module notary::assets {
     public fun return_land_bool(self: &Land) : bool {
         self.approve
     }
-
-      // change the house object approve bool to true 
+    // change the house object approve bool to true 
     public(friend) fun shop_bool(self: &mut Shop)  {
          self.approve = true;
     }
@@ -229,7 +229,15 @@ module notary::assets {
     public fun return_shop_owner(self: &Shop): address {
         self.owner
     }
-
-   
+    public fun return_house_price(self: &House): u64 {
+        self.price
+    }
+    public fun transfer_house(self: House, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    public fun change_house_owner(self: House, recipient: address) : House {
+        self.owner = recipient;
+        self
+    }
 
 }
