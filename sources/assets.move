@@ -164,8 +164,9 @@ module notary::assets {
         shop
     }
     // change the house object approve bool to true 
-    public(friend) fun house_bool(self: &mut House)  {
+    public(friend) fun house_bool(self: House) : House {
          self.approve = true;
+         self
     }
     // helper function that check house.approve equal to false
     public fun return_house_bool(self: &House) : bool {

@@ -66,7 +66,7 @@ module notary::assets_operation {
     /// notary fee will be keep in this object
     struct ListedAssets has key, store {
         id: UID,
-        house: LinkedTable<address, LinkedTable<ID, House>>,
+        house: LinkedTable<address, LinkedTable<u64, House>>,
         shop: LinkedTable<address, LinkedTable<u64, Shop>>,
         car: LinkedTable<address, LinkedTable<u64, Car>>,
         land: LinkedTable<address, LinkedTable<u64, Land>>,
@@ -230,9 +230,24 @@ module notary::assets_operation {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
     // only admin can approve object approve 
-    public fun approve_house(_: &AdminCap, self: &mut House) {
-        assert!(return_house_bool(self) == false, ERROR_ALREADY_APPROVED);
-        house_bool(self);
+    public fun approve_house(_: &AdminCap, asset: &mut ListedAssets, ctx: &mut TxContext) {
+        // take the sender linkedTable
+        let sender_table = lt::borrow_mut(&mut asset.house, tx_context::sender(ctx));
+        // return the sender Table length
+        let table_length = lt::length(sender_table);
+        // loop until the table empty
+        while(table_length > 1) {
+            // remove the item from table
+            let item = lt::remove(sender_table, table_length);
+            // change the approve boolean
+            let new_item = house_bool( item);
+            // get item owner 
+            let owner = assets::return_house_owner(&new_item);
+            // transfer the item to sender
+            assets::transfer_house(new_item, owner);
+            // decrease the length 1
+            table_length = table_length - 1;
+        } 
     }
     // only admin can approve object approve 
     public fun approve_car(_: &AdminCap, self: &mut Car) {
@@ -262,18 +277,16 @@ module notary::assets_operation {
     ) {
         // check that ListedAssets approved by admin
         assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
-        // get object ID from ListedAssets module
-        let object_id = return_house_id(&item);
         // check that if user doesnt has any table add it. 
         if (!lt::contains(&mut asset.house, tx_context::sender(ctx))) {
-            let user_table = lt::new<ID, House>(ctx);
+            let user_table = lt::new<u64, House>(ctx);
                  lt::push_back(&mut asset.house, tx_context::sender(ctx), user_table);
                  }; 
         let user_object_table = lt::borrow_mut(
             &mut asset.house, tx_context::sender(ctx));
+        let table_length = lt::length(user_object_table);
         // add the object to the objecttable
-        //  vector::push_back(&mut asset.house_id, object_id); // FIXME: DELETE 
-        lt::push_back(user_object_table, object_id, item);
+        lt::push_back(user_object_table, table_length + 1, item);
     }
 
      /// Users have to add theirs assets into the ObjectTable . 
