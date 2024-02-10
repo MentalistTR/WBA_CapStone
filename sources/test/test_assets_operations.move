@@ -84,6 +84,23 @@ module notary::test_ListedAssetss_operations {
     }
 
     // lets test linked list method now 
+    #[test]
+    public fun test_linked_add() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+        helper_create_all(scenario);
+
+
+
+
+
+
+
+
+        ts::end(scenario_test);
+
+    }
 
 
 
