@@ -129,26 +129,35 @@ module notary::test_ListedAssetss_operations {
     }
 
 
-    // #[test]
-    // public fun test_approve() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
+    #[test]
+    public fun test_approve() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_add_table_house(scenario);
+        // approve the house 
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let asset_share = ts::take_shared<ListedAssets>(scenario); 
+            ao::approve_house(&admin_cap, &mut asset_share, TEST_ADDRESS1);
 
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    //         let asset_share = ts::take_from_sender<ListedAssets>(scenario); 
-    //         ao::approve_house(&admin_cap, &mut asset_share, TEST_ADDRESS1);
+            ts::return_shared(asset_share);
+            ts::return_to_sender(scenario, admin_cap);
 
-
-    //         ts::return_shared(asset_share);
-    //         ts::return_to_sender(scenario, admin_cap);
-    //     };
-    //     ts::end(scenario_test);
-    // }
+        };
+        // Owner should has the item 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let house = ts::take_from_sender<House>(scenario);
+            // it has been approved so it should return true 
+            assert_eq(return_house_bool(&house), true);
+            ts::return_to_sender(scenario, house);
+        };
+        ts::end(scenario_test);
+    }
 
     // lets test linked list method now 
     // #[test]

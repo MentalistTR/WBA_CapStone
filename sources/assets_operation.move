@@ -38,7 +38,7 @@ module notary::assets_operation {
 
     // =================== Errors ===================
     const ERROR_ALREADY_APPROVED: u64 = 1;
-    const ERROR_ASSET_NOT_APPROVED: u64 = 2;
+    const ERROR_ASSET_ALREADY_APPROVED: u64 = 2;
     const ERROR_INVALID_PRICE: u64 = 3;
     // =================== Constants ===================
 
@@ -236,15 +236,13 @@ module notary::assets_operation {
         // return the sender Table length
         let table_length = lt::length(sender_table);
         // loop until the table empty
-        while(table_length > 1) {
+        while(table_length > 0) {
             // remove the item from table
             let item = lt::remove(sender_table, table_length);
             // change the approve boolean
             let new_item = house_bool( item);
-            // get item owner 
-            let owner = assets::return_house_owner(&new_item);
             // transfer the item to sender
-            assets::transfer_house(new_item, owner);
+            assets::transfer_house(new_item, recipient);
             // decrease the length 1
             table_length = table_length - 1;
         } 
@@ -276,7 +274,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        //assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
+        assert!(return_house_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
         // check that if user doesnt has any table add it. 
         if (!lt::contains(&mut asset.house, tx_context::sender(ctx))) {
             let user_table = lt::new<u64, House>(ctx);

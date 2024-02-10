@@ -327,12 +327,13 @@ module notary::helpers {
     public fun helper_add_table_house(scenario: &mut Scenario) {
         //Add ListedAssets to table
         next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+        {
+            let asset_share = ts::take_shared<ListedAssets>(scenario);
             let house = ts::take_from_sender<House>(scenario);
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
+            
+            ao::add_house_table(&mut asset_share, house, ts::ctx(scenario));
 
-            ts::return_shared(listed_asset_shared);
+            ts::return_shared(asset_share);
         };
     }
     
