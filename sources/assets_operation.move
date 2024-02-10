@@ -36,11 +36,16 @@ module notary::assets_operation {
         };
   
     // =================== Errors ===================
+    // asset can not be approve again
     const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
+    // User price is not equal to asset price 
     const ERROR_INVALID_PRICE: u64 = 2;
+    // admin can not approve empty table. There must be at least 1 object to approve. 
     const ERROR_EMPTY_TABLE: u64 = 3;
     // =================== Constants ===================
 
+    // Fee is  the protocol receives whenever a sales transaction occurs
+    // Admin can change this ratio.
     const FEE: u64 = 5;
 
     // =================== Structs ===================
@@ -228,11 +233,11 @@ module notary::assets_operation {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
    
-     /// Users have to add theirs assets into the ObjectTable . 
+     /// Users have to add theirs assets into the Linked_table for approve by admin . 
      /// # Arguments
      /// 
-     /// * `model, year, color, distance ` -  are the property of car   
-     /// * `price` - Defines the car price.
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `item` -   Defines the type 
     public fun add_house_table(
         asset: &mut ListedAssets,
         item: House,
@@ -252,11 +257,11 @@ module notary::assets_operation {
         lt::push_back(user_object_table, table_length + 1, item);
     }
 
-    //  / Users have to add theirs assets into the ObjectTable . 
-    //  / # Arguments
-    //  / 
-    //  / * `model, year, color, distance ` -  are the property of car   
-    //  / * `price` - Defines the car price.
+     /// Users have to add theirs assets into the Linked_table for approve by admin . 
+     /// # Arguments
+     /// 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `item` -   Defines the type 
     public fun add_car_table(
         asset: &mut ListedAssets,
         item: Car,
@@ -275,11 +280,11 @@ module notary::assets_operation {
         // add the object to the objecttable
         lt::push_back(user_object_table, table_length + 1, item);
     }
-     /// Users have to add theirs assets into the ObjectTable . 
+     /// Users have to add theirs assets into the Linked_table for approve by admin . 
      /// # Arguments
      /// 
-     /// * `model, year, color, distance ` -  are the property of car   
-     /// * `price` - Defines the car price.
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `item` -   Defines the type 
     public fun add_land_table(
         asset: &mut ListedAssets,
         item: Land,
@@ -298,12 +303,11 @@ module notary::assets_operation {
         // add the object to the objecttable
         lt::push_back(user_object_table, table_length + 1, item);
     }
-
-     /// Users have to add theirs assets into the ObjectTable . 
+     /// Users have to add theirs assets into the Linked_table for approve by admin . 
      /// # Arguments
      /// 
-     /// * `model, year, color, distance ` -  are the property of car   
-     /// * `price` - Defines the car price.
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `item` -   Defines the type 
     public fun add_shop_table(
         asset: &mut ListedAssets,
         item: Shop,
@@ -323,7 +327,12 @@ module notary::assets_operation {
         lt::push_back(user_object_table, table_length + 1, item);
     }
 
-     // only admin can approve object approve 
+     /// Only owner of this contract can approve assets . 
+     /// # Arguments
+     /// 
+     /// * `AdminCap` -Defines the admin access object 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `recipient` - is the address of owner of objects  
     public fun approve_house(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
         let sender_table = lt::borrow_mut(&mut asset.house, recipient);
@@ -342,7 +351,12 @@ module notary::assets_operation {
             table_length = table_length - 1;
         } 
     }
-    // only admin can approve object approve 
+     /// Only owner of this contract can approve assets . 
+     /// # Arguments
+     /// 
+     /// * `AdminCap` -Defines the admin access object 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `recipient` - is the address of owner of objects   
     public fun approve_car(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
         let sender_table = lt::borrow_mut(&mut asset.car, recipient);
@@ -361,7 +375,12 @@ module notary::assets_operation {
             table_length = table_length - 1;
         } 
     }
-    // only admin can approve object approve 
+     /// Only owner of this contract can approve assets . 
+     /// # Arguments
+     /// 
+     /// * `AdminCap` -Defines the admin access object 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `recipient` - is the address of owner of objects  
     public fun approve_land(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
         let sender_table = lt::borrow_mut(&mut asset.land, recipient);
@@ -380,7 +399,12 @@ module notary::assets_operation {
             table_length = table_length - 1;
         } 
     }
-    // only admin can approve object approve 
+     /// Only owner of this contract can approve assets . 
+     /// # Arguments
+     /// 
+     /// * `AdminCap` -Defines the admin access object 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `recipient` - is the address of owner of objects   
      public fun approve_shop(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
         let sender_table = lt::borrow_mut(&mut asset.shop, recipient);
