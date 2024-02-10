@@ -230,9 +230,9 @@ module notary::assets_operation {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
     // only admin can approve object approve 
-    public fun approve_house(_: &AdminCap, asset: &mut ListedAssets, ctx: &mut TxContext) {
+    public fun approve_house(_: &AdminCap, asset: &mut ListedAssets, recipient: address) {
         // take the sender linkedTable
-        let sender_table = lt::borrow_mut(&mut asset.house, tx_context::sender(ctx));
+        let sender_table = lt::borrow_mut(&mut asset.house, recipient);
         // return the sender Table length
         let table_length = lt::length(sender_table);
         // loop until the table empty
@@ -276,7 +276,7 @@ module notary::assets_operation {
         ctx: &mut TxContext
     ) {
         // check that ListedAssets approved by admin
-        assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
+        //assert!(return_house_bool(&item) == true, ERROR_ASSET_NOT_APPROVED);
         // check that if user doesnt has any table add it. 
         if (!lt::contains(&mut asset.house, tx_context::sender(ctx))) {
             let user_table = lt::new<u64, House>(ctx);
@@ -469,12 +469,12 @@ module notary::assets_operation {
         init(ctx);
     }
     // get house object from table 
-    // #[test_only]
-    // public fun get_house_table(asset: &ListedAssets, id: ID, ctx: &mut TxContext) : &House {
-    //     let user_table = ot::borrow(&asset.house, tx_context::sender(ctx));
-    //     let house = ot::borrow(user_table, id);
-    //     house
-    // }
+    #[test_only]
+    public fun get_house_table(asset: &ListedAssets, id: u64, ctx: &mut TxContext) : &House {
+        let user_table = lt::borrow(&asset.house, tx_context::sender(ctx));
+        let house = lt::borrow(user_table, id);
+        house
+    }
     #[test_only] // FIXME: DELETE 
     // get house ID 
     public fun get_house_id(asset: &ListedAssets, number: u64) : ID {

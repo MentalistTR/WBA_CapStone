@@ -254,20 +254,20 @@ module notary::helpers {
             price
         );
     }
-    public fun helper_approve_house(
-        scenario: &mut Scenario
-    ) {
-        next_tx(scenario, ADMIN);
-        {   
-            let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
+    // public fun helper_approve_house(
+    //     scenario: &mut Scenario
+    // ) {
+    //     next_tx(scenario, ADMIN);
+    //     {   
+    //         let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
+    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
 
-            ao::approve_house(&admincap, &mut house);
+    //         ao::approve_house(&admincap, &mut house);
 
-            ts::return_to_address(TEST_ADDRESS1, house);
-            ts::return_to_sender(scenario, admincap);
-        };
-    }
+    //         ts::return_to_address(TEST_ADDRESS1, house);
+    //         ts::return_to_sender(scenario, admincap);
+    //     };
+    // }
 
     public fun helper_approve_car(
         scenario: &mut Scenario
@@ -317,12 +317,12 @@ module notary::helpers {
         };
     }
 
-    public fun helper_approve_all(scenario: &mut Scenario) {
-        helper_approve_car(scenario);
-        helper_approve_house(scenario);
-        helper_approve_land(scenario);
-        helper_approve_shop(scenario);
-    }
+    // public fun helper_approve_all(scenario: &mut Scenario) {
+    //     helper_approve_car(scenario);
+    //     helper_approve_house(scenario);
+    //     helper_approve_land(scenario);
+    //     helper_approve_shop(scenario);
+    // }
 
     public fun helper_add_table_house(scenario: &mut Scenario) {
         //Add ListedAssets to table
