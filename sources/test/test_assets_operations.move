@@ -91,6 +91,13 @@ module notary::test_ListedAssetss_operations {
 
         helper_create_all(scenario);
 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+
+
+            
+        }
+
 
 
 
