@@ -35,11 +35,10 @@ module notary::assets_operation {
         return_house_owner, return_car_owner, return_land_owner, return_shop_owner, return_house_price
         };
   
-
     // =================== Errors ===================
-    const ERROR_ALREADY_APPROVED: u64 = 1;
-    const ERROR_ASSET_ALREADY_APPROVED: u64 = 2;
-    const ERROR_INVALID_PRICE: u64 = 3;
+    const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
+    const ERROR_INVALID_PRICE: u64 = 2;
+    const ERROR_EMPTY_TABLE: u64 = 3;
     // =================== Constants ===================
 
     const FEE: u64 = 5;
@@ -174,7 +173,6 @@ module notary::assets_operation {
         balance::join(&mut asset.admin_fee, notary_fee);
         // transfer the object to sender
         transfer::public_transfer(shop, tx_context::sender(ctx));
-
     }
      /// Users can create a land . 
      /// # Arguments
@@ -290,7 +288,7 @@ module notary::assets_operation {
         // check that ListedAssets approved by admin
         assert!(return_land_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
         // check that if user doesnt has any table add it. 
-        if (!lt::contains(&mut asset.car, tx_context::sender(ctx))) {
+        if (!lt::contains(&mut asset.land, tx_context::sender(ctx))) {
             let user_table = lt::new<u64, Land>(ctx);
                  lt::push_back(&mut asset.land, tx_context::sender(ctx), user_table);
                  }; 
@@ -331,6 +329,7 @@ module notary::assets_operation {
         let sender_table = lt::borrow_mut(&mut asset.house, recipient);
         // return the sender Table length
         let table_length = lt::length(sender_table);
+        assert!(table_length >=1, ERROR_EMPTY_TABLE);
         // loop until the table empty
         while(table_length > 0) {
             // remove the item from table
@@ -349,6 +348,7 @@ module notary::assets_operation {
         let sender_table = lt::borrow_mut(&mut asset.car, recipient);
         // return the sender Table length
         let table_length = lt::length(sender_table);
+        assert!(table_length >=1, ERROR_EMPTY_TABLE);
         // loop until the table empty
         while(table_length > 0) {
             // remove the item from table
@@ -367,6 +367,7 @@ module notary::assets_operation {
         let sender_table = lt::borrow_mut(&mut asset.land, recipient);
         // return the sender Table length
         let table_length = lt::length(sender_table);
+        assert!(table_length >=1, ERROR_EMPTY_TABLE);
         // loop until the table empty
         while(table_length > 0) {
             // remove the item from table
@@ -385,6 +386,7 @@ module notary::assets_operation {
         let sender_table = lt::borrow_mut(&mut asset.shop, recipient);
         // return the sender Table length
         let table_length = lt::length(sender_table);
+        assert!(table_length >=1, ERROR_EMPTY_TABLE);
         // loop until the table empty
         while(table_length > 0) {
             // remove the item from table

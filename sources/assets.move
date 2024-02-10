@@ -168,10 +168,6 @@ module notary::assets {
          self.approve = true;
          self
     }
-    // helper function that check house.approve equal to false
-    public fun return_house_bool(self: &House) : bool {
-        self.approve
-    }
     // change the house object approve bool to true 
     public(friend) fun car_bool(self: Car) : Car  {
          self.approve = true;
@@ -184,6 +180,10 @@ module notary::assets {
     public(friend) fun shop_bool(self: Shop) : Shop  {
          self.approve = true;
          self
+    }
+    // helper function that check house.approve equal to false
+    public fun return_house_bool(self: &House) : bool {
+        self.approve
     }
     // helper function that check house.approve equal to false
     public fun return_car_bool(self: &Car) : bool {

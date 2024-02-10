@@ -8,9 +8,10 @@ module notary::test_ListedAssetss_operations {
     use std::string::{Self,String};
 
     use notary::helpers::{
+        Self,
         init_test_helper, helper_create_account, helper_create_land, helper_create_house, 
-        helper_create_car, helper_create_shop, helper_create_all, 
-         helper_add_table_house, // helper_add_all_table
+        helper_create_car, helper_create_shop, helper_create_all, helper_approve_all, 
+        helper_add_table_house, helper_add_all_table
         };
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
@@ -158,293 +159,103 @@ module notary::test_ListedAssetss_operations {
         ts::end(scenario_test);
     }
 
-    // We are expecting error. Admin didint approve the ListedAssets. 
-    // #[test]
-    // #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
-    // public fun test_error_not_approved() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
+   // We are expecting error. There is no assset in table. 
+    #[test]
+    #[expected_failure(abort_code = ao::ERROR_EMPTY_TABLE)]
+    public fun test_error_not_approved() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_add_table_house(scenario);
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_add_all_table(scenario);
+        helper_approve_all(scenario);
+        helpers::helper_approve_house(scenario);
 
-    //     ts::end(scenario_test);
-    // }
+        ts::end(scenario_test);
+    }
+     // We are expecting error. Admin already approved this asset. 
+    #[test]
+    #[expected_failure(abort_code = ao::ERROR_ASSET_ALREADY_APPROVED)]
+    public fun test_error_already_approved() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
-    // #[test]
-    // public fun test_approve() {
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_add_all_table(scenario);
+        helper_approve_all(scenario);
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
+            let house = ts::take_from_sender<House>(scenario);
+            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
 
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
+            ts::return_shared(listed_asset_shared);
+        };
 
-    //     // create 3 account and send them 1000 stabil coin
-    //     helper_create_account(scenario);
+        ts::end(scenario_test);
+    }
 
-    //     let location = b"ankara";
-    //     let model = b"focus";
-    //     let color = b"red";
-    //     let area : u64 = 144;
-    //     let year : u64 = 10;
-    //     let price: u64 = 1000;
-    //     let distance: u64 = 50000;
+    #[test]
+    public fun test_approve2() {
 
-    //     // create a house for test_address1
-    //     helper_create_house(
-    //         scenario,
-    //         TEST_ADDRESS1,
-    //         location,
-    //         area,
-    //         year,
-    //         price
-    //         );
-    //     // create a shop for test_address1
-    //     helper_create_land(
-    //         scenario,
-    //         TEST_ADDRESS1,
-    //         location,
-    //         area,
-    //         price
-    //     );
-    //     // create a shop for test_address1
-    //     helper_create_shop(
-    //         scenario,
-    //         TEST_ADDRESS1,
-    //         location,
-    //         area,
-    //         year,
-    //         price
-    //     );
-    //     helper_create_car(
-    //         scenario,
-    //         TEST_ADDRESS1,
-    //         model,
-    //         year,
-    //         color,
-    //         distance,
-    //         price
-    //     );
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
-    //     // owner must approve that House 
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
-    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
+        // create 3 account and send them 1000 stabil coin
+        helper_create_account(scenario);
+        helper_create_all(scenario);
+        helper_add_all_table(scenario);
+        helper_approve_all(scenario);
+    
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let house = ts::take_from_sender<House>(scenario);
+            // lets call house bool 
+            let approve = return_house_bool(&mut house);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
-    //         ao::approve_house(&admincap, &mut house);
+            ts::return_to_sender(scenario, house);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let car = ts::take_from_sender<Car>(scenario);
+            // lets call house bool 
+            let approve = return_car_bool(&mut car);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
-    //         ts::return_to_address(TEST_ADDRESS1, house);
-    //         ts::return_to_sender(scenario, admincap);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let house = ts::take_from_sender<House>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_house_bool(&mut house);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
+            ts::return_to_sender(scenario, car);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let land = ts::take_from_sender<Land>(scenario);
+            // lets call house bool 
+            let approve = return_land_bool(&mut land);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
-    //         ts::return_to_sender(scenario, house);
-    //     };
+            ts::return_to_sender(scenario, land);
+        };
+        // lets check that test_address1 object has been approved
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let shop = ts::take_from_sender<Shop>(scenario);
+            // lets call house bool 
+            let approve = return_shop_bool(&mut shop);
+            // bool must be equal to true 
+            assert_eq(approve, true);
 
-    //      // owner must approve that Car
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let car = ts::take_from_address<Car>(scenario, TEST_ADDRESS1);
-    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
+            ts::return_to_sender(scenario, shop);
+        };
 
-    //         ao::approve_car(&admincap, &mut car);
-
-    //         ts::return_to_address(TEST_ADDRESS1, car);
-    //         ts::return_to_sender(scenario, admincap);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let car = ts::take_from_sender<Car>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_car_bool(&mut car);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, car);
-    //     };
-
-    //     // owner must approve that Land
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let land = ts::take_from_address<Land>(scenario, TEST_ADDRESS1);
-    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
-
-    //         ao::approve_land(&admincap, &mut land);
-
-    //         ts::return_to_address(TEST_ADDRESS1, land);
-    //         ts::return_to_sender(scenario, admincap);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let land = ts::take_from_sender<Land>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_land_bool(&mut land);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, land);
-    //     };
-
-    //      // owner must approve that Shop
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let shop = ts::take_from_address<Shop>(scenario, TEST_ADDRESS1);
-    //         let admincap = ts::take_from_sender<AdminCap>(scenario);
-
-    //         ao::approve_shop(&admincap, &mut shop);
-
-    //         ts::return_to_address(TEST_ADDRESS1, shop);
-    //         ts::return_to_sender(scenario, admincap);
-    //     };
-    //     // lets check that test_address1 object has been approved
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let shop = ts::take_from_sender<Shop>(scenario);
-    //         // lets call house bool 
-    //         let approve = return_shop_bool(&mut shop);
-    //         // bool must be equal to true 
-    //         assert_eq(approve, true);
-
-    //         ts::return_to_sender(scenario, shop);
-    //     };
-
-    //     ts::end(scenario_test);
-    // }
-    // Admin already approved the ListedAssets. We are expecting error
-    // #[test]
-    // #[expected_failure(abort_code = ao::ERROR_ALREADY_APPROVED)]
-    // public fun test_error_already_approved() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_approve_all(scenario);
-    //     helper_approve_house(scenario);
-
-    //     ts::end(scenario_test);
-    // }
-
-    // #[test]
-    // public fun test_add_table() {
-
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_approve_all(scenario);
-
-    //     //Add ListedAssets to table
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let house = ts::take_from_sender<House>(scenario);
-    //         // keep ID before add the table 
-    //         let house_id = return_house_id(&house);
-    //         // add house to the table 
-    //         ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-    //         // get house object from table 
-    //         let house_table = ao::get_house_table(&listed_asset_shared, house_id, ts::ctx(scenario));
-    //         // return the house object owner 
-    //         let house_owner = return_house_owner(house_table);
-    //         // check the owner variable from that object 
-    //         assert_eq(house_owner, TEST_ADDRESS1);
-
-    //         ts::return_shared(listed_asset_shared);
-    //     };
-    //     //Add ListedAssets to table
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let car = ts::take_from_sender<Car>(scenario);
-    //         ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
-
-    //         ts::return_shared(listed_asset_shared);
-    //     };
-    //      //Add ListedAssets to table
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let land = ts::take_from_sender<Land>(scenario);
-    //         ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
-
-    //         ts::return_shared(listed_asset_shared);
-    //     };
-    //     //Add ListedAssets to table
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let shop = ts::take_from_sender<Shop>(scenario);
-    //         ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
-
-    //         ts::return_shared(listed_asset_shared);
-    //     };
-
-    //      ts::end(scenario_test);
-    // }
-
-    // #[test]
-    // public fun test_remove_object() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_approve_all(scenario);
-    //     // add and remove the house from table
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let house = ts::take_from_sender<House>(scenario);
-    //         let house_id = return_house_id(&house);
-    //         ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-    //         ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
-
-    //         ts::return_shared(listed_asset_shared);
-    //     };
-
-    //     ts::end(scenario_test);
-    // }
-    // #[test]
-    // #[expected_failure(abort_code = 0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::EFieldDoesNotExist)]
-    // public fun test_error_remove_object() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-
-    //     helper_create_account(scenario);
-    //     helper_create_all(scenario);
-    //     helper_approve_all(scenario);
-    //     helper_add_all_table(scenario);
-        
-    //     // lets check that test_address2 try to remove another person object. 
-    //     next_tx(scenario, TEST_ADDRESS2);
-    //     {   
-    //         let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let house_id = ao::get_house_id(&listed_asset_shared, 0);
-
-    //         ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
-
-    //         ts::return_shared(listed_asset_shared);
-
-    //     };
-
-       // ts::end(scenario_test);
-
-    //}
-
-
-
-
+        ts::end(scenario_test);
+    }
 
 
 
