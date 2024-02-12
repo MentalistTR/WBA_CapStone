@@ -1,13 +1,14 @@
 #[test_only]
 module notary::test_ListedAssetss_operations {
     use sui::transfer;
-    use sui::coin::{Self, mint_for_testing};
+    use sui::coin::{Self, Coin, mint_for_testing};
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
+    use sui::balance;
 
     use std::string::{Self,String};
 
-    use notary::helpers::{Self, init_test_helper, helper_create_account};
+    use notary::helpers::{Self, init_test_helper, helper_create_account, helper_create_share_listed};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
@@ -22,14 +23,50 @@ module notary::test_ListedAssetss_operations {
     const TEST_ADDRESS4: address = @0xE;
 
    #[test]
-    public fun test_create() {
+    public fun test_create_accounts() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        // check the Test_address1 balance 
+        next_tx(scenario, TEST_ADDRESS1);
+        {  
+            let account = ts::take_from_sender<Account>(scenario);
+            let balance = ao::get_account_balance(&account);
+            assert_eq(balance, 1000);
+            ts::return_to_sender(scenario, account);
+        };
+        // check the Test_address2 balance 
+        next_tx(scenario, TEST_ADDRESS2);
+        {  
+            let account = ts::take_from_sender<Account>(scenario);
+            let balance = ao::get_account_balance(&account);
+            assert_eq(balance, 1000);
+            ts::return_to_sender(scenario, account);
+        };
+        // debt must be zero 
+        next_tx(scenario, TEST_ADDRESS1);
+        {  
+            let account = ts::take_from_sender<Account>(scenario);
+            let balance = ao::get_account_debt(&account);
+            assert_eq(balance, 0);
+            ts::return_to_sender(scenario, account);
+        };
+        ts::end(scenario_test);
+    }
 
+    #[test]
+    public fun create_asset() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        helper_create_share_listed(scenario);
 
 
 
         ts::end(scenario_test);
+
     }
 
 

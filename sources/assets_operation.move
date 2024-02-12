@@ -89,6 +89,10 @@ module notary::assets_operation {
         balance: Balance<LIRA_STABLE_COIN>
     }
 
+    struct Capy has key, store {
+        id: UID
+    }
+
     // =================== Initializer ===================
 
     fun init(ctx: &mut TxContext) {
@@ -230,19 +234,17 @@ module notary::assets_operation {
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
     }
-    // get house object from table 
-    // #[test_only]
-    // public fun get_house_table(asset: &ListedAssets, id: u64, ctx: &mut TxContext) : &House {
-    //     let user_table = lt::borrow(&asset.house, tx_context::sender(ctx));
-    //     let house = lt::borrow(user_table, id);
-    //     house
-    // }
-    //#[test_only]
-    // get id for local test 
-    // public fun test_get_house_id(asset: &ListedAssets, number: u64) : ID {
-    //     let id = vector::borrow(&asset.house_id, number);
-    //     *id
-    // }
+    #[test_only]
+    // get account balance 
+    public fun get_account_balance(account: &Account) : u64 {
+        balance::value(&account.balance)
+    } 
+    #[test_only]
+    // get account debt
+    public fun get_account_debt(account: &Account) : u64 {
+        account.debt
+    } 
+
 
 }
 
