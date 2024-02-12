@@ -129,7 +129,6 @@ module notary::assets_operation {
                 admin_fee: balance::zero(),
             }
         );
-
     }
      /// Users can create a asset. 
      /// # Arguments
@@ -150,84 +149,10 @@ module notary::assets_operation {
         let asset = assets::create_house(type, price, ctx);
         asset
     }
-
-    //  /// Users can create shop . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `location, area, year ` -  are the property of shop 
-    //  /// * `price` - Defines the shop price.
-    //  public fun create_shop( 
-    //     asset: &mut ListedAssets,
-    //     account: &mut Account, 
-    //     location: String,
-    //     area: u64,
-    //     year: u64,
-    //     price: u64,
-    //     ctx :&mut TxContext,
-
-    //  ) {
-    //     // create an Shop
-    //     let shop = return_shop(location, area, year, price, ctx);
-    //     // calculate the notary fee
-    //     let notary_fee = balance::split(&mut account.balance, FEE / 1000);
-    //     // transfer the notary_fee to notary balance 
-    //     balance::join(&mut asset.admin_fee, notary_fee);
-    //     // transfer the object to sender
-    //     transfer::public_transfer(shop, tx_context::sender(ctx));
-    // }
-    //  /// Users can create a land . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `location, area ` -  are the property of land  
-    //  /// * `price` - Defines the land price.
-    //  public fun create_land(
-    //     asset: &mut ListedAssets,
-    //     account: &mut Account, 
-    //     location: String,
-    //     area: u64,
-    //     price: u64,
-    //     ctx :&mut TxContext,
-    //  ) {
-    //     // create an Land
-    
-    //     let land = return_land(location, area, price, ctx);
-     
-    //     // calculate the notary fee
-    //     let notary_fee = balance::split(&mut account.balance, FEE / 1000);
-    //     // transfer the notary_fee to notary balance 
-    //     balance::join(&mut asset.admin_fee, notary_fee);
-    //     // transfer the object to sender
-    //     transfer::public_transfer(land, tx_context::sender(ctx));
-
-    // }
-    //  /// Users can create a house . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `model, year, color, distance ` -  are the property of car   
-    //  /// * `price` - Defines the car price.
-    //  public fun create_car(
-    //     asset: &mut ListedAssets,
-    //     account: &mut Account, 
-    //     model: String,
-    //     year: u64,
-    //     color: String,
-    //     distance: u64,
-    //     price: u64,
-    //     ctx :&mut TxContext,
-    //  ) {
-    //     // create an car
-    //     let car = return_car(model, year, color, distance, price, ctx);
-    //     // calculate the notary fee
-    //     let notary_fee = balance::split(&mut account.balance, FEE / 1000);
-    //     // transfer the notary_fee to notary balance 
-    //     balance::join(&mut asset.admin_fee, notary_fee);
-    //     // transfer the object to sender
-    //     transfer::public_transfer(car, tx_context::sender(ctx));
-    // }
-    // // users can deposit lira_stable_coin to theirs account balance 
-    // public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
-    //     balance::join(&mut account.balance, coin::into_balance(coin));
-    // }
+    // users can deposit lira_stable_coin to theirs account balance 
+    public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
+        balance::join(&mut account.balance, coin::into_balance(coin));
+    }
    
     //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
     //  /// # Arguments
