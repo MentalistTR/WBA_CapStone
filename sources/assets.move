@@ -63,6 +63,19 @@ module notary::assets {
         asset.inner
     }
 
+    public(friend) fun return_new_asset<T: key + store>(asset: Asset<T>) : Asset<T> {
+        asset.approve = true;
+        asset
+    }
+
+    public fun return_asset_owner<T: key + store>(asset: &Asset<T>) : address {
+        asset.owner
+    }
+
+     public(friend) fun transfer_asset<T: key + store>(asset: Asset<T>, owner: address) {
+        transfer::public_transfer(asset, owner);
+    }
+
 
 
 }

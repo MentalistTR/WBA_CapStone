@@ -152,7 +152,6 @@ module notary::assets_operation {
         asset
     }
    
-   
      /// Users have to add theirs assets into the Linked_table for approve by admin . 
      /// # Arguments
      /// 
@@ -170,135 +169,26 @@ module notary::assets_operation {
         lt::push_back(&mut asset.assets, object_id, item);
     }
 
-    //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `asset` -  share object for keep assets to approve  
-    //  /// * `item` -   Defines the type 
-    // public fun add_car_table(
-    //     asset: &mut ListedAssets,
-    //     item: Car,
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_car_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
-    //     // check that if user doesnt has any table add it.
-    //     let object_id = return_car_id(&item); 
-    //     // add the object to the objecttable
-    //     lt::push_back(&mut asset.car, object_id, item);
-    // }
-    //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `asset` -  share object for keep assets to approve  
-    //  /// * `item` -   Defines the type 
-    //   public fun add_land_table(
-    //     asset: &mut ListedAssets,
-    //     item: Land,
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_land_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
-    //     // check that if user doesnt has any table add it.
-    //     let object_id = return_land_id(&item); 
-    //     // add the object to the objecttable
-    //     lt::push_back(&mut asset.land, object_id, item);
-    // }
-    //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `asset` -  share object for keep assets to approve  
-    //  /// * `item` -   Defines the type 
-    //  public fun add_shop_table(
-    //     asset: &mut ListedAssets,
-    //     item: Shop,
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_shop_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
-    //     // check that if user doesnt has any table add it.
-    //     let object_id = return_shop_id(&item); 
-    //     // add the object to the objecttable
-    //     lt::push_back(&mut asset.shop, object_id, item);
-    // }
-
-    //  /// Only owner of this contract can approve assets . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `AdminCap` -Defines the admin access object 
-    //  /// * `asset` -  share object for keep assets to approve  
-    //  /// * `recipient` - is the address of owner of objects  
-    // public fun approve_house<T: key + store>(_: &AdminCap, asset: &Asset<T>, id: ID, approve: bool) {
-      
-        
-       
-   
-    //     }
+    public fun approve_asset<T: key + store>(_: &AdminCap, listed_asset: &mut ListedAssets<T>, id: ID, approve: bool) {
+        // remove the asset from table 
+        let asset = lt::remove(&mut listed_asset.assets, id);
+        if(approve == true) {
+            // set the bool to approve variable 
+            let new_asset = assets::return_new_asset( asset);
+            // define recipient 
+            let recipient = assets::return_asset_owner(&new_asset);
+            // transfer the object 
+            assets::transfer_asset<T>(new_asset, recipient);
+        } else {
+            // if admin is not approve send the object to owner 
+            let recipient = assets::return_asset_owner(&asset);
+            assets::transfer_asset<T>(asset, recipient);  
+    }
+    }
     
-    // //  /// Only owner of this contract can approve assets . 
-    // //  /// # Arguments
-    // //  /// 
-    // //  /// * `AdminCap` -Defines the admin access object 
-    // //  /// * `asset` -  share object for keep assets to approve  
-    // //  /// * `recipient` - is the address of owner of objects   
-    // public fun approve_car(_: &AdminCap, asset: &mut ListedAssets, id: ID, approve: bool) {
-    //     // remove the asset from table 
-    //     let asset = lt::remove(&mut asset.car, id);
-    //     // check the asset is not approved
-    //     if(approve == true) {
-    //         // set the bool to approve variable 
-    //         let new_asset = car_bool(asset);
-    //         // define recipient 
-    //         let recipient = return_car_owner(&new_asset);
-    //         // transfer the object 
-    //         assets::transfer_car(new_asset, recipient);
-    //     } else {
-    //         // if admin is not approve send the object to owner 
-    //         let recipient = return_car_owner(&asset);
-    //         assets::transfer_car(asset, recipient);  
-    //     }
-    //     }
-    // //  /// Only owner of this contract can approve assets . 
-    // //  /// # Arguments
-    // //  /// 
-    // //  /// * `AdminCap` -Defines the admin access object 
-    // //  /// * `asset` -  share object for keep assets to approve  
-    // //  /// * `recipient` - is the address of owner of objects  
-    // public fun approve_land(_: &AdminCap, asset: &mut ListedAssets, id: ID, approve: bool) {
-    //     // remove the asset from table 
-    //     let asset = lt::remove(&mut asset.land, id);
-    //     if(approve == true) {
-    //         // set the bool to approve variable 
-    //         let new_asset = land_bool(asset);
-    //         // define recipient 
-    //         let recipient = return_land_owner(&new_asset);
-    //         // transfer the object 
-    //         assets::transfer_land(new_asset, recipient);
-    //     } else {
-    //         // if admin is not approve send the object to owner 
-    //         let recipient = return_land_owner(&asset);
-    //         assets::transfer_land(asset, recipient);  
-    //     }
-    //     }
-    // //  /// Only owner of this contract can approve assets . 
-    // //  /// # Arguments
-    // //  /// 
-    // //  /// * `AdminCap` -Defines the admin access object 
-    // //  /// * `asset` -  share object for keep assets to approve  
-    // //  /// * `recipient` - is the address of owner of objects   
-    // public fun approve_shop(_: &AdminCap, asset: &mut ListedAssets, id: ID, approve: bool) {
-    //     // remove the asset from table 
-    //     let asset = lt::remove(&mut asset.shop, id);
-    //     if(approve == true) {
-    //         // set the bool to approve variable 
-    //         let new_asset = shop_bool(asset);
-    //         // define recipient 
-    //         let recipient = return_shop_owner(&new_asset);
-    //         // transfer the object 
-    //         assets::transfer_shop(new_asset, recipient);
-    //     } else {
-    //         // if admin is not approve send the object to owner 
-    //         let recipient = return_shop_owner(&asset);
-    //         assets::transfer_shop(asset, recipient);  
-    //     }
-    //     }
+   
+
+
     // public fun buy_house(
     //     assets: &mut ListedAssets,
     //     account: &mut Account,
@@ -355,4 +245,6 @@ module notary::assets_operation {
     // }
 
 }
+
+
 
