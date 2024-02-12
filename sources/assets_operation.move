@@ -12,17 +12,15 @@
 /// 3. Create an account for keep balance or debt
 /// 4. Keep Sales events in Data share object
 module notary::assets_operation {
-    use std::string::{Self, String};
-    use std::vector;
-    use std::debug;
+    use std::string::{String};
+    //use std::vector;
+    //use std::debug;
 
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self,UID,ID};
     use sui::transfer;
-    use sui::object_table::{Self as ot, ObjectTable};
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
-    use sui::table_vec::{Self, TableVec};
     use sui::coin::{Self, Coin};
     use sui::linked_table::{Self as lt, LinkedTable};
 
@@ -33,7 +31,7 @@ module notary::assets_operation {
   
     // =================== Errors ===================
     // asset can not be approve again
-    //const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
+    const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
     // User price is not equal to asset price 
    // const ERROR_INVALID_PRICE: u64 = 2;
 
@@ -120,6 +118,10 @@ module notary::assets_operation {
           balance: balance::zero()
         }
     }
+     // users can deposit lira_stable_coin to theirs account balance 
+    public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
+        balance::join(&mut account.balance, coin::into_balance(coin));
+    }
      /// Admin must create one share object for users to set theirs RWA for approve. 
     public fun new_listed_assets<T: key + store>(_: &AdminCap, ctx: &mut TxContext) {
             transfer::share_object(
@@ -149,27 +151,24 @@ module notary::assets_operation {
         let asset = assets::create_house(type, price, ctx);
         asset
     }
-    // users can deposit lira_stable_coin to theirs account balance 
-    public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
-        balance::join(&mut account.balance, coin::into_balance(coin));
-    }
    
-    //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
-    //  /// # Arguments
-    //  /// 
-    //  /// * `asset` -  share object for keep assets to approve  
-    //  /// * `item` -   Defines the type 
-    // public fun add_house_table(
-    //     asset: &mut ListedAssets,
-    //     item: House,
-    // ) {
-    //     // check that ListedAssets approved by admin
-    //     assert!(return_house_bool(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
-    //     // check that if user doesnt has any table add it.
-    //     let object_id = return_house_id(&item); 
-    //     // add the object to the objecttable
-    //     lt::push_back(&mut asset.house, object_id, item);
-    // }
+   
+     /// Users have to add theirs assets into the Linked_table for approve by admin . 
+     /// # Arguments
+     /// 
+     /// * `asset` -  share object for keep assets to approve  
+     /// * `item` -   Defines the type 
+    public fun add_asset_table<T: key + store>(
+        asset: &mut ListedAssets<T>,
+        item: Asset<T>,
+    ) {
+        // check the asset approved or not.
+        assert!(assets::return_asset_approve(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        // set the object id.
+        let object_id = assets::return_asset_id(&item); 
+        // add the object to the objecttable
+        lt::push_back(&mut asset.assets, object_id, item);
+    }
 
     //  /// Users have to add theirs assets into the Linked_table for approve by admin . 
     //  /// # Arguments
@@ -226,12 +225,12 @@ module notary::assets_operation {
     //  /// * `AdminCap` -Defines the admin access object 
     //  /// * `asset` -  share object for keep assets to approve  
     //  /// * `recipient` - is the address of owner of objects  
-    public fun approve_house<T: key + store>(_: &AdminCap, asset: &Asset<T>, id: ID, approve: bool) {
+    // public fun approve_house<T: key + store>(_: &AdminCap, asset: &Asset<T>, id: ID, approve: bool) {
       
         
        
    
-        }
+    //     }
     
     // //  /// Only owner of this contract can approve assets . 
     // //  /// # Arguments

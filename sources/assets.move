@@ -53,6 +53,16 @@ module notary::assets {
         house
     }
 
+    // helper functions 
+
+    public fun return_asset_approve<T: key + store>(asset: &Asset<T>) : bool {
+        asset.approve
+    }
+
+    public fun return_asset_id<T: key + store>(asset: &Asset<T>) : ID {
+        asset.inner
+    }
+
 
 
 }
