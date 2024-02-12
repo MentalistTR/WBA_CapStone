@@ -89,10 +89,6 @@ module notary::assets_operation {
         balance: Balance<LIRA_STABLE_COIN>
     }
 
-    struct Capy has key, store {
-        id: UID
-    }
-
     // =================== Initializer ===================
 
     fun init(ctx: &mut TxContext) {
@@ -245,8 +241,4 @@ module notary::assets_operation {
         account.debt
     } 
 
-
 }
-
-
-

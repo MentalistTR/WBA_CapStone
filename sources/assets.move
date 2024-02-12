@@ -75,6 +75,10 @@ module notary::assets {
      public(friend) fun transfer_asset<T: key + store>(asset: Asset<T>, owner: address) {
         transfer::public_transfer(asset, owner);
     }
+    
+    public fun return_asset_type<T: key + store + copy>(asset: &Asset<T>) : T {
+        asset.type
+    }
 
 
 

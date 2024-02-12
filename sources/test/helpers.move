@@ -3,19 +3,24 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
+    use sui::object::{Self, UID};
 
-    use notary::assets_operation::{Self as ao, AdminCap, Account, test_init, Capy};
+    use std::string::{Self,String};
+
+    use notary::assets_operation::{Self as ao, AdminCap, Account, test_init};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
-    use notary::assets::{Self,};
+    use notary::assets::{Self};
 
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
 
-
+     struct Test has key, store {
+        id: UID,
+    }
     public fun helper_create_account(scenario: &mut Scenario) {
         // TEST_ADDRESS1
         next_tx(scenario, TEST_ADDRESS1);
@@ -73,7 +78,7 @@ module notary::helpers {
         {
         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
 
-        ao::new_listed_assets<Capy>(&admin_cap, ts::ctx(scenario));
+        ao::new_listed_assets<Test>(&admin_cap, ts::ctx(scenario));
 
         ts::return_to_sender(scenario,admin_cap);
         };
@@ -83,7 +88,13 @@ module notary::helpers {
 
     // }
 
-    
+    // create a test object for create a Asset
+    public fun helper_return_test(scenario: &mut Scenario) : Test {
+        let test= Test{
+            id: object::new(ts::ctx(scenario)),
+        };
+        test
+    }
 
     public fun init_test_helper() : ts::Scenario{
 

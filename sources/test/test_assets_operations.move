@@ -5,14 +5,14 @@ module notary::test_ListedAssetss_operations {
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
     use sui::balance;
-
+   
     use std::string::{Self,String};
 
-    use notary::helpers::{Self, init_test_helper, helper_create_account, helper_create_share_listed};
+    use notary::helpers::{Self, Test, init_test_helper, helper_create_account, helper_create_share_listed, helper_return_test};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    use notary::assets::{Self, };
+    use notary::assets::{Self, Asset};
     
     use notary::assets_operation::{Self as ao, NotaryData, ListedAssets, Account, AdminCap};
     
@@ -61,21 +61,38 @@ module notary::test_ListedAssetss_operations {
         let scenario = &mut scenario_test;
         // create 4 Account and send them 1000 lira
         helper_create_account(scenario);
+        // create a share object only one time
         helper_create_share_listed(scenario);
+        // create a Asset object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let listed_shared = ts::take_shared<ListedAssets<Test>>(scenario);
+            let account = ts::take_from_sender<Account>(scenario);
+            let amount: u64 = 900;
+            let type = helper_return_test(scenario);
+
+            let asset = ao::create_asset<Test>(
+                &mut listed_shared,
+                &mut account,
+                type,
+                amount,
+                ts::ctx(scenario)
+            );
+            transfer::public_transfer(asset, TEST_ADDRESS1);
+
+            ts::return_shared(listed_shared);
+            ts::return_to_sender(scenario, account);
+        };
+        // check the user's object 
+        next_tx(scenario, TEST_ADDRESS1);
+        {   
+            let asset = ts::take_from_sender<Asset<Test>>(scenario);
+            ts::return_to_sender(scenario, asset)
+        };
 
 
 
         ts::end(scenario_test);
 
     }
-
-
-
-
-
-
-
-
-
-
 }
