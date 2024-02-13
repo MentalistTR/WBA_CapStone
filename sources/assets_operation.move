@@ -14,7 +14,7 @@
 module notary::assets_operation {
     use std::string::{String};
     //use std::vector;
-    //use std::debug;
+    use std::debug;
 
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self,UID,ID};
@@ -39,7 +39,7 @@ module notary::assets_operation {
 
     // Fee is  the protocol receives whenever a sales transaction occurs
     // Admin can change this ratio.
-    const FEE: u64 = 5;
+    const FEE: u128 = 5;
 
     // =================== Structs ===================
 
@@ -145,7 +145,10 @@ module notary::assets_operation {
         ctx :&mut TxContext,
     ) : Asset<T> {
         // calculate the notary fee
-        let notary_fee = balance::split(&mut account.balance, FEE / 1000);
+        let value = balance::value(&account.balance);
+        let admin_fee = value - (((value as u128) * FEE / 1000) as u64);
+        let notary_fee = balance::split(&mut account.balance, value - admin_fee);
+        debug::print(&notary_fee);
         // transfer the notary_fee to notary balance 
         balance::join(&mut listed_asset.admin_fee, notary_fee);
         let asset = assets::create_house(type, price, ctx);
@@ -221,11 +224,6 @@ module notary::assets_operation {
 
     // === Test Functions ===
     #[test_only]
-    // get user Account balance 
-    public fun user_account_balance(account: &Account): u64 {
-        balance::value(&account.balance)
-    }
-    #[test_only]
     // get init function 
     public fun test_init(ctx: &mut TxContext) {
         init(ctx);
@@ -240,5 +238,10 @@ module notary::assets_operation {
     public fun get_account_debt(account: &Account) : u64 {
         account.debt
     } 
+    #[test_only]
+    // get admin balance 
+    public fun get_admin_balance<T: key + store>(share: &ListedAssets<T>) : u64 {
+        balance::value(&share.admin_fee)
+    }
 
 }

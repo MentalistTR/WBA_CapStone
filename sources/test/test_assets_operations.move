@@ -80,6 +80,10 @@ module notary::test_ListedAssetss_operations {
             );
             transfer::public_transfer(asset, TEST_ADDRESS1);
 
+            // check the admin balance. It should be equal to 5.
+            let admin_balance = ao::get_admin_balance(&listed_shared);
+            assert_eq(admin_balance, 5);
+
             ts::return_shared(listed_shared);
             ts::return_to_sender(scenario, account);
         };
@@ -89,10 +93,9 @@ module notary::test_ListedAssetss_operations {
             let asset = ts::take_from_sender<Asset<Test>>(scenario);
             ts::return_to_sender(scenario, asset)
         };
-
-
-
+  
         ts::end(scenario_test);
-
     }
+
+
 }
