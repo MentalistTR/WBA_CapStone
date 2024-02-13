@@ -38,6 +38,7 @@ module notary::assets {
     // this struct represents the extensions of Asset
     struct Accessory has key, store {
          id: UID,
+         inner: ID,
          property: String 
     }
 
@@ -50,7 +51,7 @@ module notary::assets {
         
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
-        let house = Asset {
+        let asset = Asset {
             id:id,
             inner: inner,
             owner: tx_context::sender(ctx),
@@ -60,12 +61,15 @@ module notary::assets {
             approve: false,
             property: ot::new(ctx)
         };
-        house
+        asset
     }
     public fun create_accessory(property: String, ctx: &mut TxContext) : Accessory {
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
         let new_accessory = Accessory {
-        id: object::new(ctx),
-        property: property
+            id: id,
+            inner: inner,
+            property: property
         };
         new_accessory
     }
@@ -89,8 +93,16 @@ module notary::assets {
         asset.owner
     }
 
-     public(friend) fun transfer_asset(asset: Asset, owner: address) {
+    public(friend) fun transfer_asset(asset: Asset, owner: address) {
         transfer::public_transfer(asset, owner);
+    }
+
+    public fun return_uid_to_inner(accessory: &Accessory) : ID {
+        accessory.inner
+    }
+    
+    public fun add_table_accessory(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
+        &mut asset.property
     }
     
 

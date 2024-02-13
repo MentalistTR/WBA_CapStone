@@ -17,12 +17,13 @@ module notary::assets_operation {
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
-    use sui::object::{Self,UID,ID};
+    use sui::object::{Self,UID,ID, uid_to_inner};
     use sui::transfer;
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
     use sui::linked_table::{Self as lt, LinkedTable};
+    use sui::object_table::{Self as ot};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
@@ -159,6 +160,18 @@ module notary::assets_operation {
         let asset = assets::create_asset(type, price, ctx);
         asset
     }
+     //Add extensions to reel world assets 
+    public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) {
+        let accessory = assets::create_accessory(property, ctx);
+    
+        let accessory_id = assets::return_uid_to_inner(&accessory);
+        let ot = assets::add_table_accessory( asset);
+        ot::add(ot, accessory_id, accessory);
+     
+        
+
+    }
+
    
     /// Users have to add theirs assets into the Linked_table for approve by admin . 
     /// # Arguments
@@ -194,21 +207,7 @@ module notary::assets_operation {
         }
     }
 
-    // Add extensions to reel world assets 
-
-    // public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) {
-    //     let wrapped_asset = assets::return_wrapped(asset);
-    //     let new_accessory = assets::create_accessory(property, ctx);
-    //     let accessory_id = 
-        
-       
-
-
-          
-        
-
-    // }
-
+ 
 
     
    
