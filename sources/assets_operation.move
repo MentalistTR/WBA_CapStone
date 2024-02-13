@@ -106,11 +106,11 @@ module notary::assets_operation {
 
     // =================== Functions ===================
 
-     /// Users has to create an account. 
-     /// # Arguments
-     /// 
-     /// * `debt` -  Defines the user debt 
-     /// * `balance` - Defines the user balance
+    /// Users has to create an account. 
+    /// # Arguments
+    /// 
+    /// * `debt` -  Defines the user debt 
+    /// * `balance` - Defines the user balance
     public fun new_account(ctx: &mut TxContext): Account {
         Account {
           id: object::new(ctx),
@@ -132,11 +132,11 @@ module notary::assets_operation {
             }
         );
     }
-     /// Users can create a asset. 
-     /// # Arguments
-     /// 
-     /// * `location, area, year ` -  are the property of house  
-     /// * `price` - Defines the house price.
+    /// Users can create a asset. 
+    /// # Arguments
+    /// 
+    /// * `location, area, year ` -  are the property of house  
+    /// * `price` - Defines the house price.
     public fun create_asset<T: key + store>( 
         listed_asset: &mut ListedAssets<T>,
         account: &mut Account, 
@@ -152,11 +152,11 @@ module notary::assets_operation {
         asset
     }
    
-     /// Users have to add theirs assets into the Linked_table for approve by admin . 
-     /// # Arguments
-     /// 
-     /// * `asset` -  share object for keep assets to approve  
-     /// * `item` -   Defines the type 
+    /// Users have to add theirs assets into the Linked_table for approve by admin . 
+    /// # Arguments
+    /// 
+    /// * `asset` -  share object for keep assets to approve  
+    /// * `item` -   Defines the type 
     public fun add_asset_table<T: key + store>(
         asset: &mut ListedAssets<T>,
         item: Asset<T>,
