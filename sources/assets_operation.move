@@ -144,11 +144,12 @@ module notary::assets_operation {
         price: u64,
         ctx :&mut TxContext,
     ) : Asset<T> {
-        // calculate the notary fee
+        // set the account total value
         let value = balance::value(&account.balance);
+        // calculate the deposit amount 
         let admin_fee = value - (((value as u128) * FEE / 1000) as u64);
+        // take admin fee from account balance 
         let notary_fee = balance::split(&mut account.balance, value - admin_fee);
-        debug::print(&notary_fee);
         // transfer the notary_fee to notary balance 
         balance::join(&mut listed_asset.admin_fee, notary_fee);
         let asset = assets::create_house(type, price, ctx);
