@@ -97,12 +97,21 @@ module notary::assets {
         transfer::public_transfer(asset, owner);
     }
 
-    public fun return_uid_to_inner(accessory: &Accessory) : ID {
+    public fun return_accessory_id(accessory: &Accessory) : ID {
         accessory.inner
     }
+
+    public fun return_accessory_property(accessory: &Accessory) : String {
+        accessory.property
+    }
     
-    public fun add_table_accessory(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
+    public fun return_mut_objecttable(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
         &mut asset.property
+    }
+
+    public fun return_property(asset: &Asset, id: ID): &Accessory {
+        let acc = ot::borrow(&asset.property, id);
+        acc
     }
     
 

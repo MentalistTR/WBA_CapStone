@@ -6,9 +6,9 @@ module notary::test_ListedAssetss_operations {
 
     use std::string::{Self};
 
-    use notary::helpers::{init_test_helper, helper_create_account, helper_add_types};
+    use notary::helpers::{init_test_helper, helper_create_account, helper_add_types, helper_create_asset};
 
-    use notary::assets::{Asset};
+    use notary::assets::{Self, Asset};
     
     use notary::assets_operation::{Self as ao, ListedAssets, Account};
     
@@ -90,6 +90,37 @@ module notary::test_ListedAssetss_operations {
         };
   
         ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_add_accessory() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        // admin should create types 
+        helper_add_types(scenario);
+        // create an asset
+        helper_create_asset(scenario);
+
+        // add an property to asset
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let asset = ts::take_from_sender<Asset>(scenario);
+          
+            let property = string::utf8(b"4+1");
+
+            let asset_id =  ao::add_accessory(&mut asset, property, ts::ctx(scenario));
+
+            let accesory = assets::return_property(&asset, asset_id);
+            let property2 = assets::return_accessory_property(accesory);
+            assert_eq(property, property2);
+
+            ts::return_to_sender(scenario, asset);
+        };
+     
+        ts::end(scenario_test);
+
     }
 
 

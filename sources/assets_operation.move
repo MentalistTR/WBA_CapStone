@@ -161,15 +161,16 @@ module notary::assets_operation {
         asset
     }
      //Add extensions to reel world assets 
-    public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) {
+    public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) : ID { //FIXME: Remove return ID
+        // create an new accesory
         let accessory = assets::create_accessory(property, ctx);
-    
-        let accessory_id = assets::return_uid_to_inner(&accessory);
-        let ot = assets::add_table_accessory( asset);
+        // set the accesory id
+        let accessory_id = assets::return_accessory_id(&accessory);
+        // return the &mut objecttable 
+        let ot = assets::return_mut_objecttable(asset);
+        // add the property to table
         ot::add(ot, accessory_id, accessory);
-     
-        
-
+        accessory_id
     }
 
    
