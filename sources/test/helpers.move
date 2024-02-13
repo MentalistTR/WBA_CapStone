@@ -69,17 +69,18 @@ module notary::helpers {
             ts::return_to_sender(scenario, account);
         };
     }
+
     public fun helper_create_asset(scenario: &mut Scenario) {
         // create a Asset object
         next_tx(scenario, TEST_ADDRESS1);
         {
-            let listed_shared = ts::take_shared<ListedAssets<Test>>(scenario);
+            let listed_shared = ts::take_shared<ListedAssets>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let amount: u64 = 900;
             let name = string::utf8(b"ankara");
-            let type = helper_return_test(scenario, name);
+            let type = string::utf8(b"House");
 
-            let asset = ao::create_asset<Test>(
+            let asset = ao::create_asset(
                 &mut listed_shared,
                 &mut account,
                 type,
@@ -93,26 +94,26 @@ module notary::helpers {
         };
     }
 
-    public fun helper_create_share_listed(scenario: &mut Scenario) {
-        next_tx(scenario, ADMIN); 
+    public fun helper_add_types(scenario: &mut Scenario) {
+        next_tx(scenario, ADMIN);
         {
-        let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-        ao::new_listed_assets<Test>(&admin_cap, ts::ctx(scenario));
-        ts::return_to_sender(scenario,admin_cap);
+            let listed_shared = ts::take_shared<ListedAssets>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+     
+            let type1 = string::utf8(b"House");
+            let type2 = string::utf8(b"Car");
+            let type3 = string::utf8(b"Shop");
+            let type4 = string::utf8(b"Land");
+
+            ao::add_type(&admin_cap, &mut listed_shared, type1);
+            ao::add_type(&admin_cap, &mut listed_shared, type2);
+            ao::add_type(&admin_cap, &mut listed_shared, type3);
+            ao::add_type(&admin_cap, &mut listed_shared, type4);
+
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(listed_shared);
         };
-    }
 
-    // public fun helper_create_all(scenario: &mut Scenario) {
-
-    // }
-
-    // create a test object for create a Asset
-    public fun helper_return_test(scenario: &mut Scenario, type: String) : Test {
-        let test= Test{
-            type: type,
-            accessory: table::new(ts::ctx(scenario))
-    };
-        test
     }
 
     public fun init_test_helper() : ts::Scenario{

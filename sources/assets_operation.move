@@ -99,6 +99,14 @@ module notary::assets_operation {
                 assets: vec_map::empty(),
             }
         );
+        transfer::share_object(
+            ListedAssets {
+                id: object::new(ctx),
+                assets: lt::new<ID, Asset>(ctx),
+                admin_fee: balance::zero(),
+                types: vector::empty()
+            }
+        );
        // transfer AdminCap object to owner 
         transfer::transfer(AdminCap 
         { id: object::new(ctx),}, tx_context::sender(ctx) );
@@ -122,16 +130,10 @@ module notary::assets_operation {
     public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
-     /// Admin must create one share object for users to set theirs RWA for approve. 
-    public fun new_listed_assets(_: &AdminCap, ctx: &mut TxContext) {
-            transfer::share_object(
-            ListedAssets {
-                id: object::new(ctx),
-                assets: lt::new<ID, Asset>(ctx),
-                admin_fee: balance::zero(),
-                types: vector::empty()
-            }
-        );
+    // admin can add any types to share object
+    public fun add_type(_:&AdminCap, share: &mut ListedAssets, type: String) {
+        assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
+        vector::push_back(&mut share.types, type);
     }
     /// Users can create a asset. 
     /// # Arguments
