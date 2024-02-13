@@ -3,15 +3,12 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
-    use sui::object::{Self, UID};
 
     use std::string::{Self, String};
 
     use notary::assets_operation::{Self as ao, AdminCap, Account, ListedAssets, test_init};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
-
-    use notary::assets::{Self};
 
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
@@ -104,7 +101,7 @@ module notary::helpers {
     // }
 
     // create a test object for create a Asset
-    public fun helper_return_test(scenario: &mut Scenario, type: String) : Test {
+    public fun helper_return_test(_scenario: &mut Scenario, type: String) : Test {
         let test= Test{
             type: type
     };

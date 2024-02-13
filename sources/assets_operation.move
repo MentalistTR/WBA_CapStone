@@ -14,7 +14,7 @@
 module notary::assets_operation {
     use std::string::{String};
     //use std::vector;
-    use std::debug;
+   // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self,UID,ID};
@@ -134,9 +134,9 @@ module notary::assets_operation {
     }
     /// Users can create a asset. 
     /// # Arguments
-    /// 
-    /// * `location, area, year ` -  are the property of house  
-    /// * `price` - Defines the house price.
+    /// * `account ` -  is the user accout that keep debt or balance.
+    /// * `type ` -  is the wrapped object. It can be house, car , plane 
+    /// * `price` - Defines the asset price.
     public fun create_asset<T: store>( 
         listed_asset: &mut ListedAssets<T>,
         account: &mut Account, 

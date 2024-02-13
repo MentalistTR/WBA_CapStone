@@ -9,7 +9,6 @@
 /// 1. Define structures
 /// 2. Return structs variables
 module notary::assets {
-    use std::string::{Self,String};
 
     use sui::object::{Self,UID,ID};
     use sui::tx_context::{Self,TxContext};
