@@ -69,13 +69,14 @@ module notary::test_ListedAssetss_operations {
             let listed_shared = ts::take_shared<ListedAssets<Test>>(scenario);
             let account = ts::take_from_sender<Account>(scenario);
             let amount: u64 = 900;
-            let type = helper_return_test(scenario);
+            let name = string::utf8(b"ankara");
+            let type = helper_return_test(scenario, name);
 
             let asset = ao::create_asset<Test>(
                 &mut listed_shared,
                 &mut account,
                 type,
-                amount,
+                amount, 
                 ts::ctx(scenario)
             );
             transfer::public_transfer(asset, TEST_ADDRESS1);

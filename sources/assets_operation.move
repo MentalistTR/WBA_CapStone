@@ -58,7 +58,7 @@ module notary::assets_operation {
     /// 
     /// * `house, shop, car, land` - Users must add the assets to linkedtable for approve by admin  
     /// * `admin_fee` -  Defines the procol fee revenue
-    struct ListedAssets<T: key + store> has key, store {
+    struct ListedAssets<T: store> has key, store {
         id: UID,
         assets: LinkedTable<ID, Asset<T>>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
@@ -123,7 +123,7 @@ module notary::assets_operation {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
      /// Admin must create one share object for users to set theirs RWA for approve. 
-    public fun new_listed_assets<T: key + store>(_: &AdminCap, ctx: &mut TxContext) {
+    public fun new_listed_assets<T: store>(_: &AdminCap, ctx: &mut TxContext) {
             transfer::share_object(
             ListedAssets {
                 id: object::new(ctx),
@@ -137,7 +137,7 @@ module notary::assets_operation {
     /// 
     /// * `location, area, year ` -  are the property of house  
     /// * `price` - Defines the house price.
-    public fun create_asset<T: key + store>( 
+    public fun create_asset<T: store>( 
         listed_asset: &mut ListedAssets<T>,
         account: &mut Account, 
         type: T,
@@ -161,7 +161,7 @@ module notary::assets_operation {
     /// 
     /// * `asset` -  share object for keep assets to approve  
     /// * `item` -   Defines the type 
-    public fun add_asset_table<T: key + store>(
+    public fun add_asset_table<T: store>(
         asset: &mut ListedAssets<T>,
         item: Asset<T>,
     ) {
@@ -173,7 +173,7 @@ module notary::assets_operation {
         lt::push_back(&mut asset.assets, object_id, item);
     }
 
-    public fun approve_asset<T: key + store>(_: &AdminCap, listed_asset: &mut ListedAssets<T>, id: ID, approve: bool) {
+    public fun approve_asset<T: store>(_: &AdminCap, listed_asset: &mut ListedAssets<T>, id: ID, approve: bool) {
         // remove the asset from table 
         let asset = lt::remove(&mut listed_asset.assets, id);
         if(approve == true) {
@@ -241,7 +241,7 @@ module notary::assets_operation {
     } 
     #[test_only]
     // get admin balance 
-    public fun get_admin_balance<T: key + store>(share: &ListedAssets<T>) : u64 {
+    public fun get_admin_balance<T: store>(share: &ListedAssets<T>) : u64 {
         balance::value(&share.admin_fee)
     }
 

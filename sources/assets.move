@@ -24,7 +24,7 @@ module notary::assets {
     // /// * `price` -    Defines the price of asset 
     // /// * `on_rent` -  Defines the rentable
     // /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
-    struct Asset<T: key + store> has key, store {
+    struct Asset<T: store> has key, store {
         id: UID,
         inner: ID,
         owner: address,
@@ -34,7 +34,7 @@ module notary::assets {
         on_rent: bool
     }
     // return a asset to create
-    public fun create_house<T: key + store>(
+    public fun create_house<T: store>(
         type: T,
         price: u64,
         ctx :&mut TxContext,
@@ -55,28 +55,28 @@ module notary::assets {
 
     // helper functions 
 
-    public fun return_asset_approve<T: key + store>(asset: &Asset<T>) : bool {
+    public fun return_asset_approve<T: store>(asset: &Asset<T>) : bool {
         asset.approve
     }
 
-    public fun return_asset_id<T: key + store>(asset: &Asset<T>) : ID {
+    public fun return_asset_id<T: store>(asset: &Asset<T>) : ID {
         asset.inner
     }
 
-    public(friend) fun return_new_asset<T: key + store>(asset: Asset<T>) : Asset<T> {
+    public(friend) fun return_new_asset<T: store>(asset: Asset<T>) : Asset<T> {
         asset.approve = true;
         asset
     }
 
-    public fun return_asset_owner<T: key + store>(asset: &Asset<T>) : address {
+    public fun return_asset_owner<T: store>(asset: &Asset<T>) : address {
         asset.owner
     }
 
-     public(friend) fun transfer_asset<T: key + store>(asset: Asset<T>, owner: address) {
+     public(friend) fun transfer_asset<T: store>(asset: Asset<T>, owner: address) {
         transfer::public_transfer(asset, owner);
     }
     
-    public fun return_asset_type<T: key + store + copy>(asset: &Asset<T>) : T {
+    public fun return_asset_type<T:store + copy>(asset: &Asset<T>) : T {
         asset.type
     }
 
