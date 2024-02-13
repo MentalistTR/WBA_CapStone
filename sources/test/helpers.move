@@ -3,6 +3,9 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
+    use sui::table::{Self, Table};
+    use sui::object::{ID};
+    use sui::tx_context::{TxContext};
 
     use std::string::{Self, String};
 
@@ -10,13 +13,16 @@ module notary::helpers {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
+    use notary::assets::{Accessory};
+
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
 
-     struct Test has  store {
-        type: String
+     struct House has store {
+        type: String,
+        accessory: Table<ID, Accessory>  
     }
 
     public fun helper_create_account(scenario: &mut Scenario) {
@@ -101,9 +107,10 @@ module notary::helpers {
     // }
 
     // create a test object for create a Asset
-    public fun helper_return_test(_scenario: &mut Scenario, type: String) : Test {
+    public fun helper_return_test(scenario: &mut Scenario, type: String) : Test {
         let test= Test{
-            type: type
+            type: type,
+            accessory: table::new(ts::ctx(scenario))
     };
         test
     }

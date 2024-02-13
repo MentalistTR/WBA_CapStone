@@ -13,7 +13,7 @@
 /// 4. Keep Sales events in Data share object
 module notary::assets_operation {
     use std::string::{String};
-    //use std::vector;
+    use std::vector;
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
@@ -26,14 +26,13 @@ module notary::assets_operation {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    use notary::assets::{Self, Asset};
+    use notary::assets::{Self, Asset, Accessory};
 
   
     // =================== Errors ===================
     // asset can not be approve again
     const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
-    // User price is not equal to asset price 
-   // const ERROR_INVALID_PRICE: u64 = 2;
+    const ERROR_INVALID_TYPE: u64 = 2;
 
     // =================== Constants ===================
 
@@ -58,10 +57,11 @@ module notary::assets_operation {
     /// 
     /// * `house, shop, car, land` - Users must add the assets to linkedtable for approve by admin  
     /// * `admin_fee` -  Defines the procol fee revenue
-    struct ListedAssets<T: store> has key, store {
+    struct ListedAssets has key, store {
         id: UID,
-        assets: LinkedTable<ID, Asset<T>>,
+        assets: LinkedTable<ID, Asset>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
+        types: vector<String>
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
@@ -123,12 +123,13 @@ module notary::assets_operation {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
      /// Admin must create one share object for users to set theirs RWA for approve. 
-    public fun new_listed_assets<T: store>(_: &AdminCap, ctx: &mut TxContext) {
+    public fun new_listed_assets(_: &AdminCap, ctx: &mut TxContext) {
             transfer::share_object(
             ListedAssets {
                 id: object::new(ctx),
-                assets: lt::new<ID, Asset<T>>(ctx),
+                assets: lt::new<ID, Asset>(ctx),
                 admin_fee: balance::zero(),
+                types: vector::empty()
             }
         );
     }
@@ -137,13 +138,14 @@ module notary::assets_operation {
     /// * `account ` -  is the user accout that keep debt or balance.
     /// * `type ` -  is the wrapped object. It can be house, car , plane 
     /// * `price` - Defines the asset price.
-    public fun create_asset<T: store>( 
-        listed_asset: &mut ListedAssets<T>,
+    public fun create_asset( 
+        listed_asset: &mut ListedAssets,
         account: &mut Account, 
-        type: T,
+        type: String,
         price: u64,
         ctx :&mut TxContext,
-    ) : Asset<T> {
+    ) : Asset {
+        assert!(vector::contains(&listed_asset.types, &type) == true, ERROR_INVALID_TYPE);
         // set the account total value
         let value = balance::value(&account.balance);
         // calculate the deposit amount 
@@ -152,7 +154,7 @@ module notary::assets_operation {
         let notary_fee = balance::split(&mut account.balance, value - admin_fee);
         // transfer the notary_fee to notary balance 
         balance::join(&mut listed_asset.admin_fee, notary_fee);
-        let asset = assets::create_house(type, price, ctx);
+        let asset = assets::create_asset(type, price, ctx);
         asset
     }
    
@@ -161,9 +163,9 @@ module notary::assets_operation {
     /// 
     /// * `asset` -  share object for keep assets to approve  
     /// * `item` -   Defines the type 
-    public fun add_asset_table<T: store>(
-        asset: &mut ListedAssets<T>,
-        item: Asset<T>,
+    public fun add_asset_table(
+        asset: &mut ListedAssets,
+        item: Asset,
     ) {
         // check the asset approved or not.
         assert!(assets::return_asset_approve(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
@@ -173,7 +175,7 @@ module notary::assets_operation {
         lt::push_back(&mut asset.assets, object_id, item);
     }
 
-    public fun approve_asset<T: store>(_: &AdminCap, listed_asset: &mut ListedAssets<T>, id: ID, approve: bool) {
+    public fun approve_asset(_: &AdminCap, listed_asset: &mut ListedAssets, id: ID, approve: bool) {
         // remove the asset from table 
         let asset = lt::remove(&mut listed_asset.assets, id);
         if(approve == true) {
@@ -182,42 +184,34 @@ module notary::assets_operation {
             // define recipient 
             let recipient = assets::return_asset_owner(&new_asset);
             // transfer the object 
-            assets::transfer_asset<T>(new_asset, recipient);
+            assets::transfer_asset(new_asset, recipient);
         } else {
             // if admin is not approve send the object to owner 
             let recipient = assets::return_asset_owner(&asset);
-            assets::transfer_asset<T>(asset, recipient);  
+            assets::transfer_asset(asset, recipient);  
+        }
     }
-    }
+
+    // Add extensions to reel world assets 
+
+    // public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) {
+    //     let wrapped_asset = assets::return_wrapped(asset);
+    //     let new_accessory = assets::create_accessory(property, ctx);
+    //     let accessory_id = 
+        
+       
+
+
+          
+        
+
+    // }
+
+
     
    
 
 
-    // public fun buy_house(
-    //     assets: &mut ListedAssets,
-    //     account: &mut Account,
-    //     asset: ID, 
-    //     asset_owner: address,
-    //     amount: u64, 
-    //     ctx: &mut TxContext
-    // ) { 
-    //     // get seller table
-    //     let user_table = ot::borrow_mut(&mut assets.house, asset_owner);
-    //     // get the house
-    //     let user_house = ot::remove( user_table, asset);
-    //     // check the price 
-    //     assert!(return_house_price(&user_house) == amount, ERROR_INVALID_PRICE); 
-    //     // get balance from user account object 
-    //     let price = balance::split(&mut account.balance, amount);
-    //     // convert the balance to coin for transfer 
-    //     let coin_price = coin::from_balance(price, ctx);
-    //     // transfer the coin to owner 
-    //     transfer::public_transfer(coin_price, asset_owner);
-    //     // change the asset's owner 
-    //     let new_asset =  assets::change_house_owner(user_house, tx_context::sender(ctx));
-    //     //transfer the new object 
-    //     assets::transfer_house(new_asset, tx_context::sender(ctx));
-    // }
 
     public fun burn() {
 
@@ -241,7 +235,7 @@ module notary::assets_operation {
     } 
     #[test_only]
     // get admin balance 
-    public fun get_admin_balance<T: store>(share: &ListedAssets<T>) : u64 {
+    public fun get_admin_balance(share: &ListedAssets) : u64 {
         balance::value(&share.admin_fee)
     }
 
