@@ -34,6 +34,7 @@ module notary::assets_operation {
     // asset can not be approve again
     const ERROR_ASSET_ALREADY_APPROVED: u64 = 1;
     const ERROR_INVALID_TYPE: u64 = 2;
+    const ERROR_NOT_OWNER: u64 = 3;
 
     // =================== Constants ===================
 
@@ -47,7 +48,7 @@ module notary::assets_operation {
     /// 
     /// # Arguments
     /// 
-    /// There are 4 structures event that notary should keep events. 
+    /// There is one structure event that notary should keep events. 
     struct NotaryData has key, store {
         id: UID,
         assets: VecMap<address, Sales>,
@@ -161,19 +162,29 @@ module notary::assets_operation {
         asset
     }
      //Add extensions to reel world assets 
-    public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) : ID { //FIXME: Remove return ID
+    public fun add_accessory(asset: &mut Asset, property: String, ctx: &mut TxContext) {
         // create an new accesory
         let accessory = assets::create_accessory(property, ctx);
         // set the accesory id
         let accessory_id = assets::return_accessory_id(&accessory);
+        // keep id in a vector for local test 
+        vector::push_back(assets::return_mut_vector_id(asset), accessory_id); // FIXME: Remove this line !! 
         // return the &mut objecttable 
         let ot = assets::return_mut_objecttable(asset);
         // add the property to table
         ot::add(ot, accessory_id, accessory);
-        accessory_id
     }
-
-   
+    // Remove accessory from reel world assets
+    public fun remove_accessory(asset: &mut Asset, id: ID, ctx: &mut TxContext) {
+        // check the owner of asset 
+        assert!(assets::return_asset_owner(asset) == tx_context::sender(ctx), ERROR_NOT_OWNER);
+        // remove the accessory from object table 
+        let accesory =  ot::remove(assets::return_mut_objecttable(asset), id);
+        // destructure the object
+        let(id, inner, property) = assets::delete_accessory(accesory);
+        // delete the accessory
+        object::delete(id);
+    }   
     /// Users have to add theirs assets into the Linked_table for approve by admin . 
     /// # Arguments
     /// 

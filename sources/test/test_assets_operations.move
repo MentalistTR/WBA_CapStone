@@ -107,13 +107,14 @@ module notary::test_ListedAssetss_operations {
         next_tx(scenario, TEST_ADDRESS1);
         {
             let asset = ts::take_from_sender<Asset>(scenario);
-          
             let property = string::utf8(b"4+1");
 
-            let asset_id =  ao::add_accessory(&mut asset, property, ts::ctx(scenario));
+            ao::add_accessory(&mut asset, property, ts::ctx(scenario));
 
+            let asset_id = assets::return_id_from_vector(&asset);      
             let accesory = assets::return_property(&asset, asset_id);
             let property2 = assets::return_accessory_property(accesory);
+            
             assert_eq(property, property2);
 
             ts::return_to_sender(scenario, asset);

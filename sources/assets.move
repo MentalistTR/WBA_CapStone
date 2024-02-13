@@ -13,8 +13,11 @@ module notary::assets {
     use sui::object::{Self,UID,ID};
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
-    use std::string::{String};
     use sui::object_table::{Self as ot, ObjectTable};
+
+    use std::string::{String};
+    use std::vector;
+
 
 
     friend notary::assets_operation;
@@ -33,7 +36,8 @@ module notary::assets {
         price: u64,
         approve: bool,
         on_rent: bool,
-        property: ObjectTable<ID, Accessory>
+        property: ObjectTable<ID, Accessory>,
+        property_id: vector<ID> // FIXME: Delete me !! 
     }
     // this struct represents the extensions of Asset
     struct Accessory has key, store {
@@ -59,7 +63,8 @@ module notary::assets {
             price: price,
             on_rent: false,
             approve: false,
-            property: ot::new(ctx)
+            property: ot::new(ctx),
+            property_id: vector::empty() // FIXME: Delete me !! 
         };
         asset
     }
@@ -109,10 +114,23 @@ module notary::assets {
         &mut asset.property
     }
 
+    public fun return_mut_vector_id(asset: &mut Asset) : &mut vector<ID> {
+        &mut asset.property_id
+    }
+
     public fun return_property(asset: &Asset, id: ID): &Accessory {
         let acc = ot::borrow(&asset.property, id);
         acc
     }
-    
+
+    public fun return_id_from_vector(asset: &Asset) : ID {
+       let asd =  vector::borrow(&asset.property_id, 0);
+       *asd
+    }
+
+    public fun delete_accessory(acc: Accessory) :(UID, ID, String) {
+        let Accessory {id, inner, property} = acc;
+        (id, inner, property)
+    }
 
 }
