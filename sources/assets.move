@@ -9,134 +9,277 @@
 /// 1. Define structures
 /// 2. Return structs variables
 module notary::assets {
+    use std::string::{Self,String};
 
     use sui::object::{Self,UID,ID};
-    use sui::tx_context::{Self, TxContext};
+    use sui::tx_context::{Self,TxContext};
     use sui::transfer;
-    use sui::object_table::{Self as ot, ObjectTable};
-
-
-    use std::string::{String};
-    use std::vector;
-
 
 
     friend notary::assets_operation;
 
-    // /// # Arguments
-    // /// 
-    // /// * `type ` - is the type of the asset such as house, car, plane
-    // /// * `price` -    Defines the price of asset 
-    // /// * `on_rent` -  Defines the rentable
-    // /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
-    struct Asset has key, store {
+    /// Defines the house object that users can create
+    /// 
+    /// # Arguments
+    /// 
+    /// * `inner, owner, location, area_meter, year ,price ` - are the property of this structure
+    /// * `on_rent` -  Defines the rentable
+    /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
+    struct House has key, store {
         id: UID,
         inner: ID,
         owner: address,
-        type: String,
+        location: String,
+        area_meter: u64,
+        year: u64,
         price: u64,
-        approve: bool,
         on_rent: bool,
-        property: ObjectTable<ID, Accessory>,
-        property_id: vector<ID> // FIXME: Delete me !! 
+        approve: bool
+    }  
+    /// Defines the house object that users can create
+    /// 
+    /// # Arguments
+    /// 
+    /// * `inner, owner, location, area_meter, year ,price ` - are the property of this structure
+    /// * `on_rent` -  Defines the rentable
+    /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
+    struct Shop has key, store {
+        id: UID,
+        inner: ID,
+        owner: address,
+        location: String,
+        area_meter: u64,
+        year: u64,
+        price: u64,
+        on_rent: bool,
+        approve: bool
     }
-    // this struct represents the extensions of Asset
-    struct Accessory has key, store {
-         id: UID,
-         inner: ID,
-         property: String 
+    /// Defines the house object that users can create
+    /// 
+    /// # Arguments
+    /// 
+    /// * `inner, owner, location, distance, year ,price ` - are the property of this structure
+    /// * `approve` -  Defines the object is the reel asset. It is approved by admin.  
+    struct Car has key, store {
+        id: UID,
+        inner: ID,
+        owner: address,
+        model: String,
+        year: u64,
+        color: String,
+        distance: u64,
+        price: u64,
+        approve: bool
     }
-
-    // return a asset to create
-    public fun create_asset(
-        type: String,
+    /// Defines the house object that users can create
+    /// 
+    /// # Arguments
+    /// 
+    /// * `inner, owner, location, area_meter ,price ` - are the property of this structure
+    /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
+    struct Land has key, store {
+        id: UID,
+        inner: ID,
+        owner: address,
+        location: String,
+        area_meter: u64,
+        price: u64,
+        approve: bool
+    }
+    /// Defines the event that protocol will be keep in the data share object whenever a sales transaction occurs
+    /// 
+    /// # Arguments
+    /// 
+    /// * `seller, buyer ` - are the addresses 
+    /// * `itemt` -  Defines type of structure
+    /// * `time` -  Defines the current time at the sales transaction.  
+    struct Sales has copy, drop, store {
+        seller: address,
+        buyer: address,
+        item: String,
+        time: u64,
+    }
+    // Return a new item to asset_operation module. 
+    public fun return_house(
+        location: String,
+        area: u64,
+        year: u64,
         price: u64,
         ctx :&mut TxContext,
-        ): Asset {
-        
+        ): House {
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
-        let asset = Asset {
+        let house = House {
             id:id,
             inner: inner,
             owner: tx_context::sender(ctx),
-            type: type,
+            location: location,
+            area_meter: area,
+            year: year,
             price: price,
             on_rent: false,
-            approve: false,
-            property: ot::new(ctx),
-            property_id: vector::empty() // FIXME: Delete me !! 
+            approve: false
         };
-        asset
+        house
     }
-    public fun create_accessory(property: String, ctx: &mut TxContext) : Accessory {
+    // Return a new item to asset_operation module. 
+    public fun return_car(
+        model: String,
+        year: u64,
+        color: String,
+        distance: u64,
+        price: u64,
+        ctx :&mut TxContext,
+        ): Car {
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
-        let new_accessory = Accessory {
-            id: id,
+        let car = Car {
+            id:id,
             inner: inner,
-            property: property
+            owner: tx_context::sender(ctx),
+            model: model,
+            year: year,
+            color: color,
+            distance: distance,
+            price: price,
+            approve: false
         };
-        new_accessory
+        car
     }
-
-    // helper functions 
-
-    public fun is_approved(asset: &Asset) : bool {
-        asset.approve
+    // Return a new item to asset_operation module. 
+    public fun return_land(
+        location: String,
+        area: u64,
+        price: u64,
+        ctx :&mut TxContext,
+        ): Land {
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let land = Land{
+            id:id,
+            inner: inner,
+            owner: tx_context::sender(ctx),
+            location: location,
+            area_meter: area,
+            price: price,
+            approve: false
+        };
+        land
     }
-
-    public fun get_asset_id(asset: &Asset) : ID {
-        asset.inner
+    // Return a new item to asset_operation module. 
+    public fun return_shop(
+        location: String,
+        area: u64,
+        year: u64,
+        price: u64,
+        ctx :&mut TxContext,
+        ): Shop {
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let shop = Shop {
+            id:id,
+            inner: inner,
+            owner: tx_context::sender(ctx),
+            location: location,
+            area_meter: area,
+            year: year,
+            price: price,
+            on_rent: false,
+            approve: false
+        };
+        shop
     }
-
-    public(friend) fun mint_new_asset(asset: Asset) : Asset {
-        asset.approve = true;
-        asset
+    // change the house object approve bool to true 
+    public(friend) fun house_bool(self: House) : House {
+         self.approve = true;
+         self
     }
-
-    public fun get_asset_owner(asset: &Asset) : address {
-        asset.owner
+    // change the car object approve bool to true 
+    public(friend) fun car_bool(self: Car) : Car  {
+         self.approve = true;
+         self
     }
-
-    public(friend) fun transfer_asset(asset: Asset, owner: address) {
-        transfer::public_transfer(asset, owner);
+    // change the land object approve bool to true 
+    public(friend) fun land_bool(self: Land) : Land  {
+         self.approve = true;
+         self
     }
-
-    public fun get_accessory_id(accessory: &Accessory) : ID {
-        accessory.inner
+    // change the shop object approve bool to true 
+    public(friend) fun shop_bool(self: Shop) : Shop  {
+         self.approve = true;
+         self
     }
-
-    public fun get_accessory_property(accessory: &Accessory) : String {
-        accessory.property
+    // helper function that check house.approve equal to false
+    public fun return_house_bool(self: &House) : bool {
+        self.approve
     }
-    
-    public fun get_objecttable_mut(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
-        &mut asset.property
+    // helper function that check house.approve equal to false
+    public fun return_car_bool(self: &Car) : bool {
+        self.approve
     }
-
-    public fun get_accessory_table(asset: &Asset, acc_id: ID) : &Accessory {
-        let acc = ot::borrow(&asset.property, acc_id);
-        acc
+    // helper function that check house.approve equal to false
+    public fun return_land_bool(self: &Land) : bool {
+        self.approve
     }
-
-    public fun vector_id_mut(asset: &mut Asset) : &mut vector<ID> {
-        &mut asset.property_id
+    // helper function that check house.approve equal to false
+    public fun return_shop_bool(self: &Shop) : bool {
+        self.approve
     }
-
-    public fun get_accessory(asset: &Asset, id: ID): &Accessory {
-        let acc = ot::borrow(&asset.property, id);
-        acc
+    // return House object ID for add table 
+    public fun return_house_id(self: &House) : ID {
+        self.inner
     }
-
-    public fun get_accessory_vector_id(asset: &Asset) : ID {
-       let asd =  vector::borrow(&asset.property_id, 0);
-       *asd
+    // return Car object ID for add table 
+    public fun return_car_id(self: &Car) : ID {
+        self.inner
     }
-
-    public fun destructure_accessory(acc: Accessory) : (UID, ID, String) {
-        let Accessory {id, inner, property} = acc;
-        (id, inner, property)
+    // return Land object ID for add table 
+    public fun return_land_id(self: &Land) : ID {
+        self.inner
     }
-
+    // return Shop object ID for add table 
+    public fun return_shop_id(self: &Shop) : ID {
+        self.inner
+    }
+    // return House object owner
+    public fun return_house_owner(self: &House): address {
+        self.owner
+    }
+     // return Land object owner
+    public fun return_land_owner(self: &Land): address {
+        self.owner
+    }
+     // return Car object owner
+    public fun return_car_owner(self: &Car): address {
+        self.owner
+    }
+     // return Shop object owner
+    public fun return_shop_owner(self: &Shop): address {
+        self.owner
+    }
+    // return the house price 
+    public fun return_house_price(self: &House): u64 {
+        self.price
+    }
+    // transfer house object 
+    public fun transfer_house(self: House, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    // transfer Car object 
+    public fun transfer_car(self: Car, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    // transfer Land object 
+    public fun transfer_land(self: Land, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    // transfer Shop object 
+    public fun transfer_shop(self: Shop, recipient: address) {
+        transfer::public_transfer(self, recipient);
+    }
+    // change the owner of this structure when sales transactions occurs.
+    public fun change_house_owner(self: House, recipient: address) : House {
+        self.owner = recipient;
+        self
+    }
 }
