@@ -111,9 +111,9 @@ module notary::test_ListedAssetss_operations {
 
             ao::add_accessory(&mut asset, property, ts::ctx(scenario));
 
-            let asset_id = assets::return_id_from_vector(&asset);      
-            let accesory = assets::return_property(&asset, asset_id);
-            let property2 = assets::return_accessory_property(accesory);
+            let asset_id = assets::get_vector_id(&asset);      
+            let accesory = assets::get_property(&asset, asset_id);
+            let property2 = assets::get_accessory_property(accesory);
             
             assert_eq(property, property2);
 

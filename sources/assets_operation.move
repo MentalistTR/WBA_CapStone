@@ -17,7 +17,7 @@ module notary::assets_operation {
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
-    use sui::object::{Self,UID,ID, uid_to_inner};
+    use sui::object::{Self,UID,ID};
     use sui::transfer;
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
@@ -27,7 +27,7 @@ module notary::assets_operation {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    use notary::assets::{Self, Asset, Accessory};
+    use notary::assets::{Self, Asset};
 
   
     // =================== Errors ===================
@@ -166,22 +166,22 @@ module notary::assets_operation {
         // create an new accesory
         let accessory = assets::create_accessory(property, ctx);
         // set the accesory id
-        let accessory_id = assets::return_accessory_id(&accessory);
+        let accessory_id = assets::get_accessory_id(&accessory);
         // keep id in a vector for local test 
-        vector::push_back(assets::return_mut_vector_id(asset), accessory_id); // FIXME: Remove this line !! 
+        vector::push_back(assets::vector_id_mut(asset), accessory_id); // FIXME: Remove this line !! 
         // return the &mut objecttable 
-        let ot = assets::return_mut_objecttable(asset);
+        let ot = assets::get_objecttable_mut(asset);
         // add the property to table
         ot::add(ot, accessory_id, accessory);
     }
     // Remove accessory from reel world assets
     public fun remove_accessory(asset: &mut Asset, id: ID, ctx: &mut TxContext) {
         // check the owner of asset 
-        assert!(assets::return_asset_owner(asset) == tx_context::sender(ctx), ERROR_NOT_OWNER);
+        assert!(assets::get_asset_owner(asset) == tx_context::sender(ctx), ERROR_NOT_OWNER);
         // remove the accessory from object table 
-        let accesory =  ot::remove(assets::return_mut_objecttable(asset), id);
+        let accesory =  ot::remove(assets::get_objecttable_mut(asset), id);
         // destructure the object
-        let(id, inner, property) = assets::delete_accessory(accesory);
+        let(id, _, _) = assets::destructure_accessory(accesory);
         // delete the accessory
         object::delete(id);
     }   
@@ -195,9 +195,9 @@ module notary::assets_operation {
         item: Asset,
     ) {
         // check the asset approved or not.
-        assert!(assets::return_asset_approve(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
+        assert!(assets::is_approved(&item) == false, ERROR_ASSET_ALREADY_APPROVED);
         // set the object id.
-        let object_id = assets::return_asset_id(&item); 
+        let object_id = assets::get_asset_id(&item); 
         // add the object to the objecttable
         lt::push_back(&mut asset.assets, object_id, item);
     }
@@ -207,25 +207,18 @@ module notary::assets_operation {
         let asset = lt::remove(&mut listed_asset.assets, id);
         if(approve == true) {
             // set the bool to approve variable 
-            let new_asset = assets::return_new_asset( asset);
+            let new_asset = assets::mint_new_asset( asset);
             // define recipient 
-            let recipient = assets::return_asset_owner(&new_asset);
+            let recipient = assets::get_asset_owner(&new_asset);
             // transfer the object 
             assets::transfer_asset(new_asset, recipient);
         } else {
             // if admin is not approve send the object to owner 
-            let recipient = assets::return_asset_owner(&asset);
+            let recipient = assets::get_asset_owner(&asset);
             assets::transfer_asset(asset, recipient);  
         }
     }
-
- 
-
     
-   
-
-
-
     public fun burn() {
 
     }

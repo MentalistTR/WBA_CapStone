@@ -15,6 +15,7 @@ module notary::assets {
     use sui::transfer;
     use sui::object_table::{Self as ot, ObjectTable};
 
+
     use std::string::{String};
     use std::vector;
 
@@ -81,20 +82,20 @@ module notary::assets {
 
     // helper functions 
 
-    public fun return_asset_approve(asset: &Asset) : bool {
+    public fun is_approved(asset: &Asset) : bool {
         asset.approve
     }
 
-    public fun return_asset_id(asset: &Asset) : ID {
+    public fun get_asset_id(asset: &Asset) : ID {
         asset.inner
     }
 
-    public(friend) fun return_new_asset(asset: Asset) : Asset {
+    public(friend) fun mint_new_asset(asset: Asset) : Asset {
         asset.approve = true;
         asset
     }
 
-    public fun return_asset_owner(asset: &Asset) : address {
+    public fun get_asset_owner(asset: &Asset) : address {
         asset.owner
     }
 
@@ -102,33 +103,33 @@ module notary::assets {
         transfer::public_transfer(asset, owner);
     }
 
-    public fun return_accessory_id(accessory: &Accessory) : ID {
+    public fun get_accessory_id(accessory: &Accessory) : ID {
         accessory.inner
     }
 
-    public fun return_accessory_property(accessory: &Accessory) : String {
+    public fun get_accessory_property(accessory: &Accessory) : String {
         accessory.property
     }
     
-    public fun return_mut_objecttable(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
+    public fun get_objecttable_mut(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
         &mut asset.property
     }
 
-    public fun return_mut_vector_id(asset: &mut Asset) : &mut vector<ID> {
+    public fun vector_id_mut(asset: &mut Asset) : &mut vector<ID> {
         &mut asset.property_id
     }
 
-    public fun return_property(asset: &Asset, id: ID): &Accessory {
+    public fun get_property(asset: &Asset, id: ID): &Accessory {
         let acc = ot::borrow(&asset.property, id);
         acc
     }
 
-    public fun return_id_from_vector(asset: &Asset) : ID {
+    public fun get_vector_id(asset: &Asset) : ID {
        let asd =  vector::borrow(&asset.property_id, 0);
        *asd
     }
 
-    public fun delete_accessory(acc: Accessory) :(UID, ID, String) {
+    public fun destructure_accessory(acc: Accessory) : (UID, ID, String) {
         let Accessory {id, inner, property} = acc;
         (id, inner, property)
     }
