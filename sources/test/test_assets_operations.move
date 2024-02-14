@@ -1,383 +1,223 @@
 #[test_only]
 module notary::test_ListedAssetss_operations {
     use sui::transfer;
-    use sui::coin::{Self, mint_for_testing};
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
 
-    use std::string::{Self,String};
+    use std::string::{Self};
 
     use notary::helpers::{
-        init_test_helper, helper_create_account, helper_create_land, helper_create_house, 
-        helper_create_car, helper_create_shop, helper_create_all, helper_approve_all,
-        helper_approve_house, helper_add_table_house, helper_add_all_table
-        };
+    init_test_helper, helper_create_account, helper_add_types, helper_create_asset,
+    helper_add_accessory, helper_add_asset_table
+    };
 
-    use notary::lira_stable_coin::{LIRA_STABLE_COIN};
-
-    use notary::assets::{
-        Self, House, Land, Car, Shop, Sales, return_house_bool, return_car_bool,
-        return_land_bool, return_shop_bool, return_house_id, return_house_owner
-        };
+    use notary::assets::{Self, Asset};
     
-    use notary::assets_operation::{Self as ao, NotaryData, ListedAssets, Account, AdminCap};
+    use notary::assets_operation::{Self as ao, ListedAssets, AdminCap, Account};
     
-
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
-    const TEST_ADDRESS3: address = @0xD;
-    const TEST_ADDRESS4: address = @0xE;
-
+    
    #[test]
-    public fun test_create() {
+    public fun test_create_accounts() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
-        
-        // Create 3 account, deposit 1000 and send them.
+        // create 4 Account and send them 1000 lira
         helper_create_account(scenario);
-
-        // check the user balance 
+        // check the Test_address1 balance 
         next_tx(scenario, TEST_ADDRESS1);
-        {
-             // take account object from sender
-            let account = ts::take_from_sender<Account>(scenario); 
-            // return the user balance 
-            let user_balance =  ao::user_account_balance(&account);
-            // user balance should be equal to 1000
-            assert_eq(user_balance, 1000);
-
-            // return the account object to sender 
-            ts::return_to_sender(scenario, account);
-        };
-        // Test_address1 create an House 
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            // define variables for create house object
-            let listedsasset_share = ts::take_shared<ListedAssets>(scenario);
+        {  
             let account = ts::take_from_sender<Account>(scenario);
-            let location = string::utf8(b"ankara");
-            let area: u64 = 144;
-            let year: u64 = 10;
-            let price: u64 = 500;
-
-            ao::create_house(
-             &mut listedsasset_share,
-           &mut account,
-                    location,
-                    area,
-                    year,
-                    price,
-               ts::ctx(scenario)
-             );
+            let balance = ao::get_account_balance(&account);
+            assert_eq(balance, 1000);
             ts::return_to_sender(scenario, account);
-            ts::return_shared(listedsasset_share);
         };
-        // check the house object
+        // check the Test_address2 balance 
+        next_tx(scenario, TEST_ADDRESS2);
+        {  
+            let account = ts::take_from_sender<Account>(scenario);
+            let balance = ao::get_account_balance(&account);
+            assert_eq(balance, 1000);
+            ts::return_to_sender(scenario, account);
+        };
+        // debt must be zero 
+        next_tx(scenario, TEST_ADDRESS1);
+        {  
+            let account = ts::take_from_sender<Account>(scenario);
+            let balance = ao::get_account_debt(&account);
+            assert_eq(balance, 0);
+            ts::return_to_sender(scenario, account);
+        };
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun create_asset() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        // admin should create types 
+        helper_add_types(scenario);
+        // create a Asset object
         next_tx(scenario, TEST_ADDRESS1);
         {
-            let house = ts::take_from_sender<House>(scenario);
-            ts::return_to_sender(scenario, house);
-        };
-        
-        ts::end(scenario_test);
-    }
-    // We are expecting error. Admin didint approve the ListedAssets. 
-    #[test]
-    #[expected_failure(abort_code = ao::ERROR_ASSET_NOT_APPROVED)]
-    public fun test_error_not_approved() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
+            let listed_shared = ts::take_shared<ListedAssets>(scenario);
+            let account = ts::take_from_sender<Account>(scenario);
+            let amount: u64 = 900;
+            let name = string::utf8(b"ankara");
+            let type = string::utf8(b"House");
 
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_add_table_house(scenario);
-
-        ts::end(scenario_test);
-    }
-
-    #[test]
-    public fun test_approve() {
-
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
-
-        // create 3 account and send them 1000 stabil coin
-        helper_create_account(scenario);
-
-        let location = b"ankara";
-        let model = b"focus";
-        let color = b"red";
-        let area : u64 = 144;
-        let year : u64 = 10;
-        let price: u64 = 1000;
-        let distance: u64 = 50000;
-
-        // create a house for test_address1
-        helper_create_house(
-            scenario,
-            TEST_ADDRESS1,
-            location,
-            area,
-            year,
-            price
+            let asset = ao::create_asset(
+                &mut listed_shared,
+                &mut account,
+                type,
+                amount, 
+                ts::ctx(scenario)
             );
-        // create a shop for test_address1
-        helper_create_land(
-            scenario,
-            TEST_ADDRESS1,
-            location,
-            area,
-            price
-        );
-        // create a shop for test_address1
-        helper_create_shop(
-            scenario,
-            TEST_ADDRESS1,
-            location,
-            area,
-            year,
-            price
-        );
-        helper_create_car(
-            scenario,
-            TEST_ADDRESS1,
-            model,
-            year,
-            color,
-            distance,
-            price
-        );
+            transfer::public_transfer(asset, TEST_ADDRESS1);
 
-        // owner must approve that House 
-        next_tx(scenario, ADMIN);
-        {   
-            let house = ts::take_from_address<House>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
+            // check the admin balance. It should be equal to 5.
+            let admin_balance = ao::get_admin_balance(&listed_shared);
+            //assert_eq(admin_balance, 5);
 
-            ao::approve_house(&admincap, &mut house);
-
-            ts::return_to_address(TEST_ADDRESS1, house);
-            ts::return_to_sender(scenario, admincap);
+            ts::return_shared(listed_shared);
+            ts::return_to_sender(scenario, account);
         };
-        // lets check that test_address1 object has been approved
+        // check the user's object 
         next_tx(scenario, TEST_ADDRESS1);
         {   
-            let house = ts::take_from_sender<House>(scenario);
-            // lets call house bool 
-            let approve = return_house_bool(&mut house);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-
-            ts::return_to_sender(scenario, house);
+            let asset = ts::take_from_sender<Asset>(scenario);
+            ts::return_to_sender(scenario, asset)
         };
-
-         // owner must approve that Car
-        next_tx(scenario, ADMIN);
-        {   
-            let car = ts::take_from_address<Car>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
-
-            ao::approve_car(&admincap, &mut car);
-
-            ts::return_to_address(TEST_ADDRESS1, car);
-            ts::return_to_sender(scenario, admincap);
-        };
-        // lets check that test_address1 object has been approved
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let car = ts::take_from_sender<Car>(scenario);
-            // lets call house bool 
-            let approve = return_car_bool(&mut car);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-
-            ts::return_to_sender(scenario, car);
-        };
-
-        // owner must approve that Land
-        next_tx(scenario, ADMIN);
-        {   
-            let land = ts::take_from_address<Land>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
-
-            ao::approve_land(&admincap, &mut land);
-
-            ts::return_to_address(TEST_ADDRESS1, land);
-            ts::return_to_sender(scenario, admincap);
-        };
-        // lets check that test_address1 object has been approved
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let land = ts::take_from_sender<Land>(scenario);
-            // lets call house bool 
-            let approve = return_land_bool(&mut land);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-
-            ts::return_to_sender(scenario, land);
-        };
-
-         // owner must approve that Shop
-        next_tx(scenario, ADMIN);
-        {   
-            let shop = ts::take_from_address<Shop>(scenario, TEST_ADDRESS1);
-            let admincap = ts::take_from_sender<AdminCap>(scenario);
-
-            ao::approve_shop(&admincap, &mut shop);
-
-            ts::return_to_address(TEST_ADDRESS1, shop);
-            ts::return_to_sender(scenario, admincap);
-        };
-        // lets check that test_address1 object has been approved
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let shop = ts::take_from_sender<Shop>(scenario);
-            // lets call house bool 
-            let approve = return_shop_bool(&mut shop);
-            // bool must be equal to true 
-            assert_eq(approve, true);
-
-            ts::return_to_sender(scenario, shop);
-        };
-
-        ts::end(scenario_test);
-    }
-    // Admin already approved the ListedAssets. We are expecting error
-    #[test]
-    #[expected_failure(abort_code = ao::ERROR_ALREADY_APPROVED)]
-    public fun test_error_already_approved() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
-
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-        helper_approve_house(scenario);
-
+  
         ts::end(scenario_test);
     }
 
     #[test]
-    public fun test_add_table() {
-
+    public fun test_add_accessory() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
-
+        // create 4 Account and send them 1000 lira
         helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-
-        //Add ListedAssets to table
+        // admin should create types 
+        helper_add_types(scenario);
+        // create an asset
+        helper_create_asset(scenario);
+        // add an property to asset
         next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house = ts::take_from_sender<House>(scenario);
-            // keep ID before add the table 
-            let house_id = return_house_id(&house);
-            // add house to the table 
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-            // get house object from table 
-            let house_table = ao::get_house_table(&listed_asset_shared, house_id, ts::ctx(scenario));
-            // return the house object owner 
-            let house_owner = return_house_owner(house_table);
-            // check the owner variable from that object 
-            assert_eq(house_owner, TEST_ADDRESS1);
+        {
+            let asset = ts::take_from_sender<Asset>(scenario);
+            let property = string::utf8(b"4+1");
 
-            ts::return_shared(listed_asset_shared);
+            ao::add_accessory(&mut asset, property, ts::ctx(scenario));
+
+            let asset_id = assets::get_accessory_vector_id(&asset);      
+            let accesory = assets::get_accessory_table(&asset, asset_id);
+            let property2 = assets::get_accessory_property(accesory);
+            
+            assert_eq(property, property2);
+
+            ts::return_to_sender(scenario, asset);
         };
-        //Add ListedAssets to table
+     
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_add_asset_table() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        // admin should create types 
+        helper_add_types(scenario);
+        // create an asset
+        helper_create_asset(scenario);
+        // create an accessory
+        helper_add_accessory(scenario, b"4+1");
+        // add asset to table for approve 
         next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let car = ts::take_from_sender<Car>(scenario);
-            ao::add_car_table(&mut listed_asset_shared, car, ts::ctx(scenario));
+        {
+            let shared = ts::take_shared<ListedAssets>(scenario);
+            let asset = ts::take_from_sender<Asset>(scenario);
+            let asset_id = assets::get_asset_id(&asset);
 
-            ts::return_shared(listed_asset_shared);
+            ao::add_asset_table(&mut shared, asset);
+
+            let asset = ao::get_asset(&shared, asset_id);
+            let property_id = assets::get_accessory_vector_id(asset);
+            let accessory = assets::get_accessory_table(asset, property_id);
+            let property = assets::get_accessory_property(accessory);
+            let property2 = string::utf8(b"4+1");
+
+            assert_eq(property, property2);
+
+            ts::return_shared(shared);
         };
-         //Add ListedAssets to table
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_approve_asset() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create 4 Account and send them 1000 lira
+        helper_create_account(scenario);
+        // admin should create types 
+        helper_add_types(scenario);
+        // create an asset
+        helper_create_asset(scenario);
+        // create an accessory
+        helper_add_accessory(scenario, b"4+1");
+        // add asset to table 
+        helper_add_asset_table(scenario);
+        // There are two conditions false and true. Scenario 1 is admin is not going to approve 
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let shared = ts::take_shared<ListedAssets>(scenario);
+            let id = ao::get_asset_id(&shared, 0);
+            let decision = false; 
+
+            ao::approve_asset(&admin_cap, &mut shared, id, decision);
+
+            ts::return_shared(shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+
         next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let land = ts::take_from_sender<Land>(scenario);
-            ao::add_land_table(&mut listed_asset_shared, land, ts::ctx(scenario));
+        {
+            let asset = ts::take_from_sender<Asset>(scenario);
+            assert_eq(assets::is_approved(&asset), false);
 
-            ts::return_shared(listed_asset_shared);
+            ts::return_to_sender(scenario, asset);
         };
-        //Add ListedAssets to table
+        // asset is not approved. So we have to add again to table . 
+        helper_add_asset_table(scenario);
+        // admin decided to approve it now. 
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let shared = ts::take_shared<ListedAssets>(scenario);
+            let id = ao::get_asset_id(&shared, 0);
+            let decision = true; 
+
+            ao::approve_asset(&admin_cap, &mut shared, id, decision);
+
+            ts::return_shared(shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+        // asset approved bool should be return true now. 
         next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let shop = ts::take_from_sender<Shop>(scenario);
-            ao::add_shop_table(&mut listed_asset_shared, shop, ts::ctx(scenario));
+        {
+            let asset = ts::take_from_sender<Asset>(scenario);
+            assert_eq(assets::is_approved(&asset), true);
 
-            ts::return_shared(listed_asset_shared);
+            ts::return_to_sender(scenario, asset);
         };
-
          ts::end(scenario_test);
     }
-
-    #[test]
-    public fun test_remove_object() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
-
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-        // add and remove the house from table
-        next_tx(scenario, TEST_ADDRESS1);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house = ts::take_from_sender<House>(scenario);
-            let house_id = return_house_id(&house);
-            ao::add_house_table(&mut listed_asset_shared, house, ts::ctx(scenario));
-            ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
-
-            ts::return_shared(listed_asset_shared);
-        };
-
-        ts::end(scenario_test);
-    }
-    #[test]
-    #[expected_failure(abort_code = 0000000000000000000000000000000000000000000000000000000000000002::dynamic_field::EFieldDoesNotExist)]
-    public fun test_error_remove_object() {
-        let scenario_test = init_test_helper();
-        let scenario = &mut scenario_test;
-
-        helper_create_account(scenario);
-        helper_create_all(scenario);
-        helper_approve_all(scenario);
-        helper_add_all_table(scenario);
-        
-        // lets check that test_address2 try to remove another person object. 
-        next_tx(scenario, TEST_ADDRESS2);
-        {   
-            let listed_asset_shared = ts::take_shared<ListedAssets>(scenario);
-            let house_id = ao::get_house_id(&listed_asset_shared, 0);
-
-            ao::remove_house_table(&mut listed_asset_shared, house_id, ts::ctx(scenario));
-
-            ts::return_shared(listed_asset_shared);
-
-        };
-
-        ts::end(scenario_test);
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
