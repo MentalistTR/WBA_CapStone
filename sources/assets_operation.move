@@ -224,10 +224,6 @@ module notary::assets_operation {
         }
     }
     
-    public fun burn() {
-
-    }
-
     // === Test Functions ===
     #[test_only]
     // get init function 
