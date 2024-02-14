@@ -103,6 +103,7 @@ module notary::assets_operation {
                 assets: vec_map::empty(),
             }
         );
+        // create and transfer ListedAssets share object
         transfer::share_object(
             ListedAssets {
                 id: object::new(ctx),
@@ -136,7 +137,7 @@ module notary::assets_operation {
     public fun deposit(account: &mut Account , coin: Coin<LIRA_STABLE_COIN>) {
         balance::join(&mut account.balance, coin::into_balance(coin));
     }
-    // admin can add any types to share object
+    // admin can add any types (enums) to share object
     public fun add_type(_:&AdminCap, share: &mut ListedAssets, type: String) {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
@@ -206,7 +207,7 @@ module notary::assets_operation {
         // add the object to the objecttable
         lt::push_back(&mut asset.assets, object_id, item);
     }
-
+    // Admin can approve any asset
     public fun approve_asset(_: &AdminCap, listed_asset: &mut ListedAssets, id: ID, approve: bool) {
         // remove the asset from table 
         let asset = lt::remove(&mut listed_asset.assets, id);
@@ -257,6 +258,5 @@ module notary::assets_operation {
        let id =  vector::borrow(&share.asset_id, index);
        *id
     }
-
 
 }
