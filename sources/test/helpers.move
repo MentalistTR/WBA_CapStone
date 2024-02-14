@@ -3,27 +3,21 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
-    use sui::table::{Self, Table};
-    use sui::object::{ID};
-    use sui::tx_context::{TxContext};
 
-    use std::string::{Self, String};
+    use std::string::{Self};
 
     use notary::assets_operation::{Self as ao, AdminCap, Account, ListedAssets, test_init};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
-    use notary::assets::{Accessory};
+    use notary::assets::{Self, Asset};
+
+
 
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
-
-     struct House has store {
-        type: String,
-        accessory: Table<ID, Accessory>  
-    }
 
     public fun helper_create_account(scenario: &mut Scenario) {
         // TEST_ADDRESS1
@@ -113,7 +107,31 @@ module notary::helpers {
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(listed_shared);
         };
+    }
 
+    public fun helper_add_accessory(scenario: &mut Scenario, property: vector<u8>) {
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let asset = ts::take_from_sender<Asset>(scenario);
+            let property = string::utf8(property);
+
+            ao::add_accessory(&mut asset, property, ts::ctx(scenario));
+
+            ts::return_to_sender(scenario, asset);
+        };
+    }
+
+    public fun helper_add_asset_table(scenario: &mut Scenario) {
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedAssets>(scenario);
+            let asset = ts::take_from_sender<Asset>(scenario);
+            let asset_id = assets::get_asset_id(&asset);
+
+            ao::add_asset_table(&mut shared, asset);
+            
+            ts::return_shared(shared);
+        };
     }
 
     public fun init_test_helper() : ts::Scenario{

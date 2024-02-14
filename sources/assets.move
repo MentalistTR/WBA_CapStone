@@ -115,16 +115,21 @@ module notary::assets {
         &mut asset.property
     }
 
+    public fun get_accessory_table(asset: &Asset, acc_id: ID) : &Accessory {
+        let acc = ot::borrow(&asset.property, acc_id);
+        acc
+    }
+
     public fun vector_id_mut(asset: &mut Asset) : &mut vector<ID> {
         &mut asset.property_id
     }
 
-    public fun get_property(asset: &Asset, id: ID): &Accessory {
+    public fun get_accessory(asset: &Asset, id: ID): &Accessory {
         let acc = ot::borrow(&asset.property, id);
         acc
     }
 
-    public fun get_vector_id(asset: &Asset) : ID {
+    public fun get_accessory_vector_id(asset: &Asset) : ID {
        let asd =  vector::borrow(&asset.property_id, 0);
        *asd
     }

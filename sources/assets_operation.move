@@ -17,7 +17,7 @@ module notary::assets_operation {
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
-    use sui::object::{Self,UID,ID};
+    use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
@@ -63,7 +63,9 @@ module notary::assets_operation {
         id: UID,
         assets: LinkedTable<ID, Asset>,
         admin_fee: Balance<LIRA_STABLE_COIN>,
-        types: vector<String>
+        types: vector<String>,
+        asset_id: vector<ID> // FIXME: Delete me !! 
+    
     }
     // Only owner of this module can access it.
     struct AdminCap has key {
@@ -106,7 +108,9 @@ module notary::assets_operation {
                 id: object::new(ctx),
                 assets: lt::new<ID, Asset>(ctx),
                 admin_fee: balance::zero(),
-                types: vector::empty()
+                types: vector::empty(),
+                asset_id: vector::empty() // FIXME: Delete me !! 
+           
             }
         );
        // transfer AdminCap object to owner 
@@ -159,6 +163,7 @@ module notary::assets_operation {
         // transfer the notary_fee to notary balance 
         balance::join(&mut listed_asset.admin_fee, notary_fee);
         let asset = assets::create_asset(type, price, ctx);
+        vector::push_back(&mut listed_asset.asset_id, assets::get_asset_id(&asset)); // FIXME: Delete me !! 
         asset
     }
      //Add extensions to reel world assets 
@@ -244,5 +249,18 @@ module notary::assets_operation {
     public fun get_admin_balance(share: &ListedAssets) : u64 {
         balance::value(&share.admin_fee)
     }
+    #[test_only]
+    // get item from share object
+    public fun get_asset(share: &ListedAssets, id: ID) : &Asset {
+        let asset = lt::borrow(&share.assets, id);
+        asset
+    }
+    #[test_only]
+    //get asset id from shared 
+    public fun get_asset_id(share: &ListedAssets, index: u64) : ID {
+       let id =  vector::borrow(&share.asset_id, index);
+       *id
+    }
+
 
 }
