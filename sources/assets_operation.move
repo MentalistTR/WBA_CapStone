@@ -14,21 +14,18 @@
 module notary::assets_operation {
     use std::string::{String};
     use std::vector;
-    use std::type_name::{Self, TypeName};
+    use std::type_name::{TypeName};
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::vec_map::{Self, VecMap};
     use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
-    use sui::linked_table::{Self as lt, LinkedTable};
-    use sui::object_table::{Self as ot};
-    use sui::package::{Self, Publisher};
-    use sui::transfer_policy::{Self as tp, TransferPolicy};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
     use sui::vec_set::{Self, VecSet};
+    //use sui::package::{Self, Publisher};
+    //use sui::transfer_policy::{Self as tp, TransferPolicy};
+    // use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
@@ -41,7 +38,7 @@ module notary::assets_operation {
 
     // Fee is  the protocol receives whenever a sales transaction occurs
     // Admin can change this ratio.
-    const FEE: u128 = 5;
+    const FEE: u128 = 1;
 
     // =================== Structs ===================
 
@@ -57,7 +54,6 @@ module notary::assets_operation {
         rules: VecSet<TypeName>,
         approved: vector<TypeName>,
     }
-
     // Only owner of this module can access it.
     struct AdminCap has key {
         id: UID,
@@ -83,10 +79,20 @@ module notary::assets_operation {
     }
 
     // =================== Functions ===================
-    public fun new() {
-        // create share object Notary 
-        
-        // this function might be friend, Consider access control 
+
+    public fun new(type: String, price: u64, ctx: &mut TxContext) {
+        // create an asset object 
+        let asset = assets::create_asset(type, price, ctx);
+        // set id uid and id for share object 
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        // create share object Notary
+        transfer::share_object(Notary{
+            id: id,
+            asset_owner: inner,
+            assets: asset,
+            rules: vec_set::empty()
+        });
     }
 
     public fun request<T: store + key>(notary: &Notary<T>) : NotaryRequest {
