@@ -16,7 +16,7 @@ module notary::assets_type {
     use sui::coin::{Self, Coin};
     use sui::vec_set::{Self, VecSet};
     use sui::package::{Self, Publisher};
-    use sui::transfer_policy::{Self as tp, TransferPolicy};
+    use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap};
     //use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
 
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
@@ -42,6 +42,16 @@ module notary::assets_type {
     // one time witness 
     struct ASSETS_TYPE has drop {}
 
+    /// The "Rule" witness to authorize the policy.
+    struct Rule has drop {}
+
+    /// Configuration for the `Approve by admin`.
+    /// It holds the boolean for asset.
+    /// There can't be any sales if the asset is not approved.
+    struct Approve has store, drop {
+        approved: bool
+    }
+
     // =================== Initializer ===================
 
     fun init(otw: ASSETS_TYPE, ctx: &mut TxContext) {
@@ -59,9 +69,17 @@ module notary::assets_type {
         transfer::public_share_object(transfer_policy);
     }
 
-     public fun add_type(_:&AdminCap, share: &mut ListedTypes, type: String) {
+    public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
+    }
+
+    public fun add_rule<T>(
+        policy: &mut TransferPolicy<T>,
+        cap: &TransferPolicyCap<T>,
+        approved: bool
+    ) {
+        tp::add_rule(Rule {}, policy, cap, Approve { approved })
     }
 
 
