@@ -20,9 +20,7 @@ module notary::assets {
 
     use std::string::{String};
     use std::vector;
-
-
-
+    
     // /// # Arguments
     // /// 
     // /// * `type ` - is the type of the asset such as house, car, plane
@@ -39,8 +37,6 @@ module notary::assets {
         rules: VecSet<TypeName>,
         property: VecMap<String, String>,
     }
-
-
 
     // return a asset to create
     public fun create_asset(
