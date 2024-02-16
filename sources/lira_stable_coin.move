@@ -8,8 +8,6 @@ module notary::lira_stable_coin {
 
   // === Friends ===
 
-  friend notary::assets_operation;
- 
   // === Structs ===  
 
   struct LIRA_STABLE_COIN has drop {}
