@@ -6,22 +6,23 @@
 module notary::assets_type {
     use std::string::{String};
     use std::vector;
-    use std::type_name::{TypeName};
+   // use std::type_name::{TypeName};
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::transfer;
-    use sui::balance::{Self, Balance};
-    use sui::coin::{Self, Coin};
-    use sui::vec_set::{Self, VecSet};
-    use sui::package::{Self, Publisher};
-    use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
+   // use sui::balance::{Self, Balance};
+   // use sui::coin::{Self, Coin};
+   // use sui::vec_set::{Self, VecSet};
+    use sui::package::{Self};
+   // use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
+    use sui::kiosk_extension::{Self as ke};
 
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-     use notary::assets::{Self, Asset};
+    // use notary::assets::{Self, Asset};
 
     // =================== Errors ===================
     // It can be only one type 
@@ -61,20 +62,37 @@ module notary::assets_type {
             types: vector::empty()
         });
         let publisher = package::claim(otw, ctx);
-       //let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher, ctx);
-       //transfer::public_transfer(tp_cap, tx_context::sender(ctx));
-       // transfer::public_share_object(transfer_policy);
         transfer::public_transfer(publisher, tx_context::sender(ctx));
+
+        transfer::transfer(AdminCap{id: object::new(ctx)}, tx_context::sender(ctx));
         // define kiosk and kiosk ownercap 
-        let(kiosk, kiosk_cap) = kiosk::new(ctx);
-        transfer::public_share_object(kiosk);
-        transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
+        // let(kiosk, kiosk_cap) = kiosk::new(ctx);
+        // transfer::public_share_object(kiosk);
+        // transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
+
+    // admin should create a kiosk for users
+    public fun create_kiosk(_: &AdminCap, ctx: &mut TxContext) {
+        let(kiosk, kiosk_cap) = kiosk::new(ctx);
+        transfer::public_share_object(kiosk);
+        transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
+    }
+    // only admin can add extensions to kiosk
+    public fun add_extensions<Ext: drop>(
+        _: &AdminCap, 
+        ext: Ext,
+        self: &mut Kiosk,
+        cap: &KioskOwnerCap,
+        permissions: u128,
+        ctx: &mut TxContext
+        ) {
+            ke::add(ext, self, cap, permissions, ctx);
+        }
     
 
 

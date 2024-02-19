@@ -11,15 +11,15 @@
 module notary::assets {
 
     use sui::object::{Self,UID,ID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
+    use sui::tx_context::{TxContext};
+    //use sui::transfer;
     use sui::vec_set::{Self, VecSet};
     use sui::vec_map::{Self, VecMap};
     use std::type_name::{TypeName};
 
 
     use std::string::{String};
-    use std::vector;
+    //use std::vector;
     
     // /// # Arguments
     // /// 
