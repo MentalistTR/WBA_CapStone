@@ -4,6 +4,8 @@ module notary::test_assets_type {
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
     use sui::kiosk::{Kiosk, KioskOwnerCap};
+    use sui::package::{Publisher};
+    use sui::transfer_policy::{TransferPolicy};
 
     use std::string::{Self};
 
@@ -58,10 +60,12 @@ module notary::test_assets_type {
         next_tx(scenario, ADMIN);
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let publisher = ts::take_from_sender<Publisher>(scenario);
 
-            at::create_kiosk(&admin_cap, ts::ctx(scenario));
+            at::create_kiosk(&admin_cap, &publisher, ts::ctx(scenario));
 
             ts::return_to_sender(scenario, admin_cap);
+            ts::return_to_sender(scenario, publisher);
         };
         // add extensions to kiosk 
         next_tx(scenario, ADMIN);
@@ -76,6 +80,18 @@ module notary::test_assets_type {
             ts::return_to_sender(scenario, kiosk_cap);
             ts::return_shared(kiosk);
             ts::return_to_sender(scenario, admin_cap);
+        };
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let type = string::utf8(b"House");
+            let price: u64 = 10000;
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+
+            assets::create_asset(type, price, &policy, &mut kiosk, ts::ctx(scenario));
+            
+            ts::return_shared(policy);
+            ts::return_shared(kiosk);
         };
 
 

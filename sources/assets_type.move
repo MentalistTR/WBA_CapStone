@@ -15,14 +15,15 @@ module notary::assets_type {
    // use sui::balance::{Self, Balance};
    // use sui::coin::{Self, Coin};
    // use sui::vec_set::{Self, VecSet};
-    use sui::package::{Self};
-   // use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
+    use sui::package::{Self, Publisher};
+    use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
     use sui::kiosk_extension::{Self as ke};
+    
 
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-    // use notary::assets::{Self, Asset};
+     use notary::assets::{Self, Asset};
 
     // =================== Errors ===================
     // It can be only one type 
@@ -80,8 +81,13 @@ module notary::assets_type {
     }
 
     // admin should create a kiosk for users
-    public fun create_kiosk(_: &AdminCap, ctx: &mut TxContext) {
+    public fun create_kiosk(_: &AdminCap, publisher: &Publisher, ctx: &mut TxContext) {
         let(kiosk, kiosk_cap) = kiosk::new(ctx);
+        let(policy, policy_cap) = tp::new<Asset>(publisher, ctx);
+
+        transfer::public_share_object(policy);
+        transfer::public_transfer(policy_cap, tx_context::sender(ctx));
+
         transfer::public_share_object(kiosk);
         transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }

@@ -16,6 +16,9 @@ module notary::assets {
     use sui::vec_set::{Self, VecSet};
     use sui::vec_map::{Self, VecMap};
     use std::type_name::{TypeName};
+    use sui::kiosk_extension::{Self as ke};
+    use sui::kiosk::{Kiosk};
+    use sui::transfer_policy:: {TransferPolicy};
 
 
     use std::string::{String};
@@ -38,12 +41,16 @@ module notary::assets {
         property: VecMap<String, String>,
     }
 
-    // return a asset to create
+    struct NotaryKioskExtWitness has drop {}
+
+    // create any asset and place it to kiosk. 
     public fun create_asset(
         type: String,
         price: u64,
+        policy: &TransferPolicy<Asset>,
+        kiosk: &mut Kiosk,
         ctx :&mut TxContext,
-        ): Asset {
+        ) {
         
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
@@ -57,7 +64,8 @@ module notary::assets {
             rules: vec_set::empty(),
             property: vec_map::empty(),
         };
-        asset
+        let witness= NotaryKioskExtWitness {};
+        ke::place<NotaryKioskExtWitness, Asset>(witness,  kiosk, asset, policy);
     }
 
 
