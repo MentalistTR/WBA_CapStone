@@ -46,6 +46,9 @@ module notary::assets_type {
     /// The "Rule" witness to authorize the policy.
     struct Rule has drop {}
 
+    // witness for kiosk
+    struct NotaryKioskExtWitness has drop {}
+
     /// Configuration for the `Approve by admin`.
     /// It holds the boolean for asset.
     /// There can't be any sales if the asset is not approved.
@@ -83,15 +86,15 @@ module notary::assets_type {
         transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }
     // only admin can add extensions to kiosk
-    public fun add_extensions<Ext: drop>(
+    public fun add_extensions(
         _: &AdminCap, 
-        ext: Ext,
         self: &mut Kiosk,
         cap: &KioskOwnerCap,
         permissions: u128,
         ctx: &mut TxContext
         ) {
-            ke::add(ext, self, cap, permissions, ctx);
+            let witness = NotaryKioskExtWitness {};
+            ke::add<NotaryKioskExtWitness>(witness, self, cap, permissions, ctx);
         }
     
 
@@ -132,6 +135,13 @@ module notary::assets_type {
     public fun test_init(ctx: &mut TxContext) {
         init(ASSETS_TYPE {}, ctx);
     }
+     #[test_only]
+    // call the init function
+    public fun test_witness() : NotaryKioskExtWitness  {
+        let witness = NotaryKioskExtWitness {};
+        witness
+    }
+
 
 
 
