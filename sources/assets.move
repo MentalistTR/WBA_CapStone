@@ -41,16 +41,12 @@ module notary::assets {
         property: VecMap<String, String>,
     }
 
-    struct NotaryKioskExtWitness has drop {}
-
     // create any asset and place it to kiosk. 
     public fun create_asset(
         type: String,
         price: u64,
-        policy: &TransferPolicy<Asset>,
-        kiosk: &mut Kiosk,
         ctx :&mut TxContext,
-        ) {
+        ) : Asset {
         
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
@@ -64,51 +60,29 @@ module notary::assets {
             rules: vec_set::empty(),
             property: vec_map::empty(),
         };
-        let witness= NotaryKioskExtWitness {};
-        ke::place<NotaryKioskExtWitness, Asset>(witness,  kiosk, asset, policy);
+        asset
+   
     }
 
 
     // helper functions 
 
+    public fun borrow_id(asset: &Asset) : ID {
+        asset.owner
+    }
+
     // public fun is_approved(asset: &Asset) : bool {
     //     asset.approve
     // }
 
-    // public(friend) fun mint_new_asset(asset: Asset) : Asset {
-    //     asset.approve = true;
-    //     asset
-    // }
+    public fun approve_asset(asset:&mut Asset)  {
+        asset.approve = true;
+    }
 
     // public(friend) fun transfer_asset(asset: Asset, owner: address) {
     //     transfer::public_transfer(asset, owner);
     // }
-
-    // public fun get_accessory_id(accessory: &Accessory) : ID {
-    //     accessory.inner
-    // }
-
-    // public fun get_accessory_property(accessory: &Accessory) : String {
-    //     accessory.property
-    // }
     
-    // public fun get_objecttable_mut(asset: &mut Asset) : &mut ObjectTable<ID, Accessory> {
-    //     &mut asset.property
-    // }
-
-    // public fun get_accessory_table(asset: &Asset, acc_id: ID) : &Accessory {
-    //     let acc = ot::borrow(&asset.property, acc_id);
-    //     acc
-    // }
-
-    // public fun vector_id_mut(asset: &mut Asset) : &mut vector<ID> {
-    //     &mut asset.property_id
-    // }
-
-    // public fun get_accessory(asset: &Asset, id: ID): &Accessory {
-    //     let acc = ot::borrow(&asset.property, id);
-    //     acc
-    // }
 
     // public fun get_accessory_vector_id(asset: &Asset) : ID {
     //    let asd =  vector::borrow(&asset.property_id, 0);

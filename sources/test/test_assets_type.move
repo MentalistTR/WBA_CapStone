@@ -13,13 +13,11 @@ module notary::test_assets_type {
 
     use notary::helpers::{init_test_helper, helper_add_types};
 
-    use notary::assets_type::{Self as at, AdminCap, ListedTypes, Rule};
+    use notary::assets_type::{Self as at, AdminCap, ListedTypes, Rule, NotaryKioskExtWitness};
     
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
-
-    struct Ext has drop {}
 
     #[test]
     public fun test_rules() {
@@ -87,14 +85,29 @@ module notary::test_assets_type {
             let price: u64 = 10000;
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let kiosk = ts::take_shared<Kiosk>(scenario);
+            let shared = ts::take_shared<ListedTypes>(scenario);
 
-            assets::create_asset(type, price, &policy, &mut kiosk, ts::ctx(scenario));
+            at::create_asset(type, price, &mut shared, &policy, &mut kiosk, ts::ctx(scenario));
             
             ts::return_shared(policy);
             ts::return_shared(kiosk);
+            ts::return_shared(shared);
+        };
+        next_tx(scenario, ADMIN);
+        {   
+            let shared = ts::take_shared<ListedTypes>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
+            let asset_id = at::get_id(&shared);
+
+            at::approve(&mut kiosk, &kiosk_cap, asset_id);
+
+            ts::return_to_sender(scenario, kiosk_cap);
+            ts::return_shared(kiosk);
+            ts::return_shared(shared);
         };
 
-
+        
         ts::end(scenario_test);
 
     }

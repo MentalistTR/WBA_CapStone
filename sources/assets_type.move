@@ -10,7 +10,7 @@ module notary::assets_type {
    // use std::debug;
 
     use sui::tx_context::{Self,TxContext};
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::transfer;
    // use sui::balance::{Self, Balance};
    // use sui::coin::{Self, Coin};
@@ -35,6 +35,7 @@ module notary::assets_type {
     struct ListedTypes has key, store {
         id: UID,
         types: vector<String>,
+        asset_id: vector<ID> // FIXME: Delete me !!
     }
     
     // Only owner of this module can access it.
@@ -63,7 +64,8 @@ module notary::assets_type {
         // define the ListedTypes Share object 
         transfer::share_object(ListedTypes{
             id:object::new(ctx),
-            types: vector::empty()
+            types: vector::empty(),
+            asset_id: vector::empty()
         });
         let publisher = package::claim(otw, ctx);
         transfer::public_transfer(publisher, tx_context::sender(ctx));
@@ -102,18 +104,29 @@ module notary::assets_type {
             let witness = NotaryKioskExtWitness {};
             ke::add<NotaryKioskExtWitness>(witness, self, cap, permissions, ctx);
         }
+
+    public fun create_asset(
+        type: String,
+        price: u64,
+        shared: &mut ListedTypes,
+        policy: &TransferPolicy<Asset>,
+        kiosk: &mut Kiosk,
+        ctx :&mut TxContext,
+        ) {
+        
+        let asset = assets::create_asset(type, price, ctx);
+
+        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));
+
+        let witness= NotaryKioskExtWitness {};
+        ke::place<NotaryKioskExtWitness, Asset>(witness,  kiosk, asset, policy);
+    }
+
+    public fun approve(kiosk: &mut Kiosk, cap: &KioskOwnerCap, id: ID) {
+        let asset = kiosk::borrow_mut<Asset>(kiosk, cap, id);
+        assets::approve_asset(asset);
+    }
     
-
-
-    
-
-
-
-
-
-
-
-
 
 
     // public fun add_rule<T>(
@@ -147,6 +160,14 @@ module notary::assets_type {
         let witness = NotaryKioskExtWitness {};
         witness
     }
+    #[test_only]
+     // return id of asset 
+     public fun get_id(shared: &ListedTypes) : ID {
+        let asset_id = vector::borrow(&shared.asset_id, 0);
+        *asset_id
+
+     }
+
 
 
 
