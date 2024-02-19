@@ -8,7 +8,7 @@ module notary::helpers {
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
-    use notary::assets_type::{test_init, return_witness, ASSETS_TYPE};
+    use notary::assets_type::{Self as at, AdminCap, ListedTypes, test_init};
     use notary::assets::{Self, Asset};
 
 
@@ -89,26 +89,26 @@ module notary::helpers {
     //     };
     // }
 
-    // public fun helper_add_types(scenario: &mut Scenario) {
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let listed_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+    public fun helper_add_types(scenario: &mut Scenario) {
+        next_tx(scenario, ADMIN);
+        {
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
      
-    //         let type1 = string::utf8(b"House");
-    //         let type2 = string::utf8(b"Car");
-    //         let type3 = string::utf8(b"Shop");
-    //         let type4 = string::utf8(b"Land");
+            let type1 = string::utf8(b"House");
+            let type2 = string::utf8(b"Car");
+            let type3 = string::utf8(b"Shop");
+            let type4 = string::utf8(b"Land");
 
-    //         ao::add_type(&admin_cap, &mut listed_shared, type1);
-    //         ao::add_type(&admin_cap, &mut listed_shared, type2);
-    //         ao::add_type(&admin_cap, &mut listed_shared, type3);
-    //         ao::add_type(&admin_cap, &mut listed_shared, type4);
+            at::create_type(&admin_cap, &mut listed_shared, type1);
+            at::create_type(&admin_cap, &mut listed_shared, type2);
+            at::create_type(&admin_cap, &mut listed_shared, type3);
+            at::create_type(&admin_cap, &mut listed_shared, type4);
 
-    //         ts::return_to_sender(scenario, admin_cap);
-    //         ts::return_shared(listed_shared);
-    //     };
-    // }
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(listed_shared);
+        };
+    }
 
     // public fun helper_add_accessory(scenario: &mut Scenario, property: vector<u8>) {
     //     next_tx(scenario, TEST_ADDRESS1);
@@ -135,14 +135,13 @@ module notary::helpers {
     //     };
     // }
 
-    public fun init_test_helper(otw: ASSETS_TYPE) : ts::Scenario{
+    public fun init_test_helper() : ts::Scenario{
        let owner: address = @0xA;
-       let otw = return_witness(otw);
        let scenario_val = ts::begin(owner);
        let scenario = &mut scenario_val;
  
        {
-            test_init(otw, ts::ctx(scenario));
+            test_init(ts::ctx(scenario));
        };
        {
             return_init_lira(ts::ctx(scenario));

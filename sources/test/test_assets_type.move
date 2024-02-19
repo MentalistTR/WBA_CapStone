@@ -7,22 +7,50 @@ module notary::test_assets_type {
     use std::string::{Self};
 
     use notary::assets::{Self, Asset};
+
+    use notary::helpers::{init_test_helper, helper_add_types};
+
+    use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
 
     #[test]
-    public fun test_rule() {
-
-
-
-
-
-
-
-
+    public fun test_rules() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create types
+        helper_add_types(scenario);
+  
+        ts::end(scenario_test);
     }
+
+    #[test]
+    #[expected_failure(abort_code = at::ERROR_INVALID_TYPE)]
+    public fun test_rules_fail() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create types such as House, Car, Land, Shop
+        helper_add_types(scenario);
+        // Admin trying to create same types so we are expecting error
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let shared = ts::take_shared<ListedTypes>(scenario);
+            let type = string::utf8(b"House");
+
+            at::create_type(&admin_cap, &mut shared, type);
+
+            ts::return_shared(shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+         ts::end(scenario_test);
+    }
+
+
+
+
     
 
 
