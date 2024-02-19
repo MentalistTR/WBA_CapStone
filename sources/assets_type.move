@@ -127,7 +127,15 @@ module notary::assets_type {
     // }
 
 
+    #[test_only]
+    // call the init function
+    public fun test_init(otw: ASSETS_TYPE, ctx: &mut TxContext) {
+        init(otw, ctx);
+    }
 
+    public fun return_witness(otw: ASSETS_TYPE) : ASSETS_TYPE {
+        otw 
+    }
 
 
 
