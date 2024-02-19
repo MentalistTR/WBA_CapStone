@@ -19,6 +19,7 @@ module notary::assets_type {
     use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
     use sui::kiosk_extension::{Self as ke};
+    use sui::bag::{Self, Bag}; 
     
 
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
@@ -95,7 +96,6 @@ module notary::assets_type {
     }
     // only admin can add extensions to kiosk
     public fun add_extensions(
-        _: &AdminCap, 
         self: &mut Kiosk,
         cap: &KioskOwnerCap,
         permissions: u128,
@@ -109,7 +109,6 @@ module notary::assets_type {
         type: String,
         price: u64,
         shared: &mut ListedTypes,
-        policy: &TransferPolicy<Asset>,
         kiosk: &mut Kiosk,
         ctx :&mut TxContext,
         ) {
@@ -119,14 +118,25 @@ module notary::assets_type {
         vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));
 
         let witness= NotaryKioskExtWitness {};
-        ke::place<NotaryKioskExtWitness, Asset>(witness,  kiosk, asset, policy);
+        place_in_extension(kiosk, asset);  
     }
 
-    public fun approve(kiosk: &mut Kiosk, cap: &KioskOwnerCap, id: ID) {
-        let asset = kiosk::borrow_mut<Asset>(kiosk, cap, id);
-        assets::approve_asset(asset);
+    fun place_in_extension(
+        kiosk: &mut Kiosk,
+        asset: Asset,
+    ) {
+        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
+        bag::add<ID, Asset>(bag_, object::id(&asset), asset);
     }
-    
+
+    public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
+
+        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
+        let asset = bag::remove<ID, Asset>(bag_, id);
+        ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
+    }
+
+  
 
 
     // public fun add_rule<T>(
