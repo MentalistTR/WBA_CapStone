@@ -16,8 +16,8 @@ module notary::assets_type {
     use sui::coin::{Self, Coin};
     use sui::vec_set::{Self, VecSet};
     use sui::package::{Self, Publisher};
-    use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap};
-    //use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
+    use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
+    use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
 
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
@@ -61,26 +61,52 @@ module notary::assets_type {
             types: vector::empty()
         });
         let publisher = package::claim(otw, ctx);
-        let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher, ctx);
-
+       //let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher, ctx);
+       //transfer::public_transfer(tp_cap, tx_context::sender(ctx));
+       // transfer::public_share_object(transfer_policy);
         transfer::public_transfer(publisher, tx_context::sender(ctx));
-        transfer::public_transfer(tp_cap, tx_context::sender(ctx));
-
-        transfer::public_share_object(transfer_policy);
+        // define kiosk and kiosk ownercap 
+        let(kiosk, kiosk_cap) = kiosk::new(ctx);
+        transfer::public_share_object(kiosk);
+        transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }
-
+    // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
+    
 
-    public fun add_rule<T>(
-        policy: &mut TransferPolicy<T>,
-        cap: &TransferPolicyCap<T>,
-        approved: bool
-    ) {
-        tp::add_rule(Rule {}, policy, cap, Approve { approved })
-    }
+
+    
+
+
+
+
+
+
+
+
+
+
+    // public fun add_rule<T>(
+    //     policy: &mut TransferPolicy<T>,
+    //     cap: &TransferPolicyCap<T>,
+    //     approved: bool
+    // ) {
+    //     tp::add_rule(Rule {}, policy, cap, Approve { approved })
+    // }
+
+    // public fun prove<T>(
+    //     policy: &mut TransferPolicy<T>,
+    //     request: &mut TransferRequest<T>
+    // ) {
+    //     let approve: &Approve = tp::get_rule(Rule {}, policy);
+
+    //     assert!(tp::paid(request) == approve.approved, ERROR_INVALID_TYPE);
+
+    //     tp::add_receipt(Rule {}, request)
+    // }
 
 
 
