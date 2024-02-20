@@ -50,66 +50,16 @@ module notary::test_assets_type {
         };
          ts::end(scenario_test);
     }
-    // #[test]
-    // public fun test_create_kiosk() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
-    //     // create an kiosk
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    //         let publisher = ts::take_from_sender<Publisher>(scenario);
-
-    //         at::create_kiosk(&admin_cap, &publisher, ts::ctx(scenario));
-
-    //         ts::return_to_sender(scenario, admin_cap);
-    //         ts::return_to_sender(scenario, publisher);
-    //     };
-    //     // add extensions to kiosk 
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    //         let kiosk = ts::take_shared<Kiosk>(scenario);
-    //         let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
-    //         let permission : u128 = 01;
-
-    //         at::add_extensions(&admin_cap, &mut kiosk, &kiosk_cap, permission, ts::ctx(scenario));
-
-    //         ts::return_to_sender(scenario, kiosk_cap);
-    //         ts::return_shared(kiosk);
-    //         ts::return_to_sender(scenario, admin_cap);
-    //     };
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let type = string::utf8(b"House");
-    //         let price: u64 = 10000;
-    //         let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-    //         let kiosk = ts::take_shared<Kiosk>(scenario);
-    //         let shared = ts::take_shared<ListedTypes>(scenario);
-
-    //         at::create_asset(type, price, &mut shared, &policy, &mut kiosk, ts::ctx(scenario));
-            
-    //         ts::return_shared(policy);
-    //         ts::return_shared(kiosk);
-    //         ts::return_shared(shared);
-    //     };
-    //     next_tx(scenario, ADMIN);
-    //     {   
-    //         let shared = ts::take_shared<ListedTypes>(scenario);
-    //         let kiosk = ts::take_shared<Kiosk>(scenario);
-    //         let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
-    //         let asset_id = at::get_id(&shared);
-
-    //         at::approve(&mut kiosk, &kiosk_cap, asset_id);
-
-    //         ts::return_to_sender(scenario, kiosk_cap);
-    //         ts::return_shared(kiosk);
-    //         ts::return_shared(shared);
-    //     };
-
-        
+    #[test]
+    public fun test_create_kiosk() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            at::create_kiosk(ts::ctx(scenario));
+        };
         ts::end(scenario_test);
-
     }
 
 

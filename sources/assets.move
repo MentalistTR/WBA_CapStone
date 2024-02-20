@@ -61,7 +61,6 @@ module notary::assets {
             property: vec_map::empty(),
         };
         asset
-   
     }
 
 
