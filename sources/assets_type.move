@@ -68,10 +68,15 @@ module notary::assets_type {
             types: vector::empty(),
             asset_id: vector::empty()
         });
+        // define the publisher
         let publisher = package::claim(otw, ctx);
+        // define the transfer_policy and tp_cap 
+        let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher, ctx);
+        
         transfer::public_transfer(publisher, tx_context::sender(ctx));
-
+        transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::transfer(AdminCap{id: object::new(ctx)}, tx_context::sender(ctx));
+        transfer::public_share_object(transfer_policy);
     }
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
@@ -116,6 +121,8 @@ module notary::assets_type {
 
         let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
         let asset = bag::remove<ID, Asset>(bag_, id);
+        // set the asset.approve to true 
+        assets::approve_asset(&mut asset);
         ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
     }
     // Helper function for when the asset created it will be automatically in the extension
