@@ -70,9 +70,9 @@ module notary::assets {
         asset.owner
     }
 
-    // public fun is_approved(asset: &Asset) : bool {
-    //     asset.approve
-    // }
+    public fun is_approved(asset: &Asset) : bool {
+        asset.approve
+    }
 
     public fun approve_asset(asset:&mut Asset)  {
         asset.approve = true;

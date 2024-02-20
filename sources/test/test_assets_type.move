@@ -59,6 +59,53 @@ module notary::test_assets_type {
         {
             at::create_kiosk(ts::ctx(scenario));
         };
+        // add extensions to place any asset
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
+            let permission : u128 = 01;
+
+            at::add_extensions(&mut kiosk, &kiosk_cap, permission, ts::ctx(scenario));
+
+            ts::return_to_sender(scenario, kiosk_cap);
+            ts::return_shared(kiosk);
+        };
+        // create an asset
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let type = string::utf8(b"House");
+            let price: u64 = 10000;
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_asset(type, price, &mut shared, &mut kiosk, ts::ctx(scenario));
+
+            ts::return_shared(kiosk);
+            ts::return_shared(shared);
+        };
+        // admin should approve it 
+        next_tx(scenario, ADMIN);
+        {   
+            let shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+          
+            let asset_id = at::get_id(&shared);
+
+            at::approve(&admin_cap,&mut kiosk, &policy, asset_id);
+
+            ts::return_shared(policy);
+            ts::return_shared(kiosk);
+            ts::return_shared(shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+
+
+
+
+
         ts::end(scenario_test);
     }
 
