@@ -12,9 +12,6 @@ module notary::assets_type {
     use sui::tx_context::{Self,TxContext};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-   // use sui::balance::{Self, Balance};
-   // use sui::coin::{Self, Coin};
-   // use sui::vec_set::{Self, VecSet};
     use sui::package::{Self, Publisher};
     use sui::transfer_policy::{Self as tp, TransferPolicy, TransferPolicyCap, TransferRequest};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
@@ -148,8 +145,8 @@ module notary::assets_type {
     }
     #[test_only]
      // return id of asset 
-     public fun get_id(shared: &ListedTypes) : ID {
-        let asset_id = vector::borrow(&shared.asset_id, 0);
+     public fun get_id(shared: &ListedTypes, index: u64) : ID {
+        let asset_id = vector::borrow(&shared.asset_id, index);
         *asset_id
 
      }
