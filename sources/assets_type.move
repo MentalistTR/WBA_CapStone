@@ -72,10 +72,6 @@ module notary::assets_type {
         transfer::public_transfer(publisher, tx_context::sender(ctx));
 
         transfer::transfer(AdminCap{id: object::new(ctx)}, tx_context::sender(ctx));
-        // define kiosk and kiosk ownercap 
-        // let(kiosk, kiosk_cap) = kiosk::new(ctx);
-        // transfer::public_share_object(kiosk);
-        // transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
@@ -94,7 +90,7 @@ module notary::assets_type {
         transfer::public_share_object(kiosk);
         transfer::public_transfer(kiosk_cap, tx_context::sender(ctx));
     }
-    // only admin can add extensions to kiosk
+    // the kiosk owner should add extensions
     public fun add_extensions(
         self: &mut Kiosk,
         cap: &KioskOwnerCap,
@@ -104,7 +100,7 @@ module notary::assets_type {
             let witness = NotaryKioskExtWitness {};
             ke::add<NotaryKioskExtWitness>(witness, self, cap, permissions, ctx);
         }
-
+    // Users can create asset 
     public fun create_asset(
         type: String,
         price: u64,
@@ -114,13 +110,19 @@ module notary::assets_type {
         ) {
         
         let asset = assets::create_asset(type, price, ctx);
-
-        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));
+        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset)); // FIXME: Delete me  !!!! 
 
         let witness= NotaryKioskExtWitness {};
         place_in_extension(kiosk, asset);  
     }
+    // admin can approve the asset.Means that it will be removing from extensions and placing in kiosk 
+    public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
 
+        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
+        let asset = bag::remove<ID, Asset>(bag_, id);
+        ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
+    }
+    // Helper function for when the asset created it will be automatically in the extension
     fun place_in_extension(
         kiosk: &mut Kiosk,
         asset: Asset,
@@ -129,36 +131,7 @@ module notary::assets_type {
         bag::add<ID, Asset>(bag_, object::id(&asset), asset);
     }
 
-    public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
-
-        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
-        let asset = bag::remove<ID, Asset>(bag_, id);
-        ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
-    }
-
-  
-
-
-    // public fun add_rule<T>(
-    //     policy: &mut TransferPolicy<T>,
-    //     cap: &TransferPolicyCap<T>,
-    //     approved: bool
-    // ) {
-    //     tp::add_rule(Rule {}, policy, cap, Approve { approved })
-    // }
-
-    // public fun prove<T>(
-    //     policy: &mut TransferPolicy<T>,
-    //     request: &mut TransferRequest<T>
-    // ) {
-    //     let approve: &Approve = tp::get_rule(Rule {}, policy);
-
-    //     assert!(tp::paid(request) == approve.approved, ERROR_INVALID_TYPE);
-
-    //     tp::add_receipt(Rule {}, request)
-    // }
-
-
+    // Test only 
     #[test_only]
     // call the init function
     public fun test_init(ctx: &mut TxContext) {
