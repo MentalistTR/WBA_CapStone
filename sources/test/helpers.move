@@ -3,6 +3,10 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
+    use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
+    use sui::transfer_policy::{TransferPolicy};
+    use sui::test_utils::{assert_eq};
+
 
     use std::string::{Self};
 
@@ -11,84 +15,31 @@ module notary::helpers {
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, test_init};
     use notary::assets::{Self, Asset};
 
-
-
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
 
-  
+    public fun helper_create_asset(scenario: &mut Scenario, sender: address) {
+        // create a Asset object
+        next_tx(scenario, sender);
+        {
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let price: u64 = 10000;
+            let type = string::utf8(b"House");
 
-    // public fun helper_create_account(scenario: &mut Scenario) {
-    //     // TEST_ADDRESS1
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let account = ao::new_account(ts::ctx(scenario));
-    //         transfer::public_transfer(account, TEST_ADDRESS1);
-    //     };
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let deposit_amount = mint_for_testing<LIRA_STABLE_COIN>(1000, ts::ctx(scenario));
-    //         let account = ts::take_from_sender<Account>(scenario);
+            at::create_asset(
+                type,
+                price,
+        &mut listed_shared,
+         &mut kiosk,
+           ts::ctx(scenario));
 
-    //         ao::deposit(&mut account, deposit_amount);
-    //         ts::return_to_sender(scenario, account);
-    //     };
-    //      // TEST_ADDRESS2
-    //        next_tx(scenario, TEST_ADDRESS2);
-    //     {
-    //         let account = ao::new_account(ts::ctx(scenario));
-    //         transfer::public_transfer(account, TEST_ADDRESS2);
-    //     };
-    //     next_tx(scenario, TEST_ADDRESS2);
-    //     {
-    //         let deposit_amount = mint_for_testing<LIRA_STABLE_COIN>(1000, ts::ctx(scenario));
-    //         let account = ts::take_from_sender<Account>(scenario);
-
-    //         ao::deposit(&mut account, deposit_amount);
-    //         ts::return_to_sender(scenario, account);
-    //     };
-    //      // TEST_ADDRESS3
-    //     next_tx(scenario, TEST_ADDRESS3);
-    //     {
-    //         let account = ao::new_account(ts::ctx(scenario));
-    //         transfer::public_transfer(account, TEST_ADDRESS3);
-    //     };
-    //     next_tx(scenario, TEST_ADDRESS3);
-    //     {
-    //         let deposit_amount = mint_for_testing<LIRA_STABLE_COIN>(1000, ts::ctx(scenario));
-    //         let account = ts::take_from_sender<Account>(scenario);
-
-    //         ao::deposit(&mut account, deposit_amount);
-    //         ts::return_to_sender(scenario, account);
-    //     };
-    // }
-
-    // public fun helper_create_asset(scenario: &mut Scenario) {
-    //     // create a Asset object
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let listed_shared = ts::take_shared<ListedAssets>(scenario);
-    //         let account = ts::take_from_sender<Account>(scenario);
-    //         let amount: u64 = 900;
-    //         let name = string::utf8(b"ankara");
-    //         let type = string::utf8(b"House");
-
-    //         let asset = ao::create_asset(
-    //             &mut listed_shared,
-    //             &mut account,
-    //             type,
-    //             amount,
-    //             ts::ctx(scenario)
-    //         );
-    //         transfer::public_transfer(asset, TEST_ADDRESS1);
-
-    //         ts::return_shared(listed_shared);
-    //         ts::return_to_sender(scenario, account);
-    //     };
-    // }
-
+            ts::return_shared(kiosk);
+            ts::return_shared(listed_shared);
+        };
+    }
     public fun helper_add_types(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {
@@ -110,30 +61,44 @@ module notary::helpers {
         };
     }
 
-    // public fun helper_add_accessory(scenario: &mut Scenario, property: vector<u8>) {
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let asset = ts::take_from_sender<Asset>(scenario);
-    //         let property = string::utf8(property);
+    public fun  helper_add_extensions(scenario: &mut Scenario, sender: address, permissons: u128) {
+        next_tx(scenario, sender);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
+    
+            at::add_extensions(&mut kiosk, &kiosk_cap, permissons, ts::ctx(scenario));
 
-    //         ao::add_accessory(&mut asset, property, ts::ctx(scenario));
+            ts::return_to_sender(scenario, kiosk_cap);
+            ts::return_shared(kiosk);
+        };
+    }
 
-    //         ts::return_to_sender(scenario, asset);
-    //     };
-    // }
+    public fun helper_approve(scenario: &mut Scenario, index: u64) {
+     next_tx(scenario, ADMIN);
+        {   
+            let shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+            let id_ = at::get_id(&shared, index);
 
-    // public fun helper_add_asset_table(scenario: &mut Scenario) {
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let shared = ts::take_shared<ListedAssets>(scenario);
-    //         let asset = ts::take_from_sender<Asset>(scenario);
-    //         let asset_id = assets::get_asset_id(&asset);
+            assert_eq(kiosk::has_item(&kiosk, id_), false);
 
-    //         ao::add_asset_table(&mut shared, asset);
-            
-    //         ts::return_shared(shared);
-    //     };
-    // }
+            at::approve(&admin_cap,&mut kiosk, &policy, id_);
+
+            assert_eq(kiosk::has_item(&kiosk, id_), true);
+            assert_eq(kiosk::is_locked(&kiosk, id_), false);
+            assert_eq(kiosk::is_listed(&kiosk, id_), false);
+
+            ts::return_shared(policy);
+            ts::return_shared(kiosk);
+            ts::return_shared(shared);
+            ts::return_to_sender(scenario, admin_cap);
+
+    };
+    }
+
 
     public fun init_test_helper() : ts::Scenario{
        let owner: address = @0xA;

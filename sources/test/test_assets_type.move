@@ -12,16 +12,17 @@ module notary::test_assets_type {
     use sui::coin::{Self, Coin};
     
 
-    use std::string::{Self};
+    use std::string::{Self, String};
     use std::vector::{Self};
     use std::debug;
     use std::option;
 
     use notary::assets::{Self, Asset};
 
-    use notary::helpers::{init_test_helper, helper_add_types};
+    use notary::helpers::{init_test_helper, helper_add_types, helper_add_extensions, helper_create_asset,
+    helper_approve};
 
-    use notary::assets_type::{Self as at, AdminCap, ListedTypes, NotaryKioskExtWitness};
+    use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
@@ -59,7 +60,7 @@ module notary::test_assets_type {
          ts::end(scenario_test);
     }
     #[test]
-    public fun test_create_kiosk() {
+    public fun test_kiosk_place_list() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
         // create an kiosk
@@ -68,96 +69,15 @@ module notary::test_assets_type {
             at::create_kiosk(ts::ctx(scenario));
         };
         // add extensions to place any asset
-        next_tx(scenario, TEST_ADDRESS1);
-        {
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
-            let permission : u128 = 01;
-
-            at::add_extensions(&mut kiosk, &kiosk_cap, permission, ts::ctx(scenario));
-
-            ts::return_to_sender(scenario, kiosk_cap);
-            ts::return_shared(kiosk);
-        };
+        helper_add_extensions(scenario, TEST_ADDRESS1, 01);
         // create an asset 1 
-        let effects1 = next_tx(scenario, TEST_ADDRESS1);
-        {
-            let type = string::utf8(b"House");
-            let price: u64 = 10000;
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let shared = ts::take_shared<ListedTypes>(scenario);
-
-            at::create_asset(type, price, &mut shared, &mut kiosk, ts::ctx(scenario));
-
-            ts::return_shared(kiosk);
-            ts::return_shared(shared);
-        };
-        // admin should approve it 
-        next_tx(scenario, ADMIN);
-        {   
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_id(&shared, 0);
-
-            assert_eq(kiosk::has_item(&kiosk, id_), false);
-
-            at::approve(&admin_cap,&mut kiosk, &policy, id_);
-
-            assert_eq(kiosk::has_item(&kiosk, id_), true);
-            assert_eq(kiosk::is_locked(&kiosk, id_), false);
-            assert_eq(kiosk::is_listed(&kiosk, id_), false);
-
-            ts::return_shared(policy);
-            ts::return_shared(kiosk);
-            ts::return_shared(shared);
-            ts::return_to_sender(scenario, admin_cap);
-        };
+        helper_create_asset(scenario, TEST_ADDRESS1);
         // create an asset 2
-        let effects2 = next_tx(scenario, TEST_ADDRESS1);
-        {
-            let type = string::utf8(b"House");
-            let price: u64 = 10000;
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let shared = ts::take_shared<ListedTypes>(scenario);
-
-            at::create_asset(type, price, &mut shared, &mut kiosk, ts::ctx(scenario));
-
-            ts::return_shared(shared);
-            ts::return_shared(kiosk);
-        
-        };
-        // debug::print(&effects1);
-        // debug::print(&effects2);
-
-        // admin should approve it 
-        next_tx(scenario, ADMIN);
-        {   
-           // debug::print(&effects);
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_id(&shared, 1);
-
-            // let vector1 = ts::written(&effects1);
-            // let vector2 = ts::deleted(&effects2);
-            // let id_ = vector::borrow(&vector2, 2);
-
-            assert_eq(kiosk::has_item(&kiosk, id_), false);
-      
-            at::approve(&admin_cap,&mut kiosk, &policy, id_);
-
-            assert_eq(kiosk::has_item(&kiosk, id_), true);
-            assert_eq(kiosk::is_locked(&kiosk, id_), false);
-            assert_eq(kiosk::is_listed(&kiosk, id_), false);
-
-            ts::return_shared(policy);
-            ts::return_shared(kiosk);
-            ts::return_shared(shared);
-            ts::return_to_sender(scenario, admin_cap);
-        };
+        helper_create_asset(scenario, TEST_ADDRESS1);
+        // admin should approve Asset1 
+        helper_approve(scenario, 0);
+        // admin should approve Asset2
+        helper_approve(scenario, 1);
         // TEST_ADDRESS1 Listing the asset 
         next_tx(scenario, TEST_ADDRESS1);
         {
@@ -246,7 +166,28 @@ module notary::test_assets_type {
             assert_eq(coin::value(&user_balance), 100);
             ts::return_to_sender(scenario, user_balance);
         };
-        // Use the list by purchase method for Asset 1
+        ts::end(scenario_test);
+    }
+    #[test]
+    public fun test_kiosk_list_by_purchase() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+        // create an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            at::create_kiosk(ts::ctx(scenario));
+        };
+        // add extensions to place any asset
+        helper_add_extensions(scenario, TEST_ADDRESS1, 01);
+        // create an asset 1 
+        helper_create_asset(scenario, TEST_ADDRESS1);
+        // create an asset 2
+        helper_create_asset(scenario, TEST_ADDRESS1);
+        // admin should approve Asset1 
+        helper_approve(scenario, 0);
+        // admin should approve Asset2
+        helper_approve(scenario, 1);
+
         next_tx(scenario, TEST_ADDRESS1);
         {
             let shared = ts::take_shared<ListedTypes>(scenario);
@@ -304,22 +245,14 @@ module notary::test_assets_type {
             ts::return_shared(shared);
             ts::return_shared(policy);
         };
+        // address2 hasnt got any kiosk. He has to create one.
         next_tx(scenario, TEST_ADDRESS2);
         {
             at::create_kiosk(ts::ctx(scenario));
         };
-        // add extensions to place any asset
-        next_tx(scenario, TEST_ADDRESS2);
-        {
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
-            let permission : u128 = 01;
-
-            at::add_extensions(&mut kiosk, &kiosk_cap, permission, ts::ctx(scenario));
-
-            ts::return_to_sender(scenario, kiosk_cap);
-            ts::return_shared(kiosk);
-        };
+        // address2 has to add extensions to place any asset
+        helper_add_extensions(scenario, TEST_ADDRESS2, 01);
+        // address2 wants to sell his asset in his own kiosk. 
         next_tx(scenario, TEST_ADDRESS2);
         {
             let kiosk = ts::take_shared<Kiosk>(scenario);
@@ -331,7 +264,6 @@ module notary::test_assets_type {
             ts::return_shared(kiosk);
             ts::return_to_sender(scenario, cap); 
         };
-
         ts::end(scenario_test);
     }
 }
