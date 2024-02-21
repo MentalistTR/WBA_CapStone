@@ -166,27 +166,5 @@ module notary::assets_type {
      public fun get_id(shared: &ListedTypes, index: u64) : ID {
         let asset_id = vector::borrow(&shared.asset_id, index);
         *asset_id
-
      }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
