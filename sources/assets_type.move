@@ -43,8 +43,9 @@ module notary::assets_type {
     // one time witness 
     struct ASSETS_TYPE has drop {}
 
-    /// The "Rule" witness to authorize the policy.
-    struct Rule has drop {}
+
+    /// Publisher capability object
+    struct AssetsTypePublisher has key { id: UID, publisher: Publisher }
 
     // witness for kiosk
     struct NotaryKioskExtWitness has drop {}
@@ -66,11 +67,14 @@ module notary::assets_type {
             asset_id: vector::empty()
         });
         // define the publisher
-        let publisher = package::claim(otw, ctx);
+        let publisher_ = package::claim<ASSETS_TYPE>(otw, ctx);
         // define the transfer_policy and tp_cap 
-        let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher, ctx);
+        let (transfer_policy, tp_cap) = tp::new<Asset>(&publisher_, ctx);
         
-        transfer::public_transfer(publisher, tx_context::sender(ctx));
+        transfer::share_object(AssetsTypePublisher {
+            id: object::new(ctx),
+            publisher: publisher_
+        });
         transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::transfer(AdminCap{id: object::new(ctx)}, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);
@@ -106,7 +110,7 @@ module notary::assets_type {
         kiosk: &mut Kiosk,
         ctx :&mut TxContext,
         ) {
-        
+        assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
         let asset = assets::create_asset(type, price, ctx);
         vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset)); // FIXME: Delete me  !!!! 
 
