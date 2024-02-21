@@ -24,8 +24,10 @@ module notary::assets_type {
      use notary::assets::{Self, Asset};
 
     // =================== Errors ===================
+
     // It can be only one type 
     const ERROR_INVALID_TYPE: u64 = 1;
+    const ERROR_NOT_APPROVED: u64 = 2;
 
     // =================== Structs ===================
 
@@ -42,7 +44,6 @@ module notary::assets_type {
     }
     // one time witness 
     struct ASSETS_TYPE has drop {}
-
 
     /// Publisher capability object
     struct AssetsTypePublisher has key { id: UID, publisher: Publisher }
@@ -79,6 +80,8 @@ module notary::assets_type {
         transfer::transfer(AdminCap{id: object::new(ctx)}, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);
     }
+    // =================== Functions ===================
+
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
@@ -112,20 +115,31 @@ module notary::assets_type {
         ) {
         assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
         let asset = assets::create_asset(type, price, ctx);
+
         vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset)); // FIXME: Delete me  !!!! 
 
         let witness= NotaryKioskExtWitness {};
         place_in_extension(kiosk, asset);  
     }
-    // admin can approve the asset.Means that it will be removing from extensions and placing in kiosk 
+    // admin can approve the asset. Means that it will be removing from extensions and placing in kiosk 
     public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
-
         let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
         let asset = bag::remove<ID, Asset>(bag_, id);
         // set the asset.approve to true 
         assets::approve_asset(&mut asset);
+
         ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
     }
+    public fun add_kiosk(_: &KioskOwnerCap, kiosk: &mut Kiosk, asset: Asset) {
+        assert!(assets::is_approved(&asset) ==  true, ERROR_NOT_APPROVED);
+        // set the approve false
+        assets::disable_approve(&mut asset);
+       // place to in_extension
+        place_in_extension(kiosk, asset);
+    }
+
+    // =================== Helper Functions ===================
+
     // Helper function for when the asset created it will be automatically in the extension
     fun place_in_extension(
         kiosk: &mut Kiosk,

@@ -304,14 +304,34 @@ module notary::test_assets_type {
             ts::return_shared(shared);
             ts::return_shared(policy);
         };
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            at::create_kiosk(ts::ctx(scenario));
+        };
+        // add extensions to place any asset
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
+            let permission : u128 = 01;
+
+            at::add_extensions(&mut kiosk, &kiosk_cap, permission, ts::ctx(scenario));
+
+            ts::return_to_sender(scenario, kiosk_cap);
+            ts::return_shared(kiosk);
+        };
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let cap = ts::take_from_sender<KioskOwnerCap>(scenario);
+            let asset = ts::take_from_sender<Asset>(scenario);
+            
+            at::add_kiosk(&cap, &mut kiosk, asset);
+
+            ts::return_shared(kiosk);
+            ts::return_to_sender(scenario, cap); 
+        };
 
         ts::end(scenario_test);
     }
-
-
-
-
-    
-
-
 }

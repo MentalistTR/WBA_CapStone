@@ -78,6 +78,10 @@ module notary::assets {
         asset.approve = true;
     }
 
+    public fun disable_approve(asset:&mut Asset)  {
+        asset.approve = false;
+    }
+
     // public(friend) fun transfer_asset(asset: Asset, owner: address) {
     //     transfer::public_transfer(asset, owner);
     // }
