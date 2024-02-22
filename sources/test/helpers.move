@@ -6,9 +6,12 @@ module notary::helpers {
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
     use sui::transfer_policy::{TransferPolicy};
     use sui::test_utils::{assert_eq};
+    use sui::object::{ID};
 
 
     use std::string::{Self};
+    use std::option::{Self};
+    use std::debug;
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
@@ -40,6 +43,7 @@ module notary::helpers {
             ts::return_shared(listed_shared);
         };
     }
+    
     public fun helper_add_types(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {
@@ -82,6 +86,8 @@ module notary::helpers {
             let kiosk = ts::take_shared<Kiosk>(scenario);
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let id_ = at::get_id(&shared, index);
+            // let id_ = at::get_dynamic_field(&kiosk, index);
+            // let new_id = option::destroy_some<ID>(id_);
 
             assert_eq(kiosk::has_item(&kiosk, id_), false);
 

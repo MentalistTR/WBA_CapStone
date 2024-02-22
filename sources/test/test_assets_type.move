@@ -181,7 +181,7 @@ module notary::test_assets_type {
         helper_add_extensions(scenario, TEST_ADDRESS1, 01);
         // create an asset 1 
         helper_create_asset(scenario, TEST_ADDRESS1);
-        // create an asset 2
+        //create an asset 2
         helper_create_asset(scenario, TEST_ADDRESS1);
         // admin should approve Asset1 
         helper_approve(scenario, 0);

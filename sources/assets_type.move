@@ -6,6 +6,7 @@
 module notary::assets_type {
     use std::string::{String};
     use std::vector;
+    use std::option::{Option};
    // use std::type_name::{TypeName};
    // use std::debug;
 
@@ -17,8 +18,8 @@ module notary::assets_type {
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
     use sui::kiosk_extension::{Self as ke};
     use sui::bag::{Self, Bag}; 
+    use sui::dynamic_object_field::{Self as dof};
     
-
     // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
      use notary::assets::{Self, Asset};
@@ -50,13 +51,6 @@ module notary::assets_type {
 
     // witness for kiosk
     struct NotaryKioskExtWitness has drop {}
-
-    /// Configuration for the `Approve by admin`.
-    /// It holds the boolean for asset.
-    /// There can't be any sales if the asset is not approved.
-    struct Approve has store, drop {
-        approved: bool
-    }
 
     // =================== Initializer ===================
 
@@ -116,7 +110,7 @@ module notary::assets_type {
         assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
         let asset = assets::create_asset(type, price, ctx);
 
-        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset)); // FIXME: Delete me  !!!! 
+        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));  // FIXME: Delete me  !!!! 
 
         let witness= NotaryKioskExtWitness {};
         place_in_extension(kiosk, asset);  
@@ -131,7 +125,7 @@ module notary::assets_type {
         ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
     }
     public fun add_kiosk(_: &KioskOwnerCap, kiosk: &mut Kiosk, asset: Asset) {
-        assert!(assets::is_approved(&asset) ==  true, ERROR_NOT_APPROVED);
+        assert!(assets::is_approved(&asset), ERROR_NOT_APPROVED);
         // set the approve false
         assets::disable_approve(&mut asset);
        // place to in_extension
@@ -148,8 +142,8 @@ module notary::assets_type {
         let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
         bag::add<ID, Asset>(bag_, object::id(&asset), asset);
     }
+    // =================== Test Only ===================
 
-    // Test only 
     #[test_only]
     // call the init function
     public fun test_init(ctx: &mut TxContext) {
@@ -167,4 +161,10 @@ module notary::assets_type {
         let asset_id = vector::borrow(&shared.asset_id, index);
         *asset_id
      }
+    #[test_only]
+    public fun get_dynamic_field(kiosk: &Kiosk, field: u64) : Option<ID> {
+        let kiosk_id = kiosk::uid(kiosk);
+        let id = dof::id(kiosk_id, field);
+        id
+    }
 }
