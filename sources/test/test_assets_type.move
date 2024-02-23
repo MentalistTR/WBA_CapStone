@@ -230,7 +230,7 @@ module notary::test_assets_type {
 
             assert_eq(kiosk::has_item(&kiosk, id_), true);
 
-            let(asset, request) = kiosk::purchase_with_cap<Asset>(
+            let (asset, request) = kiosk::purchase_with_cap<Asset>(
                 &mut kiosk,
                 purchase_cap,
                 mint_for_testing(10000, ts::ctx(scenario))
