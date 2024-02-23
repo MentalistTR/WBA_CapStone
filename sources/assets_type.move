@@ -40,6 +40,7 @@ module notary::assets_type {
         id: UID,
         types: vector<String>,
         kiosk_caps: Table<ID, KioskOwnerCap>,
+        purchase_cap: Table<ID, PurchaseCap<Asset>>,
         asset_id: vector<ID>, // FIXME: Delete me !!
         kiosk_id: vector<ID>  // FIXME: Delete me !!
     }
@@ -65,6 +66,7 @@ module notary::assets_type {
             id:object::new(ctx),
             types: vector::empty(),
             kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
+            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
             asset_id: vector::empty(),  // FIXME: Delete me !!
             kiosk_id: vector::empty()  // FIXME: Delete me !!
         });
@@ -146,7 +148,7 @@ module notary::assets_type {
     }
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
     public fun list_with_purchase(
-        share: &ListedTypes,
+        share: &mut ListedTypes,
         kiosk: &mut Kiosk,
         cap_id: ID,
         asset_id: ID,
@@ -164,27 +166,33 @@ module notary::assets_type {
                 price,
                 ctx
             );
-            transfer::public_transfer(purch_cap, sender(ctx));
+            // store the purchase_cap in the protocol
+            table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
         }
     // User2 can buy another person assets and it has to be directy placed in his kiosk. 
-    public fun purchase_with_list(
+    public fun purchase_with_cap(
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
-        share: &ListedTypes,
+        share: &mut ListedTypes,
         policy: &TransferPolicy<Asset>,
-        purchase_cap: PurchaseCap<Asset>,
+        purchase_cap: ID,
         kiosk_cap: ID,
         payment: Coin<SUI>,
         ctx: &mut TxContext
         ) {
+            // remove the purchase_cap from table 
+            let purchase_cap = table::remove(&mut share.purchase_cap, purchase_cap);
+            // purchase the asset from kiosk
             let (item, request) = kiosk::purchase_with_cap(
                 kiosk1,
                 purchase_cap,
                 payment
                 );
+            // confirm the request. Destroye the hot potato
             policy::confirm_request(policy, request);
+            // be sure that sender is the owner of kiosk
             assert!(kiosk::owner(kiosk2) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-
+            // place the asset into the kiosk
             let kiosk_cap = table::borrow(&share.kiosk_caps, kiosk_cap);
             kiosk::place(kiosk2, kiosk_cap, item);
         }
