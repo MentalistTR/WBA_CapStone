@@ -10,12 +10,13 @@ module notary::helpers {
 
 
     use std::string::{Self};
-    use std::option::{Self};
-    use std::debug;
+    // use std::option::{Self};
+    // use std::debug;
+    use std::vector;
 
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
-    use notary::assets_type::{Self as at, AdminCap, ListedTypes, test_init};
+    use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
     use notary::assets::{Self, Asset};
 
     const ADMIN: address = @0xA;
@@ -64,17 +65,18 @@ module notary::helpers {
             ts::return_shared(listed_shared);
         };
     }
-
-    public fun  helper_add_extensions(scenario: &mut Scenario, sender: address, permissons: u128) {
-        next_tx(scenario, sender);
-        {
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let kiosk_cap= ts::take_from_sender<KioskOwnerCap>(scenario);
     
-            at::add_extensions(&mut kiosk, &kiosk_cap, permissons, ts::ctx(scenario));
+    public fun helper_new_policy(scenario: &mut Scenario) {
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let publisher_share = ts::take_shared<AssetsTypePublisher>(scenario);
+            //let publisher = at::get_publisher(&publisher_share);
 
-            ts::return_to_sender(scenario, kiosk_cap);
-            ts::return_shared(kiosk);
+            at::new_policy(&admin_cap, &publisher_share, ts::ctx(scenario));
+
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(publisher_share);
         };
     }
 
@@ -85,9 +87,8 @@ module notary::helpers {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let kiosk = ts::take_shared<Kiosk>(scenario);
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_id(&shared, index);
-            // let id_ = at::get_dynamic_field(&kiosk, index);
-            // let new_id = option::destroy_some<ID>(id_);
+            let id_ = at::get_asset_id(&shared, index);
+ 
 
             assert_eq(kiosk::has_item(&kiosk, id_), false);
 

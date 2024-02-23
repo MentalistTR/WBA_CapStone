@@ -42,7 +42,8 @@ module notary::assets_type {
         kiosk_caps: Table<ID, KioskOwnerCap>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
         asset_id: vector<ID>, // FIXME: Delete me !!
-        kiosk_id: vector<ID>  // FIXME: Delete me !!
+        kiosk_id: vector<ID> , // FIXME: Delete me !!
+        purchase_id: vector<ID> // FIXME: Delete me !!
     }
     
     // Only owner of this module can access it.
@@ -68,7 +69,8 @@ module notary::assets_type {
             kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
             asset_id: vector::empty(),  // FIXME: Delete me !!
-            kiosk_id: vector::empty()  // FIXME: Delete me !!
+            kiosk_id: vector::empty(),  // FIXME: Delete me !!
+            purchase_id: vector::empty()  // FIXME: Delete me !!
         });
         // define the publisher
         let publisher_ = package::claim<ASSETS_TYPE>(otw, ctx);
@@ -102,11 +104,11 @@ module notary::assets_type {
         _: &AdminCap,
         share: &ListedTypes,
         self: &mut Kiosk,
-        id: ID,
+        cap_id: ID,
         permissions: u128,
         ctx: &mut TxContext
         ) { 
-            let kiosk_cap = table::borrow(&share.kiosk_caps, id); 
+            let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id); 
             let witness = NotaryKioskExtWitness {};
 
             ke::add<NotaryKioskExtWitness>(witness, self, kiosk_cap, permissions, ctx);
@@ -124,15 +126,14 @@ module notary::assets_type {
 
         vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));  // FIXME: Delete me  !!!! 
 
-        let witness= NotaryKioskExtWitness {};
         place_in_extension(kiosk, asset);  
     }
     // admin can create new_policy for sales or renting operations. 
     public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
         // set the publisher
-        let publisher_ = &publish.publisher;
+        let publisher = get_publisher(publish);
         // create an transfer_policy and tp_cap
-        let (transfer_policy, tp_cap) = policy::new<Asset>(publisher_, ctx);
+        let (transfer_policy, tp_cap) = policy::new<Asset>(publisher, ctx);
         // transfer the objects 
         transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);
@@ -166,6 +167,7 @@ module notary::assets_type {
                 price,
                 ctx
             );
+            vector::push_back(&mut share.purchase_id, object::id(&purch_cap)); // FIXME:: DELETE ME !!
             // store the purchase_cap in the protocol
             table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
         }
@@ -207,6 +209,11 @@ module notary::assets_type {
         let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
         bag::add<ID, Asset>(bag_, object::id(&asset), asset);
     }
+
+    // return the publisher
+     public fun get_publisher(shared: &AssetsTypePublisher) : &Publisher {
+        &shared.publisher
+     }
     // =================== Test Only ===================
 
     #[test_only]
@@ -222,8 +229,27 @@ module notary::assets_type {
     }
     #[test_only]
      // return id of asset 
-     public fun get_id(shared: &ListedTypes, index: u64) : ID {
+     public fun get_asset_id(shared: &ListedTypes, index: u64) : ID {
         let asset_id = vector::borrow(&shared.asset_id, index);
         *asset_id
      }
+    #[test_only]
+     // return id of kiosk_cap 
+     public fun get_cap_id(shared: &ListedTypes, index: u64) : ID {
+        let kiosk_id = vector::borrow(&shared.kiosk_id, index);
+        *kiosk_id
+     }
+     #[test_only]
+     // get kiosk_cap
+     public fun get_kiosk_cap(shared: &ListedTypes, index: u64) : ID {
+        let cap = vector::borrow(&shared.kiosk_id, index);
+        *cap
+     }
+       #[test_only]
+     // get kiosk_cap
+     public fun get_purchase_cap(shared: &ListedTypes, index: u64) : ID {
+        let cap = vector::borrow(&shared.purchase_id, index);
+        *cap
+     }
+
 }
