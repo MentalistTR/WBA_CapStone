@@ -6,7 +6,7 @@
 module notary::assets_type {
     use std::string::{String};
     use std::vector;
-   // use std::option::{Option};
+    use std::option::{Option};
    // use std::type_name::{TypeName};
    // use std::debug;
 
@@ -198,6 +198,23 @@ module notary::assets_type {
             let kiosk_cap = table::borrow(&share.kiosk_caps, kiosk_cap);
             kiosk::place(kiosk2, kiosk_cap, item);
         }
+    
+    public fun withdraw_profits(
+        kiosk: &mut Kiosk,
+        shared: &ListedTypes,
+        cap_id: ID,
+        amount: Option<u64>,
+        ctx: &mut TxContext
+    ) : Coin<SUI> {
+        // check the owner of kiosk
+        assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // set the kiosk_cap
+        let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
+        // take profits from kiosk
+        let profits = kiosk::withdraw(kiosk, kiosk_cap, amount, ctx);
+
+        profits
+    }
 
     // =================== Helper Functions ===================
 
