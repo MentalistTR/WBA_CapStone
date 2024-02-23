@@ -12,13 +12,9 @@ module notary::assets {
 
     use sui::object::{Self,UID,ID};
     use sui::tx_context::{TxContext};
-    //use sui::transfer;
     use sui::vec_set::{Self, VecSet};
     use sui::vec_map::{Self, VecMap};
     use std::type_name::{TypeName};
-    use sui::kiosk_extension::{Self as ke};
-    use sui::kiosk::{Kiosk};
-    use sui::transfer_policy:: {TransferPolicy};
 
 
     use std::string::{String};

@@ -144,7 +144,7 @@ module notary::assets_type {
 
         ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
     }
-
+    // User1 has to list with purchase so he can send the person who wants to buy him own asset
     public fun list_with_purchase(
         share: &ListedTypes,
         kiosk: &mut Kiosk,
@@ -166,7 +166,7 @@ module notary::assets_type {
             );
             transfer::public_transfer(purch_cap, sender(ctx));
         }
-
+    // User2 can buy another person assets and it has to be directy placed in his kiosk. 
     public fun purchase_with_list(
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
