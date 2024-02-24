@@ -38,8 +38,7 @@ module notary::assets_type {
         id: UID,
         types: vector<String>,
         kiosk_caps: Table<ID, KioskOwnerCap>,
-        purchase_cap: Table<ID, PurchaseCap<Asset>>,
-        purchase_id: vector<ID> // FIXME: Delete me !!
+        purchase_cap: Table<ID, PurchaseCap<Asset>>
     }
     
     // Only owner of this module can access it.
@@ -64,7 +63,6 @@ module notary::assets_type {
             types: vector::empty(),
             kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
-            purchase_id: vector::empty()  // FIXME: Delete me !!
         });
         // define the publisher
         let publisher_ = package::claim<ASSETS_TYPE>(otw, ctx);
@@ -158,7 +156,6 @@ module notary::assets_type {
                 price,
                 ctx
             );
-            vector::push_back(&mut share.purchase_id, object::id(&purch_cap)); // FIXME:: DELETE ME !!
             // store the purchase_cap in the protocol
             table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
         }
@@ -235,11 +232,4 @@ module notary::assets_type {
         let witness = NotaryKioskExtWitness {};
         witness
     }
-    #[test_only]
-     // get kiosk_cap
-     public fun get_purchase_cap(shared: &ListedTypes, index: u64) : ID {
-        let cap = vector::borrow(&shared.purchase_id, index);
-        *cap
-     }
-
 }

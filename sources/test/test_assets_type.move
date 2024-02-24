@@ -74,7 +74,7 @@ module notary::test_assets_type {
         };
 
         let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
-       // debug::print(&kiosk1_data);
+     
         // TEST_ADDRESS2 had created an kiosk
         next_tx(scenario, TEST_ADDRESS2);
         {
@@ -85,7 +85,7 @@ module notary::test_assets_type {
             ts::return_shared(shared);
         };
         let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
-        debug::print(&kiosk2_data);
+       
         // add extensions to kiosk1 for place any asset
         next_tx(scenario, ADMIN);
         {   
@@ -165,8 +165,6 @@ module notary::test_assets_type {
         // create an asset 2 
         next_tx(scenario, TEST_ADDRESS1);
         {
-            // let last_id = object::last_created(ts::ctx(scenario));
-            // debug::print(&last_id);
             let kiosk1_ = ts::created(&kiosk1_data);
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
@@ -278,6 +276,9 @@ module notary::test_assets_type {
             ts::return_shared(kiosk1_shared);
             ts::return_shared(shared);
         };
+
+        let purchase_data = next_tx(scenario, TEST_ADDRESS1);
+    
         // TEST_ADDRESS2 is going to buy asset from address 1
         next_tx(scenario, TEST_ADDRESS2);
         {
@@ -299,7 +300,10 @@ module notary::test_assets_type {
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let asset_id = asset_id1;
-            let purch_cap = at::get_purchase_cap(&shared, 0);
+
+            let purchase_written = ts::deleted(&purchase_data);
+            let purch_cap = vector::borrow(&purchase_written,5);
+
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
@@ -310,7 +314,7 @@ module notary::test_assets_type {
                 &mut kiosk2_shared ,
                 &mut shared,
                 &policy,
-                purch_cap,
+                *purch_cap,
                 *kiosk2_cap,
                 payment,
                 ts::ctx(scenario)
@@ -393,6 +397,7 @@ module notary::test_assets_type {
             ts::return_shared(kiosk2_shared);
             ts::return_shared(shared);
         };
+        let purchase_data2 = next_tx(scenario, TEST_ADDRESS1);
 
          // TEST_ADDRESS1 is going to buy asset from TEST_ADDRESS2
         next_tx(scenario, TEST_ADDRESS1);
@@ -400,7 +405,7 @@ module notary::test_assets_type {
             let shared = ts::take_shared<ListedTypes>(scenario);
 
             let kiosk1_created = ts::created(&kiosk1_data);
-            // kioskcap id
+    
             let kiosk1_deleted = ts::deleted(&kiosk1_data);
 
             let kiosk1_id = vector::borrow(&kiosk1_created, 0); 
@@ -413,7 +418,10 @@ module notary::test_assets_type {
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let asset_id = asset_id1;
-            let purch_cap = at::get_purchase_cap(&shared, 1);
+
+            let purchase_written = ts::deleted(&purchase_data2);
+            let purch_cap = vector::borrow(&purchase_written,6);   
+
             let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
@@ -425,7 +433,7 @@ module notary::test_assets_type {
                 &mut kiosk1_shared ,
                 &mut shared,
                 &policy,
-                purch_cap,
+                *purch_cap,
                 *kiosk_cap,
                 payment,
                 ts::ctx(scenario)
