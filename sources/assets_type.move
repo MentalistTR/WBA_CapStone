@@ -89,33 +89,36 @@ module notary::assets_type {
 
         table::add(&mut share.kiosk_caps, object::id(&kiosk_cap), kiosk_cap);
     }
-    // the kiosk owner should add extensions
-    public fun add_extensions(
-        _: &AdminCap,
-        share: &ListedTypes,
-        self: &mut Kiosk,
-        cap_id: ID,
-        permissions: u128,
-        ctx: &mut TxContext
-        ) { 
-            let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id); 
-            let witness = NotaryKioskExtWitness {};
+    // // the kiosk owner should add extensions
+    // public fun add_extensions(
+    //     _: &AdminCap,
+    //     share: &ListedTypes,
+    //     self: &mut Kiosk,
+    //     cap_id: ID,
+    //     permissions: u128,
+    //     ctx: &mut TxContext
+    //     ) { 
+    //         let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id); 
+    //         let witness = NotaryKioskExtWitness {};
 
-            ke::add<NotaryKioskExtWitness>(witness, self, kiosk_cap, permissions, ctx);
-        }
+    //         ke::add<NotaryKioskExtWitness>(witness, self, kiosk_cap, permissions, ctx);
+    //     }
     // Users can create asset
     public fun create_asset(
         type: String,
         price: u64,
         shared: &mut ListedTypes,
+        policy: &TransferPolicy<Asset>,
         kiosk: &mut Kiosk,
+        cap_id: ID,
         ctx :&mut TxContext,
         ) {
         assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
 
         let asset = assets::create_asset(type, price, ctx);
+        let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
 
-        place_in_extension(kiosk, asset);  
+        kiosk::lock(kiosk, kiosk_cap, policy, asset);  
     }
     // admin can create new_policy for sales or renting operations. 
     public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
@@ -127,15 +130,15 @@ module notary::assets_type {
         transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);
     } 
-    // admin can approve the asset. Means that it will be removing from extensions and placing in kiosk 
-    public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
-        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
-        let asset = bag::remove<ID, Asset>(bag_, id);
-        // set the asset.approve to true 
-        assets::approve_asset(&mut asset);
+    // // admin can approve the asset. Means that it will be removing from extensions and placing in kiosk 
+    // public fun approve(_: &AdminCap, kiosk: &mut Kiosk, policy: &TransferPolicy<Asset>, id: ID) {
+    //     let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
+    //     let asset = bag::remove<ID, Asset>(bag_, id);
+    //     // set the asset.approve to true 
+    //     assets::approve_asset(&mut asset);
 
-        ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
-    }
+    //     ke::place<NotaryKioskExtWitness, Asset>(NotaryKioskExtWitness{}, kiosk, asset, policy);  
+    // }
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
     public fun list_with_purchase(
         share: &mut ListedTypes,

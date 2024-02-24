@@ -23,27 +23,6 @@ module notary::helpers {
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
 
-    public fun helper_create_asset(scenario: &mut Scenario, sender: address) {
-        // create a Asset object
-        next_tx(scenario, sender);
-        {
-            let listed_shared = ts::take_shared<ListedTypes>(scenario);
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let price: u64 = 10000;
-            let type = string::utf8(b"House");
-
-            at::create_asset(
-                type,
-                price,
-        &mut listed_shared,
-         &mut kiosk,
-           ts::ctx(scenario));
-
-            ts::return_shared(kiosk);
-            ts::return_shared(listed_shared);
-        };
-    }
-    
     public fun helper_add_types(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {

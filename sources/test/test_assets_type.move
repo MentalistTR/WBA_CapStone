@@ -11,7 +11,6 @@ module notary::test_assets_type {
     use sui::coin::{mint_for_testing};
     use sui::coin::{Self, Coin};
     
-
     use std::string::{Self, String};
     use std::vector::{Self};
     use std::debug;
@@ -19,7 +18,7 @@ module notary::test_assets_type {
 
     use notary::assets::{Self, Asset};
 
-    use notary::helpers::{init_test_helper, helper_add_types, helper_create_asset,
+    use notary::helpers::{init_test_helper, helper_add_types,
     helper_new_policy};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
@@ -86,56 +85,8 @@ module notary::test_assets_type {
         };
         let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
        
-        // add extensions to kiosk1 for place any asset
-        next_tx(scenario, ADMIN);
-        {   
-            let kiosk1_ = ts::created(&kiosk1_data);
-            let kiosk1_deleted = ts::deleted(&kiosk1_data);
-
-            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
-            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
-
-            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-
-            at::add_extensions(
-                &admin_cap,
-                &shared,
-                &mut kiosk1_shared,
-                *kiosk_cap,
-                01,
-                ts::ctx(scenario)
-            );
-            ts::return_shared(shared);
-            ts::return_shared(kiosk1_shared);
-            ts::return_to_sender(scenario, admin_cap);
-        };
-        // add extensions to kiosk2 for place any asset
-        next_tx(scenario, ADMIN);
-        {   
-            let kiosk2_created = ts::created(&kiosk2_data);
-            let kiosk2_deleted = ts::deleted(&kiosk2_data);
-
-            let kiosk_cap = vector::borrow(&kiosk2_deleted, 0);
-            let kiosk2_id = vector::borrow(&kiosk2_created, 0); 
-
-            let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-
-            at::add_extensions(
-                &admin_cap,
-                &shared,
-                &mut kiosk2_shared,
-                *kiosk_cap,
-                01,
-                ts::ctx(scenario)
-            );
-            ts::return_shared(shared);
-            ts::return_shared(kiosk2_shared);
-            ts::return_to_sender(scenario, admin_cap);
-        };
+        // admin should create an transferpolicy
+        helper_new_policy(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -144,8 +95,12 @@ module notary::test_assets_type {
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
-
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
+
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
             let price: u64 = 10000;
             let type = string::utf8(b"House");
 
@@ -153,12 +108,22 @@ module notary::test_assets_type {
                 type,
                 price,
         &mut listed_shared,
+        &policy,
          &mut kiosk1_shared,
+        *kiosk_cap,
            ts::ctx(scenario));
-      
+
+            let asset_id = object::last_created(ts::ctx(scenario));
+
+            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
+            ts::return_shared(policy);
+
+
         };
           let asset_id1 = object::last_created(ts::ctx(scenario));
 
@@ -169,8 +134,12 @@ module notary::test_assets_type {
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
-
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
+
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
             let price: u64 = 10000;
             let type = string::utf8(b"House");
 
@@ -178,71 +147,24 @@ module notary::test_assets_type {
                 type,
                 price,
         &mut listed_shared,
+        &policy,
          &mut kiosk1_shared,
-           ts::ctx(scenario));
+        *kiosk_cap,
+           ts::ctx(scenario)); 
+
+            let asset_id = object::last_created(ts::ctx(scenario));
+
+            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
+            ts::return_shared(policy);
         };
 
         let asset_id2 = object::last_created(ts::ctx(scenario));
 
-        // admin should create an transferpolicy
-        helper_new_policy(scenario);
-        // admin should approve Asset1 
-        next_tx(scenario, ADMIN);
-        {
-            let kiosk1_ = ts::created(&kiosk1_data);
-            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
-
-            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);   
-
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ =  asset_id1;
-
-            assert_eq(kiosk::has_item(&kiosk1_shared, id_), false);
-
-            at::approve(&admin_cap,&mut kiosk1_shared, &policy, id_);
-
-            assert_eq(kiosk::has_item(&kiosk1_shared, id_), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, id_), false);
-            assert_eq(kiosk::is_listed(&kiosk1_shared, id_), false);
-
-            ts::return_shared(policy);
-            ts::return_shared(kiosk1_shared);
-            ts::return_shared(shared);
-            ts::return_to_sender(scenario, admin_cap);
-    };
-   // admin should approve Asset2
-        next_tx(scenario, ADMIN);
-        {
-            let kiosk1_ = ts::created(&kiosk1_data);
-            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
-
-            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);   
-
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = asset_id2;
- 
-            assert_eq(kiosk::has_item(&kiosk1_shared, id_), false);
-
-            at::approve(&admin_cap,&mut kiosk1_shared, &policy, id_);
-
-            assert_eq(kiosk::has_item(&kiosk1_shared, id_), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, id_), false);
-            assert_eq(kiosk::is_listed(&kiosk1_shared, id_), false);
-
-            ts::return_shared(policy);
-            ts::return_shared(kiosk1_shared);
-            ts::return_shared(shared);
-            ts::return_to_sender(scenario, admin_cap);
-        }; 
         // TEST_ADDRESS1 Listing the asset 
         next_tx(scenario, TEST_ADDRESS1);
         {
@@ -259,7 +181,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
             assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);            
             
             at::list_with_purchase(
@@ -302,7 +224,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             let purchase_written = ts::deleted(&purchase_data);
-            let purch_cap = vector::borrow(&purchase_written,5);
+            let purch_cap = vector::borrow(&purchase_written,4);
 
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
@@ -420,7 +342,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             let purchase_written = ts::deleted(&purchase_data2);
-            let purch_cap = vector::borrow(&purchase_written,6);   
+            let purch_cap = vector::borrow(&purchase_written,3);   
 
             let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
