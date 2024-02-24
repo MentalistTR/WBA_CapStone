@@ -20,7 +20,7 @@ module notary::test_assets_type {
     use notary::assets::{Self, Asset};
 
     use notary::helpers::{init_test_helper, helper_add_types, helper_create_asset,
-    helper_approve, helper_new_policy};
+    helper_new_policy};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     
@@ -69,7 +69,7 @@ module notary::test_assets_type {
             let shared = ts::take_shared<ListedTypes>(scenario);
 
             at::create_kiosk(&mut shared, ts::ctx(scenario));
-
+          
             ts::return_shared(shared);
         };
         let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
@@ -148,13 +148,18 @@ module notary::test_assets_type {
         &mut listed_shared,
          &mut kiosk1_shared,
            ts::ctx(scenario));
+      
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
         };
+          let asset_id1 = object::last_created(ts::ctx(scenario));
+
         // create an asset 2 
         next_tx(scenario, TEST_ADDRESS1);
         {
+            // let last_id = object::last_created(ts::ctx(scenario));
+            // debug::print(&last_id);
             let kiosk1_ = ts::created(&kiosk1_data);
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
@@ -174,6 +179,7 @@ module notary::test_assets_type {
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
         };
+        let asset_id2 = object::last_created(ts::ctx(scenario));
         // admin should create an transferpolicy
         helper_new_policy(scenario);
         // admin should approve Asset1 
@@ -188,8 +194,7 @@ module notary::test_assets_type {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_asset_id(&shared, 0);
- 
+            let id_ =  asset_id1;
 
             assert_eq(kiosk::has_item(&kiosk1_shared, id_), false);
 
@@ -216,9 +221,8 @@ module notary::test_assets_type {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_asset_id(&shared, 1);
+            let id_ = asset_id2;
  
-
             assert_eq(kiosk::has_item(&kiosk1_shared, id_), false);
 
             at::approve(&admin_cap,&mut kiosk1_shared, &policy, id_);
@@ -242,7 +246,7 @@ module notary::test_assets_type {
 
             let shared = ts::take_shared<ListedTypes>(scenario);
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let asset_id = at::get_asset_id(&shared, 0);
+            let asset_id = asset_id1;
             let cap_id = at::get_cap_id(&shared, 0);
 
           
@@ -279,7 +283,7 @@ module notary::test_assets_type {
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let asset_id = at::get_asset_id(&shared, 0);
+            let asset_id = asset_id1;
             let purch_cap = at::get_purchase_cap(&shared, 0);
             let kiosk_cap = at::get_cap_id(&shared, 1);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
@@ -349,7 +353,7 @@ module notary::test_assets_type {
 
             let shared = ts::take_shared<ListedTypes>(scenario);
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let asset_id = at::get_asset_id(&shared, 0);
+            let asset_id = asset_id1;
             let cap_id = at::get_cap_id(&shared, 1);
 
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), true);
@@ -386,7 +390,7 @@ module notary::test_assets_type {
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let asset_id = at::get_asset_id(&shared, 0);
+            let asset_id = asset_id1;
             let purch_cap = at::get_purchase_cap(&shared, 1);
             let kiosk_cap = at::get_cap_id(&shared, 0);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));

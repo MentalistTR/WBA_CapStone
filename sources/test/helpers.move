@@ -7,8 +7,7 @@ module notary::helpers {
     use sui::transfer_policy::{TransferPolicy};
     use sui::test_utils::{assert_eq};
     use sui::object::{ID};
-
-
+    
     use std::string::{Self};
     // use std::option::{Self};
     // use std::debug;
@@ -79,33 +78,6 @@ module notary::helpers {
             ts::return_shared(publisher_share);
         };
     }
-
-    public fun helper_approve(scenario: &mut Scenario, index: u64) {
-     next_tx(scenario, ADMIN);
-        {   
-            let shared = ts::take_shared<ListedTypes>(scenario);
-            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            let kiosk = ts::take_shared<Kiosk>(scenario);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let id_ = at::get_asset_id(&shared, index);
- 
-
-            assert_eq(kiosk::has_item(&kiosk, id_), false);
-
-            at::approve(&admin_cap,&mut kiosk, &policy, id_);
-
-            assert_eq(kiosk::has_item(&kiosk, id_), true);
-            assert_eq(kiosk::is_locked(&kiosk, id_), false);
-            assert_eq(kiosk::is_listed(&kiosk, id_), false);
-
-            ts::return_shared(policy);
-            ts::return_shared(kiosk);
-            ts::return_shared(shared);
-            ts::return_to_sender(scenario, admin_cap);
-
-    };
-    }
-
 
     public fun init_test_helper() : ts::Scenario{
        let owner: address = @0xA;

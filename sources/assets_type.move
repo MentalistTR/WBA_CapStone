@@ -21,10 +21,8 @@ module notary::assets_type {
     use sui::table::{Self, Table}; 
     use sui::coin::{Coin};
     use sui::sui::SUI;
-    
-    // use notary::lira_stable_coin::{LIRA_STABLE_COIN};
 
-     use notary::assets::{Self, Asset};
+    use notary::assets::{Self, Asset};
 
     // =================== Errors ===================
 
@@ -41,7 +39,6 @@ module notary::assets_type {
         types: vector<String>,
         kiosk_caps: Table<ID, KioskOwnerCap>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
-        asset_id: vector<ID>, // FIXME: Delete me !!
         kiosk_id: vector<ID> , // FIXME: Delete me !!
         purchase_id: vector<ID> // FIXME: Delete me !!
     }
@@ -68,7 +65,6 @@ module notary::assets_type {
             types: vector::empty(),
             kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
-            asset_id: vector::empty(),  // FIXME: Delete me !!
             kiosk_id: vector::empty(),  // FIXME: Delete me !!
             purchase_id: vector::empty()  // FIXME: Delete me !!
         });
@@ -122,9 +118,8 @@ module notary::assets_type {
         ctx :&mut TxContext,
         ) {
         assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
-        let asset = assets::create_asset(type, price, ctx);
 
-        vector::push_back(&mut shared.asset_id, assets::borrow_id(&asset));  // FIXME: Delete me  !!!! 
+        let asset = assets::create_asset(type, price, ctx);
 
         place_in_extension(kiosk, asset);  
     }
@@ -244,12 +239,7 @@ module notary::assets_type {
         let witness = NotaryKioskExtWitness {};
         witness
     }
-    #[test_only]
-     // return id of asset 
-     public fun get_asset_id(shared: &ListedTypes, index: u64) : ID {
-        let asset_id = vector::borrow(&shared.asset_id, index);
-        *asset_id
-     }
+    
     #[test_only]
      // return id of kiosk_cap 
      public fun get_cap_id(shared: &ListedTypes, index: u64) : ID {
