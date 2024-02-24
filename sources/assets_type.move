@@ -39,7 +39,6 @@ module notary::assets_type {
         types: vector<String>,
         kiosk_caps: Table<ID, KioskOwnerCap>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
-        kiosk_id: vector<ID> , // FIXME: Delete me !!
         purchase_id: vector<ID> // FIXME: Delete me !!
     }
     
@@ -65,7 +64,6 @@ module notary::assets_type {
             types: vector::empty(),
             kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
-            kiosk_id: vector::empty(),  // FIXME: Delete me !!
             purchase_id: vector::empty()  // FIXME: Delete me !!
         });
         // define the publisher
@@ -88,8 +86,6 @@ module notary::assets_type {
     // Users will create kiosk and protocol will store these caps in share object
     public fun create_kiosk(share: &mut ListedTypes, ctx: &mut TxContext) {
         let(kiosk, kiosk_cap) = kiosk::new(ctx);
-
-        vector::push_back(&mut share.kiosk_id, object::id(&kiosk_cap)); // FIXME: Delete me !!
 
         transfer::public_share_object(kiosk);
 
@@ -239,20 +235,7 @@ module notary::assets_type {
         let witness = NotaryKioskExtWitness {};
         witness
     }
-    
     #[test_only]
-     // return id of kiosk_cap 
-     public fun get_cap_id(shared: &ListedTypes, index: u64) : ID {
-        let kiosk_id = vector::borrow(&shared.kiosk_id, index);
-        *kiosk_id
-     }
-     #[test_only]
-     // get kiosk_cap
-     public fun get_kiosk_cap(shared: &ListedTypes, index: u64) : ID {
-        let cap = vector::borrow(&shared.kiosk_id, index);
-        *cap
-     }
-       #[test_only]
      // get kiosk_cap
      public fun get_purchase_cap(shared: &ListedTypes, index: u64) : ID {
         let cap = vector::borrow(&shared.purchase_id, index);
