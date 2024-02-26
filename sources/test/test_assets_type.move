@@ -107,11 +107,9 @@ module notary::test_assets_type {
 
             at::create_asset(
                 type,
-                price,
         &mut listed_shared,
         &policy,
          &mut kiosk1_shared,
-        *kiosk_cap,
            ts::ctx(scenario));
 
             let asset_id = object::last_created(ts::ctx(scenario));
@@ -146,11 +144,9 @@ module notary::test_assets_type {
 
             at::create_asset(
                 type,
-                price,
         &mut listed_shared,
         &policy,
          &mut kiosk1_shared,
-        *kiosk_cap,
            ts::ctx(scenario)); 
 
             let asset_id = object::last_created(ts::ctx(scenario));
@@ -185,8 +181,8 @@ module notary::test_assets_type {
                 &admin_cap,
                 &listed_shared,
                 &mut kiosk1_shared,
-                *kiosk_cap,
-                asset_id1
+                asset_id1,
+                TEST_ADDRESS1
             );
 
             ts::return_shared(listed_shared);
@@ -208,12 +204,12 @@ module notary::test_assets_type {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
 
-            at::approve(
+           at::approve(
                 &admin_cap,
                 &listed_shared,
                 &mut kiosk1_shared,
-                *kiosk_cap,
-                asset_id2
+                asset_id1,
+                TEST_ADDRESS1
             );
 
             ts::return_shared(listed_shared);
@@ -238,13 +234,12 @@ module notary::test_assets_type {
             at::new_property(
                 &mut listed_shared,
                 &mut kiosk1_shared,
-                *kiosk_cap,
                 asset_id1,
                 size,
                 number,
                 ts::ctx(scenario)  
             );
-            let kiosk_cap = at::get_kiosk_cap(&listed_shared, *kiosk_cap);
+            let kiosk_cap = at::get_kiosk_cap(&listed_shared, ts::ctx(scenario) );
 
             let item = kiosk::borrow<Asset>(&kiosk1_shared, kiosk_cap, asset_id1);
 
@@ -273,8 +268,8 @@ module notary::test_assets_type {
                 &admin_cap,
                 &listed_shared,
                 &mut kiosk1_shared,
-                *kiosk_cap,
-                asset_id1
+                asset_id1,
+                TEST_ADDRESS1
             );
 
             ts::return_shared(listed_shared);
@@ -304,7 +299,6 @@ module notary::test_assets_type {
             at::list_with_purchase(
                 &mut shared,
                 &mut kiosk1_shared,
-                *kiosk_cap,
                 asset_id,
                 10000,
                 ts::ctx(scenario)
@@ -354,7 +348,6 @@ module notary::test_assets_type {
                 &mut shared,
                 &policy,
                 *purch_cap,
-                *kiosk2_cap,
                 payment,
                 ts::ctx(scenario)
             );
@@ -383,7 +376,6 @@ module notary::test_assets_type {
             let profit = at::withdraw_profits(
                 &mut kiosk1_shared,
                 &shared,
-                *kiosk_cap,
                 option::some(10000),
                 ts::ctx(scenario)
                 );
@@ -425,7 +417,6 @@ module notary::test_assets_type {
             at::list_with_purchase(
                 &mut shared,
                 &mut kiosk2_shared,
-                *kiosk_cap,
                 asset_id,
                 10000,
                 ts::ctx(scenario)
@@ -473,7 +464,6 @@ module notary::test_assets_type {
                 &mut shared,
                 &policy,
                 *purch_cap,
-                *kiosk_cap,
                 payment,
                 ts::ctx(scenario)
             );

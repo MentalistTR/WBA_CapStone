@@ -38,7 +38,7 @@ module notary::assets_type {
     struct ListedTypes has key, store {
         id: UID,
         types: vector<String>,
-        kiosk_caps: Table<ID, KioskOwnerCap>,
+        kiosk_caps: Table<address, KioskOwnerCap>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>
     }
     
@@ -59,7 +59,7 @@ module notary::assets_type {
         transfer::share_object(ListedTypes{
             id:object::new(ctx),
             types: vector::empty(),
-            kiosk_caps: table::new<ID, KioskOwnerCap>(ctx),
+            kiosk_caps: table::new<address, KioskOwnerCap>(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
         });
         // define the publisher
@@ -85,23 +85,21 @@ module notary::assets_type {
 
         transfer::public_share_object(kiosk);
 
-        table::add(&mut share.kiosk_caps, object::id(&kiosk_cap), kiosk_cap);
+        table::add(&mut share.kiosk_caps, sender(ctx), kiosk_cap);
     }
 
     // Users can create asset
     public fun create_asset(
         type: String,
-        price: u64,
         shared: &mut ListedTypes,
         policy: &TransferPolicy<Asset>,
         kiosk: &mut Kiosk,
-        cap_id: ID,
         ctx :&mut TxContext,
         ) {
             assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
 
-            let asset = assets::create_asset(type, price, ctx);
-            let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
+            let asset = assets::create_asset(type, ctx);
+            let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
 
             kiosk::lock(kiosk, kiosk_cap, policy, asset);  
     }
@@ -109,7 +107,6 @@ module notary::assets_type {
     public fun new_property(
         share: &ListedTypes,
         kiosk: &mut Kiosk,
-        cap_id: ID,
         item_id: ID,
         property_name: String,
         property: String,
@@ -117,7 +114,7 @@ module notary::assets_type {
         ) {
             // check the kiosk owner
             assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-            let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+            let kiosk_cap = table::borrow(&share.kiosk_caps, sender(ctx));
             let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item_id);
             // add the new property 
             assets::new_property(item, property_name, property);
@@ -137,9 +134,9 @@ module notary::assets_type {
     }
 
     // admin must approve the asset
-    public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, cap_id: ID, item: ID) {
+    public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, item: ID, user: address) {
         // take the kiosk cap from table 
-        let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+        let kiosk_cap = table::borrow(&share.kiosk_caps, user);
         // take the item from kiosk
         let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item);
         // approve the asset.
@@ -150,14 +147,13 @@ module notary::assets_type {
     public fun list_with_purchase(
         share: &mut ListedTypes,
         kiosk: &mut Kiosk,
-        cap_id: ID,
         asset_id: ID,
         price: u64,
         ctx: &mut TxContext) {
             // check the kiosk owner
             assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
             // set the kiosk cap 
-            let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+            let kiosk_cap = table::borrow(&share.kiosk_caps, sender(ctx));
             // borrow the asset 
             let asset = kiosk::borrow<Asset>(kiosk, kiosk_cap, asset_id);
             assert!(assets::is_approved(asset), ERROR_NOT_APPROVED);
@@ -180,7 +176,6 @@ module notary::assets_type {
         share: &mut ListedTypes,
         policy: &TransferPolicy<Asset>,
         purchase_cap: ID,
-        kiosk_cap: ID,
         payment: Coin<SUI>,
         ctx: &mut TxContext
         ) {
@@ -197,21 +192,20 @@ module notary::assets_type {
             // be sure that sender is the owner of kiosk
             assert!(kiosk::owner(kiosk2) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
             // place the asset into the kiosk
-            let kiosk_cap = table::borrow(&share.kiosk_caps, kiosk_cap);
+            let kiosk_cap = table::borrow(&share.kiosk_caps, sender(ctx));
             kiosk::place(kiosk2, kiosk_cap, item);
         }
     // Kiosk owner's can withdraw the profits
     public fun withdraw_profits(
         kiosk: &mut Kiosk,
         shared: &ListedTypes,
-        cap_id: ID,
         amount: Option<u64>,
         ctx: &mut TxContext
     ) : Coin<SUI> {
         // check the owner of kiosk
         assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // set the kiosk_cap
-        let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
+        let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
         // take profits from kiosk
         let profits = kiosk::withdraw(kiosk, kiosk_cap, amount, ctx);
 
@@ -233,8 +227,8 @@ module notary::assets_type {
     }
     #[test_only]
     // call the init function
-    public fun get_kiosk_cap(share: &ListedTypes, id: ID) : &KioskOwnerCap  {
-       let cap = table::borrow(&share.kiosk_caps, id);
+    public fun get_kiosk_cap(share: &ListedTypes, ctx: &mut TxContext) : &KioskOwnerCap  {
+       let cap = table::borrow(&share.kiosk_caps, sender(ctx));
        cap   
     }
 

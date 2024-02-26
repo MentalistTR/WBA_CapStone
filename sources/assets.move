@@ -39,7 +39,6 @@ module notary::assets {
     // create any asset and place it to kiosk. 
     public fun create_asset(
         type: String,
-        price: u64,
         ctx :&mut TxContext,
         ) : Asset {
         
