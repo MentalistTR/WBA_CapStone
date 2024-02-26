@@ -7,8 +7,7 @@ module notary::assets_type {
     use std::string::{String};
     use std::vector;
     use std::option::{Option};
-   // use std::type_name::{TypeName};
-   // use std::debug;
+  //use std::debug;
 
     use sui::tx_context::{Self, TxContext, sender};
     use sui::object::{Self, UID, ID};
@@ -90,9 +89,9 @@ module notary::assets_type {
 
     // Users can create asset
     public fun create_asset(
-        type: String,
         shared: &mut ListedTypes,
         kiosk: &mut Kiosk,
+        type: String,
         ctx :&mut TxContext,
         ) {
             assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
@@ -214,7 +213,7 @@ module notary::assets_type {
     // =================== Helper Functions ===================
     
     // return the publisher
-     public fun get_publisher(shared: &AssetsTypePublisher) : &Publisher {
+    fun get_publisher(shared: &AssetsTypePublisher) : &Publisher {
         &shared.publisher
      }
 

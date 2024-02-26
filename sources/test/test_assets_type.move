@@ -105,9 +105,9 @@ module notary::test_assets_type {
             let type = string::utf8(b"House");
 
             at::create_asset(
-                type,
         &mut listed_shared,
          &mut kiosk1_shared,
+                              type,
            ts::ctx(scenario));
 
             let asset_id = object::last_created(ts::ctx(scenario));
@@ -137,10 +137,10 @@ module notary::test_assets_type {
             let type = string::utf8(b"House");
 
             at::create_asset(
-                type,
         &mut listed_shared,
          &mut kiosk1_shared,
-           ts::ctx(scenario)); 
+                              type,
+           ts::ctx(scenario));
 
             let asset_id = object::last_created(ts::ctx(scenario));
 
