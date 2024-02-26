@@ -92,7 +92,6 @@ module notary::assets_type {
     public fun create_asset(
         type: String,
         shared: &mut ListedTypes,
-        policy: &TransferPolicy<Asset>,
         kiosk: &mut Kiosk,
         ctx :&mut TxContext,
         ) {
@@ -101,7 +100,7 @@ module notary::assets_type {
             let asset = assets::create_asset(type, ctx);
             let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
 
-            kiosk::lock(kiosk, kiosk_cap, policy, asset);  
+            kiosk::place(kiosk, kiosk_cap, asset);  
     }
     // Users can make new property 
     public fun new_property(

@@ -96,7 +96,6 @@ module notary::test_assets_type {
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
 
             let kiosk1_deleted = ts::deleted(&kiosk1_data);
@@ -108,21 +107,17 @@ module notary::test_assets_type {
             at::create_asset(
                 type,
         &mut listed_shared,
-        &policy,
          &mut kiosk1_shared,
            ts::ctx(scenario));
 
             let asset_id = object::last_created(ts::ctx(scenario));
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
             assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
-            ts::return_shared(policy);
-
-
         };
           let asset_id1 = object::last_created(ts::ctx(scenario));
 
@@ -133,7 +128,6 @@ module notary::test_assets_type {
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
 
             let kiosk1_deleted = ts::deleted(&kiosk1_data);
@@ -145,19 +139,17 @@ module notary::test_assets_type {
             at::create_asset(
                 type,
         &mut listed_shared,
-        &policy,
          &mut kiosk1_shared,
            ts::ctx(scenario)); 
 
             let asset_id = object::last_created(ts::ctx(scenario));
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
             assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(listed_shared);
-            ts::return_shared(policy);
         };
 
         let asset_id2 = object::last_created(ts::ctx(scenario));
@@ -293,7 +285,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
             assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);            
             
             at::list_with_purchase(
