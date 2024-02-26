@@ -30,7 +30,6 @@ module notary::assets {
         id: UID,
         owner: ID,
         type: String,
-        price: u64,
         approve: bool,
         on_rent: bool,
         rules: VecSet<TypeName>,
@@ -50,13 +49,16 @@ module notary::assets {
             id:id,
             owner:inner,
             type: type,
-            price: price,
             on_rent: false,
             approve: false,
             rules: vec_set::empty(),
             property: vec_map::empty(),
         };
         asset
+    }
+
+    public fun new_property(item: &mut Asset, property_name: String, property: String) {
+        vec_map::insert(&mut item.property, property_name, property);
     }
 
 
@@ -72,6 +74,9 @@ module notary::assets {
 
     public fun approve_asset(asset: &mut Asset)  {
         asset.approve = true;
+    }
+    public fun disapprove_asset(asset: &mut Asset) {
+        asset.approve = false;
     }
 
     public fun disable_approve(asset:&mut Asset)  {

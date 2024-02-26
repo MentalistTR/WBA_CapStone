@@ -100,12 +100,27 @@ module notary::assets_type {
         cap_id: ID,
         ctx :&mut TxContext,
         ) {
-        assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
+            assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
 
-        let asset = assets::create_asset(type, price, ctx);
-        let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
+            let asset = assets::create_asset(type, price, ctx);
+            let kiosk_cap = table::borrow(&shared.kiosk_caps, cap_id);
 
-        kiosk::lock(kiosk, kiosk_cap, policy, asset);  
+            kiosk::lock(kiosk, kiosk_cap, policy, asset);  
+    }
+    public fun new_property(
+        share: &ListedTypes,
+        kiosk: &mut Kiosk,
+        cap_id: ID,
+        item_id: ID,
+        property_name: String,
+        property: String) {
+
+            let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+            let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item_id);
+            // add the new property 
+            assets::new_property(item, property_name, property);
+            // if the user change asset propertys. It should be removed.
+            assets::disapprove_asset(item);
     }
 
     // admin can create new_policy for sales or renting operations. 
