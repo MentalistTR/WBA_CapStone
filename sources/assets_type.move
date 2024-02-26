@@ -50,10 +50,7 @@ module notary::assets_type {
 
     /// Publisher capability object
     struct AssetsTypePublisher has key { id: UID, publisher: Publisher }
-
-    // witness for kiosk
-    struct NotaryKioskExtWitness has drop {}
-
+    
     // =================== Initializer ===================
 
     fun init(otw: ASSETS_TYPE, ctx: &mut TxContext) {
@@ -107,6 +104,7 @@ module notary::assets_type {
 
             kiosk::lock(kiosk, kiosk_cap, policy, asset);  
     }
+    // Users can make new property 
     public fun new_property(
         share: &ListedTypes,
         kiosk: &mut Kiosk,
@@ -228,12 +226,6 @@ module notary::assets_type {
     // call the init function
     public fun test_init(ctx: &mut TxContext) {
         init(ASSETS_TYPE {}, ctx);
-    }
-     #[test_only]
-    // call the init function
-    public fun test_witness() : NotaryKioskExtWitness  {
-        let witness = NotaryKioskExtWitness {};
-        witness
     }
     #[test_only]
     // call the init function
