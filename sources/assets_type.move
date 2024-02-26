@@ -111,8 +111,11 @@ module notary::assets_type {
         cap_id: ID,
         item_id: ID,
         property_name: String,
-        property: String) {
-
+        property: String,
+        ctx: &mut TxContext
+        ) {
+            // check the kiosk owner
+            assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
             let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
             let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item_id);
             // add the new property 

@@ -241,7 +241,8 @@ module notary::test_assets_type {
                 *kiosk_cap,
                 asset_id1,
                 size,
-                number  
+                number,
+                ts::ctx(scenario)  
             );
             let kiosk_cap = at::get_kiosk_cap(&listed_shared, *kiosk_cap);
 
