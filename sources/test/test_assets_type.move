@@ -165,6 +165,62 @@ module notary::test_assets_type {
 
         let asset_id2 = object::last_created(ts::ctx(scenario));
 
+        // ADMIN should approve the asset 1 before users list on kiosk 
+        next_tx(scenario, ADMIN);
+        {
+
+            let kiosk1_ = ts::created(&kiosk1_data);
+            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+            
+
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+
+            at::approve(
+                &admin_cap,
+                &listed_shared,
+                &mut kiosk1_shared,
+                *kiosk_cap,
+                asset_id1
+            );
+
+            ts::return_shared(listed_shared);
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+
+        // ADMIN should approve the asset 2 before users list on kiosk 
+        next_tx(scenario, ADMIN);
+        {
+            let kiosk1_ = ts::created(&kiosk1_data);
+            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+            
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+
+            at::approve(
+                &admin_cap,
+                &listed_shared,
+                &mut kiosk1_shared,
+                *kiosk_cap,
+                asset_id2
+            );
+
+            ts::return_shared(listed_shared);
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+
         // TEST_ADDRESS1 Listing the asset 
         next_tx(scenario, TEST_ADDRESS1);
         {
