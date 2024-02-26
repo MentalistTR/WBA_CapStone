@@ -72,6 +72,10 @@ module notary::assets {
         asset.approve
     }
 
+    public fun is_renting(asset: &Asset) : bool {
+        asset.on_rent
+    }
+
     public fun approve_asset(asset: &mut Asset)  {
         asset.approve = true;
     }

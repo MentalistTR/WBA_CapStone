@@ -30,6 +30,7 @@ module notary::assets_type {
     const ERROR_INVALID_TYPE: u64 = 1;
     const ERROR_NOT_APPROVED: u64 = 2;
     const ERROR_NOT_KIOSK_OWNER: u64 = 3;
+    const ERROR_ASSET_IN_RENTING: u64 = 4;
 
     // =================== Structs ===================
 
@@ -160,7 +161,7 @@ module notary::assets_type {
             // borrow the asset 
             let asset = kiosk::borrow<Asset>(kiosk, kiosk_cap, asset_id);
             assert!(assets::is_approved(asset), ERROR_NOT_APPROVED);
-
+            assert!(!assets::is_renting(asset), ERROR_ASSET_IN_RENTING);
             let purch_cap = kiosk::list_with_purchase_cap<Asset>(
                 kiosk,
                 kiosk_cap,
@@ -170,7 +171,7 @@ module notary::assets_type {
             );
             // store the purchase_cap in the protocol
             table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
-        }
+    }
 
     // User2 can buy another person assets and it has to be directy placed in his kiosk. 
     public fun purchase_with_cap(
