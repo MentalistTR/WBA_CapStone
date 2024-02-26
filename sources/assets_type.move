@@ -28,7 +28,7 @@ module notary::assets_type {
 
     // It can be only one type 
     const ERROR_INVALID_TYPE: u64 = 1;
-    //const ERROR_NOT_APPROVED: u64 = 2;
+    const ERROR_NOT_APPROVED: u64 = 2;
     const ERROR_NOT_KIOSK_OWNER: u64 = 3;
 
     // =================== Structs ===================
@@ -107,6 +107,7 @@ module notary::assets_type {
 
         kiosk::lock(kiosk, kiosk_cap, policy, asset);  
     }
+
     // admin can create new_policy for sales or renting operations. 
     public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
         // set the publisher
@@ -116,7 +117,17 @@ module notary::assets_type {
         // transfer the objects 
         transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);
-    } 
+    }
+
+    // admin must approve the asset
+    public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, cap_id: ID, item: ID) {
+        // take the kiosk cap from table 
+        let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+        // take the item from kiosk
+        let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item);
+        // approve the asset.
+        assets::approve_asset(item);
+    }
 
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
     public fun list_with_purchase(
@@ -130,6 +141,9 @@ module notary::assets_type {
             assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
             // set the kiosk cap 
             let kiosk_cap = table::borrow(&share.kiosk_caps, cap_id);
+            // borrow the asset 
+            let asset = kiosk::borrow<Asset>(kiosk, kiosk_cap, asset_id);
+            assert!(assets::is_approved(asset), ERROR_NOT_APPROVED);
 
             let purch_cap = kiosk::list_with_purchase_cap<Asset>(
                 kiosk,
@@ -141,6 +155,7 @@ module notary::assets_type {
             // store the purchase_cap in the protocol
             table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
         }
+
     // User2 can buy another person assets and it has to be directy placed in his kiosk. 
     public fun purchase_with_cap(
         kiosk1: &mut Kiosk,
@@ -168,7 +183,7 @@ module notary::assets_type {
             let kiosk_cap = table::borrow(&share.kiosk_caps, kiosk_cap);
             kiosk::place(kiosk2, kiosk_cap, item);
         }
-    
+    // Kiosk owner's can withdraw the profits
     public fun withdraw_profits(
         kiosk: &mut Kiosk,
         shared: &ListedTypes,
@@ -187,22 +202,13 @@ module notary::assets_type {
     }
 
     // =================== Helper Functions ===================
-
-    // Helper function for when the asset created it will be automatically in the extension
-    fun place_in_extension(
-        kiosk: &mut Kiosk,
-        asset: Asset,
-    ) {
-        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(NotaryKioskExtWitness{}, kiosk);
-        bag::add<ID, Asset>(bag_, object::id(&asset), asset);
-    }
-
+    
     // return the publisher
      public fun get_publisher(shared: &AssetsTypePublisher) : &Publisher {
         &shared.publisher
      }
-    // =================== Test Only ===================
 
+    // =================== Test Only ===================
     #[test_only]
     // call the init function
     public fun test_init(ctx: &mut TxContext) {
