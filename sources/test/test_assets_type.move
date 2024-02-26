@@ -10,6 +10,7 @@ module notary::test_assets_type {
     use sui::sui::SUI;
     use sui::coin::{mint_for_testing};
     use sui::coin::{Self, Coin};
+    use sui::table;
     
     use std::string::{Self, String};
     use std::vector::{Self};
@@ -168,7 +169,6 @@ module notary::test_assets_type {
         // ADMIN should approve the asset 1 before users list on kiosk 
         next_tx(scenario, ADMIN);
         {
-
             let kiosk1_ = ts::created(&kiosk1_data);
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
             
@@ -214,6 +214,66 @@ module notary::test_assets_type {
                 &mut kiosk1_shared,
                 *kiosk_cap,
                 asset_id2
+            );
+
+            ts::return_shared(listed_shared);
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+        // Asset 1 's owner make new property for his own asset
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let kiosk1_ = ts::created(&kiosk1_data);
+            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+            
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+
+            let size = string::utf8(b"size");
+            let number = string::utf8(b"144m2");
+
+            at::new_property(
+                &mut listed_shared,
+                &mut kiosk1_shared,
+                *kiosk_cap,
+                asset_id1,
+                size,
+                number  
+            );
+            let kiosk_cap = at::get_kiosk_cap(&listed_shared, *kiosk_cap);
+
+            let item = kiosk::borrow<Asset>(&kiosk1_shared, kiosk_cap, asset_id1);
+
+            assert_eq(assets::is_approved(item), false);
+
+            ts::return_shared(kiosk1_shared);
+            ts::return_shared(listed_shared);
+        };
+
+        // ADMIN should approve the asset 1 before users list on kiosk 
+        next_tx(scenario, ADMIN);
+        {
+            let kiosk1_ = ts::created(&kiosk1_data);
+            let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+            
+
+            let kiosk1_deleted = ts::deleted(&kiosk1_data);
+            let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
+
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+
+            at::approve(
+                &admin_cap,
+                &listed_shared,
+                &mut kiosk1_shared,
+                *kiosk_cap,
+                asset_id1
             );
 
             ts::return_shared(listed_shared);
@@ -280,7 +340,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             let purchase_written = ts::deleted(&purchase_data);
-            let purch_cap = vector::borrow(&purchase_written,4);
+            let purch_cap = vector::borrow(&purchase_written,3);
 
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
@@ -398,7 +458,7 @@ module notary::test_assets_type {
             let asset_id = asset_id1;
 
             let purchase_written = ts::deleted(&purchase_data2);
-            let purch_cap = vector::borrow(&purchase_written,3);   
+            let purch_cap = vector::borrow(&purchase_written,4);   
 
             let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));

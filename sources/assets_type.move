@@ -235,4 +235,11 @@ module notary::assets_type {
         let witness = NotaryKioskExtWitness {};
         witness
     }
+    #[test_only]
+    // call the init function
+    public fun get_kiosk_cap(share: &ListedTypes, id: ID) : &KioskOwnerCap  {
+       let cap = table::borrow(&share.kiosk_caps, id);
+       cap   
+    }
+
 }
