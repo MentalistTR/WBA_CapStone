@@ -76,6 +76,27 @@ module notary::assets_type {
         assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
+    // admin can create new_policy for sales or renting operations. 
+    public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
+        // set the publisher
+        let publisher = get_publisher(publish);
+        // create an transfer_policy and tp_cap
+        let (transfer_policy, tp_cap) = policy::new<Asset>(publisher, ctx);
+        // transfer the objects 
+        transfer::public_transfer(tp_cap, tx_context::sender(ctx));
+        transfer::public_share_object(transfer_policy);
+    }
+
+    // admin must approve the asset
+    public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, item: ID, user: address) {
+        // take the kiosk cap from table 
+        let kiosk_cap = table::borrow(&share.kiosk_caps, user);
+        // take the item from kiosk
+        let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item);
+        // approve the asset.
+        assets::approve_asset(item);
+    }
+    
     // Users will create kiosk and protocol will store these caps in share object
     public fun create_kiosk(share: &mut ListedTypes, ctx: &mut TxContext) {
         let(kiosk, kiosk_cap) = kiosk::new(ctx);
@@ -135,27 +156,6 @@ module notary::assets_type {
             // if the user change asset propertys. It should be removed.
             assets::disapprove_asset(item);
 
-    }
-
-    // admin can create new_policy for sales or renting operations. 
-    public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
-        // set the publisher
-        let publisher = get_publisher(publish);
-        // create an transfer_policy and tp_cap
-        let (transfer_policy, tp_cap) = policy::new<Asset>(publisher, ctx);
-        // transfer the objects 
-        transfer::public_transfer(tp_cap, tx_context::sender(ctx));
-        transfer::public_share_object(transfer_policy);
-    }
-
-    // admin must approve the asset
-    public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, item: ID, user: address) {
-        // take the kiosk cap from table 
-        let kiosk_cap = table::borrow(&share.kiosk_caps, user);
-        // take the item from kiosk
-        let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item);
-        // approve the asset.
-        assets::approve_asset(item);
     }
 
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
