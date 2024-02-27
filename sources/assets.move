@@ -55,9 +55,13 @@ module notary::assets {
         };
         asset
     }
-
+    // The owner of asset can make new property 
     public fun new_property(item: &mut Asset, property_name: String, property: String) {
         vec_map::insert(&mut item.property, property_name, property);
+    }
+    // The owner of asset can remove property 
+    public fun remove_property(item: &mut Asset, property_name: String) {
+        vec_map::remove(&mut item.property, &property_name);
     }
 
 

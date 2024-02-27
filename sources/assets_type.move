@@ -118,6 +118,25 @@ module notary::assets_type {
             assets::disapprove_asset(item);
     }
 
+    // Users can remove the property
+    public fun remove_property(
+        share: &ListedTypes,
+        kiosk: &mut Kiosk,
+        item_id: ID,
+        property_name: String,
+        ctx: &mut TxContext
+        ) {
+            // check the kiosk owner
+            assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+            let kiosk_cap = table::borrow(&share.kiosk_caps, sender(ctx));
+            let item = kiosk::borrow_mut<Asset>(kiosk, kiosk_cap, item_id);
+            // remove the property
+            assets::remove_property(item, property_name);
+            // if the user change asset propertys. It should be removed.
+            assets::disapprove_asset(item);
+
+    }
+
     // admin can create new_policy for sales or renting operations. 
     public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
         // set the publisher
