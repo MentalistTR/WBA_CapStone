@@ -21,7 +21,7 @@ module notary::assets {
     // === Friends ===
 
     friend notary::assets_type;
-    friend notary::test_assets_type;
+    
   
     // /// # Arguments
     // /// 
@@ -73,7 +73,7 @@ module notary::assets {
         asset.owner
     }
 
-    public(friend) fun is_approved(asset: &Asset) : bool {
+    public fun is_approved(asset: &Asset) : bool {
         asset.approve
     }
 
