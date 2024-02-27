@@ -91,20 +91,4 @@ module notary::assets {
     public(friend) fun disable_approve(asset:&mut Asset)  {
         asset.approve = false;
     }
-
-    // public(friend) fun transfer_asset(asset: Asset, owner: address) {
-    //     transfer::public_transfer(asset, owner);
-    // }
-    
-
-    // public fun get_accessory_vector_id(asset: &Asset) : ID {
-    //    let asd =  vector::borrow(&asset.property_id, 0);
-    //    *asd
-    // }
-
-    // public fun destructure_accessory(acc: Accessory) : (UID, ID, String) {
-    //     let Accessory {id, inner, property} = acc;
-    //     (id, inner, property)
-    // }
-
 }
