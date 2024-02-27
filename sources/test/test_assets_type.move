@@ -288,7 +288,7 @@ module notary::test_assets_type {
             assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
             assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);            
             
-            at::list_with_purchase(
+            at::list(
                 &mut shared,
                 &mut kiosk1_shared,
                 asset_id,
@@ -334,12 +334,12 @@ module notary::test_assets_type {
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), false);
 
-            at::purchase_with_cap(
+            at::purchase(
                 &mut kiosk1_shared,
                 &mut kiosk2_shared ,
                 &mut shared,
                 &policy,
-                *purch_cap,
+                asset_id1,
                 payment,
                 ts::ctx(scenario)
             );
@@ -406,7 +406,7 @@ module notary::test_assets_type {
             assert_eq(kiosk::is_locked(&kiosk2_shared, asset_id), false);
             assert_eq(kiosk::is_listed(&kiosk2_shared, asset_id), false);            
             
-            at::list_with_purchase(
+            at::list(
                 &mut shared,
                 &mut kiosk2_shared,
                 asset_id,
@@ -427,7 +427,6 @@ module notary::test_assets_type {
             let shared = ts::take_shared<ListedTypes>(scenario);
 
             let kiosk1_created = ts::created(&kiosk1_data);
-    
             let kiosk1_deleted = ts::deleted(&kiosk1_data);
 
             let kiosk1_id = vector::borrow(&kiosk1_created, 0); 
@@ -439,29 +438,25 @@ module notary::test_assets_type {
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let asset_id = asset_id1;
-
-            let purchase_written = ts::deleted(&purchase_data2);
-            let purch_cap = vector::borrow(&purchase_written,4);   
 
             let kiosk_cap = vector::borrow(&kiosk1_deleted, 1);
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
-            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), false);
-            assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), true);
+            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id1), false);
+            assert_eq(kiosk::has_item(&kiosk2_shared, asset_id1), true);
 
-            at::purchase_with_cap(
+            at::purchase(
                 &mut kiosk2_shared,
                 &mut kiosk1_shared ,
                 &mut shared,
                 &policy,
-                *purch_cap,
+                asset_id1,
                 payment,
                 ts::ctx(scenario)
             );
 
-            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-            assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), false);
+            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id1), true);
+            assert_eq(kiosk::has_item(&kiosk2_shared, asset_id1), false);
 
             ts::return_shared(policy);
             ts::return_shared(kiosk1_shared);

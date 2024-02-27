@@ -15,8 +15,6 @@ module notary::assets_type {
     use sui::package::{Self, Publisher};
     use sui::transfer_policy::{Self as policy, TransferPolicy};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
-    use sui::kiosk_extension::{Self as ke};
-    use sui::bag::{Self};
     use sui::table::{Self, Table}; 
     use sui::coin::{Coin};
     use sui::sui::SUI;
@@ -142,7 +140,7 @@ module notary::assets_type {
     }
 
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
-    public fun list_with_purchase(
+    public fun list(
         share: &mut ListedTypes,
         kiosk: &mut Kiosk,
         asset_id: ID,
@@ -156,33 +154,28 @@ module notary::assets_type {
             let asset = kiosk::borrow<Asset>(kiosk, kiosk_cap, asset_id);
             assert!(assets::is_approved(asset), ERROR_NOT_APPROVED);
             assert!(!assets::is_renting(asset), ERROR_ASSET_IN_RENTING);
-            let purch_cap = kiosk::list_with_purchase_cap<Asset>(
+            kiosk::list<Asset>(
                 kiosk,
                 kiosk_cap,
                 asset_id,
                 price,
-                ctx
-            );
-            // store the purchase_cap in the protocol
-            table::add(&mut share.purchase_cap, object::id(&purch_cap), purch_cap);
+            );     
     }
 
     // User2 can buy another person assets and it has to be directy placed in his kiosk. 
-    public fun purchase_with_cap(
+    public fun purchase(
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
         share: &mut ListedTypes,
         policy: &TransferPolicy<Asset>,
-        purchase_cap: ID,
+        asset_id: ID,
         payment: Coin<SUI>,
         ctx: &mut TxContext
         ) {
-            // remove the purchase_cap from table 
-            let purchase_cap = table::remove(&mut share.purchase_cap, purchase_cap);
             // purchase the asset from kiosk
-            let (item, request) = kiosk::purchase_with_cap(
+            let (item, request) = kiosk::purchase(
                 kiosk1,
-                purchase_cap,
+                asset_id,
                 payment
                 );
             // confirm the request. Destroye the hot potato
