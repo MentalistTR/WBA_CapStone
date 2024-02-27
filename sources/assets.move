@@ -16,10 +16,13 @@ module notary::assets {
     use sui::vec_map::{Self, VecMap};
     use std::type_name::{TypeName};
 
-
     use std::string::{String};
-    //use std::vector;
-    
+
+    // === Friends ===
+
+    friend notary::assets_type;
+    friend notary::test_assets_type;
+  
     // /// # Arguments
     // /// 
     // /// * `type ` - is the type of the asset such as house, car, plane
@@ -56,37 +59,36 @@ module notary::assets {
         asset
     }
     // The owner of asset can make new property 
-    public fun new_property(item: &mut Asset, property_name: String, property: String) {
+    public(friend) fun new_property(item: &mut Asset, property_name: String, property: String) {
         vec_map::insert(&mut item.property, property_name, property);
     }
     // The owner of asset can remove property 
-    public fun remove_property(item: &mut Asset, property_name: String) {
+    public(friend) fun remove_property(item: &mut Asset, property_name: String) {
         vec_map::remove(&mut item.property, &property_name);
     }
 
-
     // helper functions 
 
-    public fun borrow_id(asset: &Asset) : ID {
+    public(friend) fun borrow_id(asset: &Asset) : ID {
         asset.owner
     }
 
-    public fun is_approved(asset: &Asset) : bool {
+    public(friend) fun is_approved(asset: &Asset) : bool {
         asset.approve
     }
 
-    public fun is_renting(asset: &Asset) : bool {
+    public(friend) fun is_renting(asset: &Asset) : bool {
         asset.on_rent
     }
 
-    public fun approve_asset(asset: &mut Asset)  {
+    public(friend) fun approve_asset(asset: &mut Asset)  {
         asset.approve = true;
     }
-    public fun disapprove_asset(asset: &mut Asset) {
+    public(friend) fun disapprove_asset(asset: &mut Asset) {
         asset.approve = false;
     }
 
-    public fun disable_approve(asset:&mut Asset)  {
+    public(friend) fun disable_approve(asset:&mut Asset)  {
         asset.approve = false;
     }
 
