@@ -164,7 +164,8 @@ module notary::assets_type {
         kiosk: &mut Kiosk,
         asset_id: ID,
         price: u64,
-        ctx: &mut TxContext) {
+        ctx: &mut TxContext
+        ) {
             // check the kiosk owner
             assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
             // set the kiosk cap 
