@@ -1,19 +1,14 @@
 module notary::assets_renting {
 
     use std::string::{String};
-    use std::vector;
-    use std::option::{Option};
-  //use std::debug;
-
+    
     use sui::tx_context::{Self, TxContext, sender};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::package::{Self, Publisher};
-    use sui::transfer_policy::{Self as policy, TransferPolicy};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
+
+    // use sui::transfer_policy::{Self as policy, TransferPolicy};
+    // use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
     use sui::table::{Self, Table}; 
-    use sui::coin::{Coin};
-    use sui::sui::SUI;
 
     use notary::assets::{Self, Asset};
 
@@ -44,18 +39,15 @@ module notary::assets_renting {
         active: bool
     }
 
-
-
     // =================== Initializer ===================
 
     fun init(ctx: &mut TxContext) {
+        // share the Contracts
         transfer::share_object(Contracts{
             id: object::new(ctx),
             contracts: table::new(ctx),
             complaints: table::new(ctx)
         });
-
-
     }
 
     // =================== Functions ===================
