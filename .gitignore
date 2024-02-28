@@ -1,3 +1,4 @@
 /contracts/asset_operations/build
+/contracts/rules/build
 /build
 sui.log*

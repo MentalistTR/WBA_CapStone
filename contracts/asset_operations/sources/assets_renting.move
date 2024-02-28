@@ -2,26 +2,30 @@ module notary::assets_renting {
 
     use std::string::{String};
     
-    use sui::tx_context::{Self, TxContext, sender};
+    use sui::tx_context::{TxContext, sender};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-
+    use sui::kiosk::{Self, Kiosk, PurchaseCap};
+    use sui::table::{Self, Table};
+    use sui::transfer_policy::{Self as policy, TransferPolicy};
+    use sui::coin::{Self, Coin};
+    use sui::sui::SUI;
+    use sui::clock::{Clock, timestamp_ms}; 
     // use sui::transfer_policy::{Self as policy, TransferPolicy};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
-    use sui::table::{Self, Table}; 
 
     use notary::assets::{Self, Asset};
     use notary::assets_type::{Self as at, ListedTypes};
 
     // =================== Errors ===================
 
-    const ERROR_NOT_APPROVED: u64 = 2;
-    const ERROR_NOT_KIOSK_OWNER: u64 = 3;
-    const ERROR_ASSET_IN_RENTING: u64 = 4;
+    const ERROR_NOT_APPROVED: u64 = 1;
+    const ERROR_NOT_KIOSK_OWNER: u64 = 2;
+    const ERROR_ASSET_IN_RENTING: u64 = 3;
+    const ERROR_INVALID_PRICE : u64 = 4;
 
     // =================== Structs ===================
 
-    struct Contracts has key {
+    struct Contracts has key, store {
         id: UID,
         contracts: Table<address, Contract>,
         complaints: Table<address, Complaint>,
@@ -59,7 +63,6 @@ module notary::assets_renting {
     // =================== Functions ===================
 
     public fun list_with_purchase_cap(
-        contract: &mut Contracts,
         share: &mut ListedTypes,
         kiosk: &mut Kiosk,
         asset_id: ID,
@@ -86,8 +89,60 @@ module notary::assets_renting {
         transfer::public_transfer(purch_cap, buyer);
     }
 
-    public fun rent() {
+    public fun rent(
+        share: &mut Contracts,
+        listed_types: &ListedTypes,
+        owner_kiosk: &mut Kiosk,
+        leaser_kiosk: &mut Kiosk,
+        policy: &TransferPolicy<Asset>,
+        purch_cap: PurchaseCap<Asset>,
+        asset_id: ID,
+        payment: Coin<SUI>,
+        buyer: address,
+        rental_period: u64,
+        clock: &Clock,
+        ctx: &mut TxContext 
+    ) {
+        // calculate the payment. It should be greater or equal to total renting price. 
+        assert!(
+            coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * rental_period), ERROR_INVALID_PRICE);
+        // purchase the asset from kiosk
+        let (item, request) = kiosk::purchase_with_cap<Asset>(
+            owner_kiosk,
+            purch_cap,
+            payment
+        );
+        // confirm the request. Destroye the hot potato
+        policy::confirm_request(policy, request);
+        // be sure that sender is the owner of kiosk
+        assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // calculate the end time as a second
+        let end_time: u64 = (86400 * 30) * (rental_period);
 
+        let contract = Contract {
+            owner: kiosk::owner(leaser_kiosk),
+            leaser: sender(ctx),
+            item: asset_id,
+            start: timestamp_ms(clock),
+            end: end_time 
+        };
+        // keep the contract in protocol
+        table::add( &mut share.contracts, sender(ctx), contract);
+         // be sure that sender is the owner of kiosk
+        assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // place the asset into the kiosk
+        let kiosk_cap = at::get_cap(listed_types, sender(ctx));
+        // place the item into the leaser kiosk
+        kiosk::place(leaser_kiosk, kiosk_cap, item);
+        // list the asset and keep the pruch_cap in protocol
+        let leaser_purch_cap = kiosk::list_with_purchase_cap<Asset>(
+            leaser_kiosk,
+            kiosk_cap,
+            asset_id,
+            1,
+            ctx
+        );
+        table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
 
     public fun complain() {
