@@ -33,11 +33,12 @@ module notary::assets_renting {
         purchase_cap: Table<ID, PurchaseCap<Asset>>
     }
 
-    struct Contract has store {
+    struct Contract has key, store {
+        id: UID,
         owner: address,
         leaser: address,
         item: ID,
-        deposit: Coin<SUI>,
+        deposit: Balance<SUI>,
         rental_period: u64,
         rental_count: u64,
         start: u64,
@@ -126,10 +127,11 @@ module notary::assets_renting {
         let end_time: u64 = (86400 * 30) * (rental_period);
         // set the contract
         let contract = Contract {
+            id: object::new(ctx),
             owner: kiosk::owner(leaser_kiosk),
             leaser: sender(ctx),
             item: asset_id,
-            deposit: payment,
+            deposit: coin::into_balance(payment),
             rental_period:rental_period,
             rental_count: 1, 
             start: timestamp_ms(clock),
@@ -158,7 +160,7 @@ module notary::assets_renting {
     // owner take the asset back
     public fun get_asset(
         listed: &ListedTypes,
-        share: &Contracts,
+        share: &mut Contracts,
         kiosk: &mut Kiosk,
         purch_cap: PurchaseCap<Asset>,
         policy: &TransferPolicy<Asset>,
@@ -169,7 +171,11 @@ module notary::assets_renting {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
-        let contract = table::borrow(&share.contracts, sender(ctx));
+        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        if((timestamp_ms(clock) - (contract.start)) % ((86400 * 30)) >= contract.rental_count) {
+            unpaid_rent(listed, share, kiosk, purch_cap, policy, payment, ctx);
+        }
+        else { 
         // check the time
         assert!(timestamp_ms(clock) >= contract.end, ERROR_ASSET_IN_RENTING);
         // get kioskcap
@@ -184,6 +190,15 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
+        // return the contract_balance as u64
+        let contract_value = balance::value(&contract.deposit);
+        // take the all balance from contract_ deposit
+        let contract_balance = balance::split(&mut contract.deposit, contract_value);
+        // change balance into the Coin
+        let deposit = coin::from_balance(contract_balance, ctx);
+        // transfer the deposit to owner
+        transfer::public_transfer(deposit, contract.owner);
+        };
     } 
     // owner or leaser can create complain
     public fun complain() {
@@ -194,10 +209,43 @@ module notary::assets_renting {
 
     }
 
-
-
-    
     // =================== Helper Functions ===================
+
+    // if the leaser couldn't pay his rent give the asset to owner 
+    fun unpaid_rent(
+        listed: &ListedTypes,
+        share: &mut Contracts,
+        kiosk: &mut Kiosk,
+        purch_cap: PurchaseCap<Asset>,
+        policy: &TransferPolicy<Asset>,
+        payment: Coin<SUI>,
+        ctx: &mut TxContext
+    ) {
+        // be sure that sender is the owner of kiosk
+        assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // get the contract between owner and leaser 
+        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        // get kioskcap
+        let kiosk_cap = at::get_cap(listed, sender(ctx));
+
+        let(asset, request) = kiosk::purchase_with_cap<Asset>(
+            kiosk,
+            purch_cap,
+            payment,
+        );
+        // confirm the request
+        policy::confirm_request(policy, request);
+        // place the asset into the kiosk
+        kiosk::place(kiosk, kiosk_cap, asset);
+        // return the contract_balance as u64
+        let contract_value = balance::value(&contract.deposit);
+        // take the all balance from contract_ deposit
+        let contract_balance = balance::split(&mut contract.deposit, contract_value);
+        // change balance into the Coin
+        let deposit = coin::from_balance(contract_balance, ctx);
+        // transfer the deposit to owner
+        transfer::public_transfer(deposit, contract.owner);
+    }
     
 
     // =================== Test Only ===================
