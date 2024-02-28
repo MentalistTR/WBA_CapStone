@@ -21,6 +21,8 @@ module notary::assets_type {
 
     use notary::assets::{Self, Asset};
 
+    friend notary::assets_renting;
+
     // =================== Errors ===================
 
     // It can be only one type 
@@ -230,6 +232,10 @@ module notary::assets_type {
     fun get_publisher(shared: &AssetsTypePublisher) : &Publisher {
         &shared.publisher
      }
+    public(friend) fun get_cap(shared: &ListedTypes, user: address) : &KioskOwnerCap {
+        let kiosk_cap = table::borrow(&shared.kiosk_caps, user);
+        kiosk_cap
+    }
 
     // =================== Test Only ===================
     #[test_only]

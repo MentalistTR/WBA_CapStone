@@ -21,6 +21,7 @@ module notary::assets {
     // === Friends ===
 
     friend notary::assets_type;
+    friend notary::assets_renting;
     
   
     // /// # Arguments
@@ -77,7 +78,7 @@ module notary::assets {
         asset.approve
     }
 
-    public(friend) fun is_renting(asset: &Asset) : bool {
+    public fun is_renting(asset: &Asset) : bool {
         asset.on_rent
     }
 
