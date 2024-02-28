@@ -85,6 +85,7 @@ module notary::assets {
     public(friend) fun approve_asset(asset: &mut Asset)  {
         asset.approve = true;
     }
+    
     public(friend) fun disapprove_asset(asset: &mut Asset) {
         asset.approve = false;
     }
