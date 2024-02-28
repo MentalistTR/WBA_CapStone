@@ -8,6 +8,7 @@ module notary::assets_renting {
     use sui::kiosk::{Self, Kiosk, PurchaseCap};
     use sui::table::{Self, Table};
     use sui::transfer_policy::{Self as policy, TransferPolicy};
+    use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
     use sui::clock::{Clock, timestamp_ms}; 
@@ -32,12 +33,15 @@ module notary::assets_renting {
         purchase_cap: Table<ID, PurchaseCap<Asset>>
     }
 
-    struct Contract has store, copy, drop {
+    struct Contract has store {
         owner: address,
         leaser: address,
         item: ID,
+        deposit: Coin<SUI>,
+        rental_period: u64,
+        rental_count: u64,
         start: u64,
-        end: u64,
+        end: u64, 
     }
 
     struct Complaint has store, copy, drop {
@@ -98,19 +102,21 @@ module notary::assets_renting {
         policy: &TransferPolicy<Asset>,
         purch_cap: PurchaseCap<Asset>,
         asset_id: ID,
-        payment: Coin<SUI>,
+        payment: Coin<SUI>, // it should be equal to 1 month rental price + deposit price 
         rental_period: u64,
         clock: &Clock,
         ctx: &mut TxContext 
     ) {
         // calculate the payment. It should be greater or equal to total renting price. 
         assert!(
-            coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * rental_period), ERROR_INVALID_PRICE);
+            coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * 2), ERROR_INVALID_PRICE);
+        // coin for put to purchase_with_cap
+        let payment_purchase = coin::split(&mut payment, (kiosk::purchase_cap_min_price(&purch_cap)), ctx);
         // purchase the asset from kiosk
         let (asset, request) = kiosk::purchase_with_cap<Asset>(
             owner_kiosk,
             purch_cap,
-            payment
+            payment_purchase
         );
         // confirm the request. Destroye the hot potato
         policy::confirm_request(policy, request);
@@ -118,11 +124,14 @@ module notary::assets_renting {
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // calculate the end time as a second
         let end_time: u64 = (86400 * 30) * (rental_period);
-
+        // set the contract
         let contract = Contract {
             owner: kiosk::owner(leaser_kiosk),
             leaser: sender(ctx),
             item: asset_id,
+            deposit: payment,
+            rental_period:rental_period,
+            rental_count: 1, 
             start: timestamp_ms(clock),
             end: end_time 
         };
@@ -176,13 +185,11 @@ module notary::assets_renting {
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
     } 
-
-
-
+    // owner or leaser can create complain
     public fun complain() {
 
     }
-
+    // admin should judge the complain
     public fun provision() {
 
     }
