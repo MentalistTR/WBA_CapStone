@@ -62,6 +62,7 @@ module notary::assets_renting {
 
     // =================== Functions ===================
 
+    // list the asset for spesific address
     public fun list_with_purchase_cap(
         share: &mut ListedTypes,
         kiosk: &mut Kiosk,
@@ -88,7 +89,7 @@ module notary::assets_renting {
         // send the purchase_cap to leaser
         transfer::public_transfer(purch_cap, buyer);
     }
-
+    // rent the asset
     public fun rent(
         share: &mut Contracts,
         listed_types: &ListedTypes,
@@ -98,7 +99,6 @@ module notary::assets_renting {
         purch_cap: PurchaseCap<Asset>,
         asset_id: ID,
         payment: Coin<SUI>,
-        buyer: address,
         rental_period: u64,
         clock: &Clock,
         ctx: &mut TxContext 
@@ -107,7 +107,7 @@ module notary::assets_renting {
         assert!(
             coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * rental_period), ERROR_INVALID_PRICE);
         // purchase the asset from kiosk
-        let (item, request) = kiosk::purchase_with_cap<Asset>(
+        let (asset, request) = kiosk::purchase_with_cap<Asset>(
             owner_kiosk,
             purch_cap,
             payment
@@ -130,10 +130,12 @@ module notary::assets_renting {
         table::add( &mut share.contracts, sender(ctx), contract);
          // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // set the on_rent variable to true
+        assets::active_rent(&mut asset);
         // place the asset into the kiosk
         let kiosk_cap = at::get_cap(listed_types, sender(ctx));
         // place the item into the leaser kiosk
-        kiosk::place(leaser_kiosk, kiosk_cap, item);
+        kiosk::place(leaser_kiosk, kiosk_cap, asset);
         // list the asset and keep the pruch_cap in protocol
         let leaser_purch_cap = kiosk::list_with_purchase_cap<Asset>(
             leaser_kiosk,
@@ -144,6 +146,9 @@ module notary::assets_renting {
         );
         table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
+    // owner take the asset back 
+
+
 
     public fun complain() {
 
