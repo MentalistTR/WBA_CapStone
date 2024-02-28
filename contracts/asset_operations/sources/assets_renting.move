@@ -25,7 +25,7 @@ module notary::assets_renting {
 
     // =================== Structs ===================
 
-    struct Contracts has key, store {
+    struct Contracts has key {
         id: UID,
         contracts: Table<address, Contract>,
         complaints: Table<address, Complaint>,
@@ -127,7 +127,7 @@ module notary::assets_renting {
             end: end_time 
         };
         // keep the contract in protocol
-        table::add( &mut share.contracts, sender(ctx), contract);
+        table::add( &mut share.contracts, kiosk::owner(leaser_kiosk), contract);
          // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // set the on_rent variable to true
@@ -146,7 +146,36 @@ module notary::assets_renting {
         );
         table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
-    // owner take the asset back 
+    // owner take the asset back
+    public fun get_asset(
+        listed: &ListedTypes,
+        share: &Contracts,
+        kiosk: &mut Kiosk,
+        purch_cap: PurchaseCap<Asset>,
+        policy: &TransferPolicy<Asset>,
+        payment: Coin<SUI>,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        // be sure that sender is the owner of kiosk
+        assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // get the contract between owner and leaser 
+        let contract = table::borrow(&share.contracts, sender(ctx));
+        // check the time
+        assert!(timestamp_ms(clock) >= contract.end, ERROR_ASSET_IN_RENTING);
+        // get kioskcap
+        let kiosk_cap = at::get_cap(listed, sender(ctx));
+
+        let(asset, request) = kiosk::purchase_with_cap<Asset>(
+            kiosk,
+            purch_cap,
+            payment,
+        );
+        // confirm the request
+        policy::confirm_request(policy, request);
+        // place the asset into the kiosk
+        kiosk::place(kiosk, kiosk_cap, asset);
+    } 
 
 
 
