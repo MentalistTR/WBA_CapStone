@@ -3,11 +3,14 @@ module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
     use sui::transfer;
     use sui::coin::{mint_for_testing};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
+    use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
     use sui::transfer_policy::{TransferPolicy};
     use sui::test_utils::{assert_eq};
-    use sui::object::{ID};
-    
+    use sui::object::{Self};
+    use sui::clock::{Self, Clock};
+    use sui::coin::{Self, Coin};
+    use sui::sui::SUI;
+
     use std::string::{Self};
     // use std::option::{Self};
     // use std::debug;
@@ -16,7 +19,7 @@ module notary::helpers {
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
-    use notary:: assets_renting::{Self as ar, test_renting_init};
+    use notary:: assets_renting::{Self as ar, Contracts, test_renting_init};
     use notary::assets::{Self, Asset};
 
     const ADMIN: address = @0xA;

@@ -24,6 +24,7 @@ module notary::assets_renting {
     const ERROR_ASSET_IN_RENTING: u64 = 3;
     const ERROR_INVALID_PRICE : u64 = 4;
     const ERROR_INCORRECT_LEASER: u64 = 5;
+    const ERROR_NOT_ASSET_OWNER: u64 = 6;
 
     // =================== Structs ===================
 
@@ -134,7 +135,7 @@ module notary::assets_renting {
         // set the contract
         let contract = Contract {
             id: object::new(ctx),
-            owner: kiosk::owner(leaser_kiosk),
+            owner: kiosk::owner(owner_kiosk),
             leaser: sender(ctx),
             item: asset_id,
             deposit: deposit_amount,
@@ -180,22 +181,23 @@ module notary::assets_renting {
     public fun get_asset(
         listed: &ListedTypes,
         share: &mut Contracts,
-        kiosk: &mut Kiosk,
+        kiosk1: &mut Kiosk,
+        kiosk2: &mut Kiosk,
         item_id : ID,
-        purch_cap: PurchaseCap<Asset>,
         policy: &TransferPolicy<Asset>,
         payment: Coin<SUI>,
         clock: &Clock,
         ctx: &mut TxContext
     ) {
         // be sure that sender is the owner of kiosk
-        assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
         let contract = table::borrow_mut(&mut share.contracts, item_id);
-        assert!(sender(ctx) == contract.owner, ERROR_NOT_KIOSK_OWNER);
+        let purch_cap = table::remove(&mut share.purchase_cap, item_id);
+        assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
 
         if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
-            unpaid_rent(listed, share, kiosk, item_id, purch_cap, policy, payment, ctx);
+            unpaid_rent(listed, share, kiosk1, kiosk2, item_id, purch_cap, policy, payment, ctx);
         }
         else { 
         // check the time
@@ -204,7 +206,7 @@ module notary::assets_renting {
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
         let(asset, request) = kiosk::purchase_with_cap<Asset>(
-            kiosk,
+            kiosk2,
             purch_cap,
             payment,
         );
@@ -213,7 +215,7 @@ module notary::assets_renting {
         // disable the on_rent boolean
         assets::disable_rent(&mut asset);
         // place the asset into the kiosk
-        kiosk::place(kiosk, kiosk_cap, asset);
+        kiosk::place(kiosk1, kiosk_cap, asset);
         // return the contract_balance as u64
         let contract_value = contract.deposit;
         // take the all balance from contract_ deposit
@@ -266,11 +268,9 @@ module notary::assets_renting {
     // admin should judge the complain
     public fun provision(
         _: &AdminCap,
-        listed: &ListedTypes,
         share: &mut Contracts,
         item_id : ID,
         decision: bool,
-        ctx: &mut TxContext
     ) {
         let contract = table::borrow_mut(&mut share.contracts, item_id);
         let complain = table::remove(&mut share.complaints, item_id);
@@ -278,12 +278,14 @@ module notary::assets_renting {
         let leaser = contract.leaser;
         let complainant_ = complain.complainant;
 
-        // if admin decide true these conditions should execute. If it is false nothing happen. 
-        if(leaser == complainant_) {
+        // if admin decide true these conditions should execute. If it is false nothing happen.
+        if(decision == true) { 
+            if(leaser == complainant_) {
             contract.rental_count = contract.rental_count + 1;
-        } else {
+            } else {
             contract.rental_count = contract.rental_count - 1;
-        }; 
+            }; 
+        }
     }
 
     // =================== Helper Functions ===================
@@ -292,7 +294,8 @@ module notary::assets_renting {
     fun unpaid_rent(
         listed: &ListedTypes,
         share: &mut Contracts,
-        kiosk: &mut Kiosk,
+        kiosk1: &mut Kiosk,
+        kiosk2: &mut Kiosk,
         item_id : ID,
         purch_cap: PurchaseCap<Asset>,
         policy: &TransferPolicy<Asset>,
@@ -300,14 +303,14 @@ module notary::assets_renting {
         ctx: &mut TxContext
     ) {
         // be sure that sender is the owner of kiosk
-        assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
         let contract = table::borrow_mut(&mut share.contracts, item_id);
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
         let(asset, request) = kiosk::purchase_with_cap<Asset>(
-            kiosk,
+            kiosk2,
             purch_cap,
             payment,
         );
@@ -316,7 +319,7 @@ module notary::assets_renting {
         // disable the on_rent boolean
         assets::disable_rent(&mut asset);
         // place the asset into the kiosk
-        kiosk::place(kiosk, kiosk_cap, asset);
+        kiosk::place(kiosk1, kiosk_cap, asset);
        // return the contract_balance as u64
         let contract_value = contract.deposit;
         // take the all balance from contract_ deposit
