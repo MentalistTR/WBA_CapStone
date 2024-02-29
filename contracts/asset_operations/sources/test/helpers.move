@@ -16,6 +16,7 @@ module notary::helpers {
     use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
+    use notary:: assets_renting::{Self as ar, test_renting_init};
     use notary::assets::{Self, Asset};
 
     const ADMIN: address = @0xA;
@@ -67,9 +68,12 @@ module notary::helpers {
             test_init(ts::ctx(scenario));
        };
        {
+            test_renting_init(ts::ctx(scenario));
+       };
+       {
             return_init_lira(ts::ctx(scenario));
        };
        scenario_val
-}
+    }
 
 }

@@ -1,5 +1,6 @@
 module notary::assets_renting {
     use std::string::{String};
+    use std::debug;
     
     use sui::tx_context::{TxContext, sender};
     use sui::object::{Self, UID, ID};
@@ -274,7 +275,7 @@ module notary::assets_renting {
 
         let leaser = contract.leaser;
         let complainant_ = complain.complainant;
-        
+
         // if admin decide true these conditions should execute. If it is false nothing happen. 
         if(leaser == complainant_) {
             contract.rental_count = contract.rental_count + 1;
@@ -338,8 +339,12 @@ module notary::assets_renting {
             object::delete(id);
     }
     
-
     // =================== Test Only ===================
+    #[test_only]
+    // call the init function
+    public fun test_renting_init(ctx: &mut TxContext) {
+        init( ctx);
+    }
 
 
 }
