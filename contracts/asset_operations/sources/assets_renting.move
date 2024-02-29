@@ -14,7 +14,7 @@ module notary::assets_renting {
     // use sui::transfer_policy::{Self as policy, TransferPolicy};
 
     use notary::assets::{Self, Asset};
-    use notary::assets_type::{Self as at, ListedTypes};
+    use notary::assets_type::{Self as at, ListedTypes, AdminCap};
 
     // =================== Errors ===================
 
@@ -29,7 +29,7 @@ module notary::assets_renting {
     struct Contracts has key {
         id: UID,
         contracts: Table<ID, Contract>,
-        complaints: Table<address, Complaint>,
+        complaints: Table<ID, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
         deposit: Balance<SUI>
     }
@@ -51,7 +51,6 @@ module notary::assets_renting {
         pleader: address,
         reason: String,
         decision: bool,
-        active: bool
     }
 
     // =================== Initializer ===================
@@ -239,12 +238,49 @@ module notary::assets_renting {
         };
     } 
     // owner or leaser can create complain
-    public fun complain() {
+    public fun new_complain(share: &mut Contracts, reason_: String, asset_id: ID, ctx: &mut TxContext) {
+        let contract = table::borrow(&share.contracts, asset_id);
 
+        let leaser = contract.leaser;
+        let owner = contract.owner;
+        let pleader_ = sender(ctx);
+
+        if(sender(ctx) == leaser) {
+            let pleader_ = owner;
+        } else {
+            let pleader_ = leaser;
+        };
+        assert!(leaser == sender(ctx) || owner == sender(ctx), ERROR_INCORRECT_LEASER);
+        // define the complain
+        let complain_ = Complaint{
+            complainant: sender(ctx),
+            pleader: pleader_,
+            reason: reason_,
+            decision: false,
+        };
+        table::add(&mut share.complaints, asset_id, complain_);
     }
     // admin should judge the complain
-    public fun provision() {
+    public fun provision(
+        _: &AdminCap,
+        listed: &ListedTypes,
+        share: &mut Contracts,
+        item_id : ID,
+        decision: bool,
+        ctx: &mut TxContext
+    ) {
+        let contract = table::borrow_mut(&mut share.contracts, item_id);
+        let complain = table::remove(&mut share.complaints, item_id);
 
+        let leaser = contract.leaser;
+        let complainant_ = complain.complainant;
+        
+        // if admin decide true these conditions should execute. If it is false nothing happen. 
+        if(leaser == complainant_) {
+            contract.rental_count = contract.rental_count + 1;
+        } else {
+            contract.rental_count = contract.rental_count - 1;
+        }; 
     }
 
     // =================== Helper Functions ===================
