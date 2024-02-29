@@ -250,12 +250,13 @@ module notary::assets_renting {
         let owner = contract.owner;
         let pleader_ = sender(ctx);
 
+        assert!(leaser == sender(ctx) || owner == sender(ctx), ERROR_INCORRECT_LEASER);
+
         if(sender(ctx) == leaser) {
             let pleader_ = owner;
         } else {
             let pleader_ = leaser;
         };
-        assert!(leaser == sender(ctx) || owner == sender(ctx), ERROR_INCORRECT_LEASER);
         // define the complain
         let complain_ = Complaint{
             complainant: sender(ctx),
@@ -351,6 +352,12 @@ module notary::assets_renting {
     // call the init function
     public fun test_renting_init(ctx: &mut TxContext) {
         init( ctx);
+    }
+    #[test_only]
+    // call the init function
+    public fun test_get_contract_rental_count(share: &Contracts, item_id: ID) : u64 {
+        let contract = table::borrow(&share.contracts, item_id);
+        contract.rental_count
     }
 
 
