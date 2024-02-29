@@ -1,5 +1,4 @@
 module notary::assets_renting {
-
     use std::string::{String};
     
     use sui::tx_context::{TxContext, sender};
@@ -157,6 +156,17 @@ module notary::assets_renting {
         );
         table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
+    // Leasers must pay their rent before the end of the month
+    public fun pay_monthly_rent(share: &mut Contracts, payment: Coin<SUI>, ctx: &mut TxContext) {
+        // get contract_mut from table
+        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        // check the payment price 
+        assert!(coin::value(&payment) >=balance::value(&contract.deposit), ERROR_INVALID_PRICE);
+        // increment the rental count 
+        contract.rental_count = contract.rental_count + 1;
+        // transfer payment to owner of asset 
+        transfer::public_transfer(payment, contract.owner); 
+    }
     // owner take the asset back
     public fun get_asset(
         listed: &ListedTypes,
@@ -172,7 +182,7 @@ module notary::assets_renting {
         assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
         let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
-        if((timestamp_ms(clock) - (contract.start)) % ((86400 * 30)) >= contract.rental_count) {
+        if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
             unpaid_rent(listed, share, kiosk, purch_cap, policy, payment, ctx);
         }
         else { 
@@ -197,7 +207,7 @@ module notary::assets_renting {
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
-        transfer::public_transfer(deposit, contract.owner);
+        transfer::public_transfer(deposit, contract.leaser);
         };
     } 
     // owner or leaser can create complain
