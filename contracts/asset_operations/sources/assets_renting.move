@@ -22,6 +22,7 @@ module notary::assets_renting {
     const ERROR_NOT_KIOSK_OWNER: u64 = 2;
     const ERROR_ASSET_IN_RENTING: u64 = 3;
     const ERROR_INVALID_PRICE : u64 = 4;
+    const ERROR_INCORRECT_LEASER: u64 = 5;
 
     // =================== Structs ===================
 
@@ -29,7 +30,8 @@ module notary::assets_renting {
         id: UID,
         contracts: Table<address, Contract>,
         complaints: Table<address, Complaint>,
-        purchase_cap: Table<ID, PurchaseCap<Asset>>
+        purchase_cap: Table<ID, PurchaseCap<Asset>>,
+        deposit: Balance<SUI>
     }
 
     struct Contract has key, store {
@@ -37,7 +39,7 @@ module notary::assets_renting {
         owner: address,
         leaser: address,
         item: ID,
-        deposit: Balance<SUI>,
+        deposit: u64,
         rental_period: u64,
         rental_count: u64,
         start: u64,
@@ -60,7 +62,8 @@ module notary::assets_renting {
             id: object::new(ctx),
             contracts: table::new(ctx),
             complaints: table::new(ctx),
-            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
+            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx),
+            deposit: balance::zero()
         });
     }
 
@@ -122,6 +125,10 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
+        // set the amount of deposit_amount before join two balances
+        let deposit_amount = coin::value(&payment);
+        // merge the two balance
+        balance::join(&mut share.deposit, coin::into_balance(payment));
         // calculate the end time as a second
         let end_time: u64 = (86400 * 30) * (rental_period);
         // set the contract
@@ -130,7 +137,7 @@ module notary::assets_renting {
             owner: kiosk::owner(leaser_kiosk),
             leaser: sender(ctx),
             item: asset_id,
-            deposit: coin::into_balance(payment),
+            deposit: deposit_amount,
             rental_period:rental_period,
             rental_count: 1, 
             start: timestamp_ms(clock),
@@ -161,7 +168,9 @@ module notary::assets_renting {
         // get contract_mut from table
         let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
         // check the payment price 
-        assert!(coin::value(&payment) >=balance::value(&contract.deposit), ERROR_INVALID_PRICE);
+        assert!(coin::value(&payment) >= contract.deposit, ERROR_INVALID_PRICE);
+        // check the leaser address
+        assert!(sender(ctx) == contract.leaser, ERROR_INCORRECT_LEASER);
         // increment the rental count 
         contract.rental_count = contract.rental_count + 1;
         // transfer payment to owner of asset 
@@ -201,9 +210,9 @@ module notary::assets_renting {
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
         // return the contract_balance as u64
-        let contract_value = balance::value(&contract.deposit);
+        let contract_value = contract.deposit;
         // take the all balance from contract_ deposit
-        let contract_balance = balance::split(&mut contract.deposit, contract_value);
+        let contract_balance = balance::split(&mut share.deposit, contract_value);
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
@@ -247,14 +256,30 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
-        // return the contract_balance as u64
-        let contract_value = balance::value(&contract.deposit);
+       // return the contract_balance as u64
+        let contract_value = contract.deposit;
         // take the all balance from contract_ deposit
-        let contract_balance = balance::split(&mut contract.deposit, contract_value);
+        let contract_balance = balance::split(&mut share.deposit, contract_value);
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
         transfer::public_transfer(deposit, contract.owner);
+        // remove the contract from table
+        let contract_remove = table::remove(&mut share.contracts, sender(ctx));
+
+        let Contract {
+            id,
+            owner: _,
+            leaser: _,
+            item: _,
+            deposit: _,
+            rental_period: _,
+            rental_count: _,
+            start: _,
+            end: _
+            } = contract_remove;
+            // delete the contract
+            object::delete(id);
     }
     
 
