@@ -28,7 +28,7 @@ module notary::assets_renting {
 
     struct Contracts has key {
         id: UID,
-        contracts: Table<address, Contract>,
+        contracts: Table<ID, Contract>,
         complaints: Table<address, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
         deposit: Balance<SUI>
@@ -144,7 +144,7 @@ module notary::assets_renting {
             end: end_time 
         };
         // keep the contract in protocol
-        table::add( &mut share.contracts, kiosk::owner(leaser_kiosk), contract);
+        table::add( &mut share.contracts, asset_id, contract);
          // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // set the on_rent variable to true
@@ -164,9 +164,9 @@ module notary::assets_renting {
         table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
     // Leasers must pay their rent before the end of the month
-    public fun pay_monthly_rent(share: &mut Contracts, payment: Coin<SUI>, ctx: &mut TxContext) {
+    public fun pay_monthly_rent(share: &mut Contracts, payment: Coin<SUI>, item_id: ID, ctx: &mut TxContext) {
         // get contract_mut from table
-        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        let contract = table::borrow_mut(&mut share.contracts, item_id);
         // check the payment price 
         assert!(coin::value(&payment) >= contract.deposit, ERROR_INVALID_PRICE);
         // check the leaser address
@@ -181,6 +181,7 @@ module notary::assets_renting {
         listed: &ListedTypes,
         share: &mut Contracts,
         kiosk: &mut Kiosk,
+        item_id : ID,
         purch_cap: PurchaseCap<Asset>,
         policy: &TransferPolicy<Asset>,
         payment: Coin<SUI>,
@@ -190,9 +191,11 @@ module notary::assets_renting {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
-        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        let contract = table::borrow_mut(&mut share.contracts, item_id);
+        assert!(sender(ctx) == contract.owner, ERROR_NOT_KIOSK_OWNER);
+
         if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
-            unpaid_rent(listed, share, kiosk, purch_cap, policy, payment, ctx);
+            unpaid_rent(listed, share, kiosk, item_id, purch_cap, policy, payment, ctx);
         }
         else { 
         // check the time
@@ -217,6 +220,22 @@ module notary::assets_renting {
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
         transfer::public_transfer(deposit, contract.leaser);
+        // remove the contract from table
+        let contract_remove = table::remove(&mut share.contracts, item_id);
+
+        let Contract {
+            id,
+            owner: _,
+            leaser: _,
+            item: _,
+            deposit: _,
+            rental_period: _,
+            rental_count: _,
+            start: _,
+            end: _
+            } = contract_remove;
+            // delete the contract
+            object::delete(id);
         };
     } 
     // owner or leaser can create complain
@@ -235,6 +254,7 @@ module notary::assets_renting {
         listed: &ListedTypes,
         share: &mut Contracts,
         kiosk: &mut Kiosk,
+        item_id : ID,
         purch_cap: PurchaseCap<Asset>,
         policy: &TransferPolicy<Asset>,
         payment: Coin<SUI>,
@@ -243,7 +263,7 @@ module notary::assets_renting {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
-        let contract = table::borrow_mut(&mut share.contracts, sender(ctx));
+        let contract = table::borrow_mut(&mut share.contracts, item_id);
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
@@ -265,7 +285,7 @@ module notary::assets_renting {
         // transfer the deposit to owner
         transfer::public_transfer(deposit, contract.owner);
         // remove the contract from table
-        let contract_remove = table::remove(&mut share.contracts, sender(ctx));
+        let contract_remove = table::remove(&mut share.contracts, item_id);
 
         let Contract {
             id,
