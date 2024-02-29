@@ -210,6 +210,8 @@ module notary::assets_renting {
         );
         // confirm the request
         policy::confirm_request(policy, request);
+        // disable the on_rent boolean
+        assets::disable_rent(&mut asset);
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
         // return the contract_balance as u64
@@ -311,6 +313,8 @@ module notary::assets_renting {
         );
         // confirm the request
         policy::confirm_request(policy, request);
+        // disable the on_rent boolean
+        assets::disable_rent(&mut asset);
         // place the asset into the kiosk
         kiosk::place(kiosk, kiosk_cap, asset);
        // return the contract_balance as u64

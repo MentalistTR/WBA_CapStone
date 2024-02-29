@@ -90,8 +90,8 @@ module notary::assets {
         asset.approve = false;
     }
 
-    public(friend) fun disable_approve(asset:&mut Asset)  {
-        asset.approve = false;
+    public(friend) fun disable_rent(asset: &mut Asset)  {
+        asset.on_rent = false;
     }
 
     public(friend) fun active_rent(asset: &mut Asset)  {
