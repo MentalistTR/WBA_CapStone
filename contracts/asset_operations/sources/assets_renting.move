@@ -35,7 +35,7 @@ module notary::assets_renting {
         complaints: Table<ID, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
     }
-    // contract must be shared 
+  
     struct Contract has key, store {
         id: UID,
         owner: address,
@@ -239,6 +239,7 @@ module notary::assets_renting {
     } 
     // owner or leaser can create complain
     public fun new_complain(share: &mut Contracts, owner_kiosk: &mut Kiosk, reason_: String, asset_id: ID, ctx: &mut TxContext) {
+        // define the witness
         let witness = at::get_witness();
         // get the owner's bag
         let owner_bag = ke::storage_mut(witness, owner_kiosk);
@@ -277,6 +278,7 @@ module notary::assets_renting {
         let owner_bag = ke::storage_mut(witness, owner_kiosk);
         // get the contract_mut
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, asset_id);
+        // remove the complain from table
         let complain = table::remove(&mut share.complaints, asset_id);
 
         let leaser = contract.leaser;
@@ -307,8 +309,6 @@ module notary::assets_renting {
     ) {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-        // get the contract between owner and leaser 
-     
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
@@ -323,12 +323,14 @@ module notary::assets_renting {
         assets::disable_rent(&mut asset);
         // place the asset into the kiosk
         kiosk::place(kiosk1, kiosk_cap, asset);
-
-        let witness = at::get_witness();   
+        // define the witness
+        let witness = at::get_witness();
+        // get owner's bag from his kiosk   
         let owner_bag = ke::storage_mut(witness, kiosk1);
+        // get contract from owners' bag
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER); 
-       // return the contract_balance as u64
+        // return the contract_balance as u64
         let contract_value = (balance::value(&contract.deposit));
         // take the all balance from contract_ deposit
         let contract_balance = balance::split(&mut contract.deposit, contract_value);
