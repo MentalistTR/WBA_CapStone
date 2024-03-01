@@ -244,6 +244,10 @@ module notary::assets_type {
         let kiosk_cap = table::borrow(&shared.kiosk_caps, user);
         kiosk_cap
     }
+    public(friend) fun get_witness() : NotaryKioskExtWitness {
+        let witness = NotaryKioskExtWitness {};
+        witness
+    }
 
     // =================== Test Only ===================
     #[test_only]

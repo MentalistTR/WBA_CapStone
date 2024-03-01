@@ -1,12 +1,14 @@
 module notary::assets_renting {
     use std::string::{String};
     //use std::debug;
-    
+
     use sui::tx_context::{TxContext, sender};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::kiosk::{Self, Kiosk, PurchaseCap};
+    use sui::kiosk_extension::{Self as ke};
     use sui::table::{Self, Table};
+    use sui::bag::{Self};
     use sui::transfer_policy::{Self as policy, TransferPolicy};
     use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
@@ -15,7 +17,7 @@ module notary::assets_renting {
     // use sui::transfer_policy::{Self as policy, TransferPolicy};
 
     use notary::assets::{Self, Asset};
-    use notary::assets_type::{Self as at, ListedTypes, AdminCap};
+    use notary::assets_type::{Self as at, ListedTypes, AdminCap, NotaryKioskExtWitness};
 
     // =================== Errors ===================
 
@@ -30,10 +32,8 @@ module notary::assets_renting {
 
     struct Contracts has key {
         id: UID,
-        contracts: Table<ID, Contract>,
         complaints: Table<ID, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
-        deposit: Balance<SUI>
     }
     // contract must be shared 
     struct Contract has key, store {
@@ -41,7 +41,7 @@ module notary::assets_renting {
         owner: address,
         leaser: address,
         item: ID,
-        deposit: u64,
+        deposit: Balance<SUI>,
         rental_period: u64,
         rental_count: u64,
         start: u64,
@@ -61,10 +61,8 @@ module notary::assets_renting {
         // share the Contracts
         transfer::share_object(Contracts{
             id: object::new(ctx),
-            contracts: table::new(ctx),
             complaints: table::new(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx),
-            deposit: balance::zero()
         });
     }
 
@@ -128,8 +126,6 @@ module notary::assets_renting {
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // set the amount of deposit_amount before join two balances
         let deposit_amount = coin::value(&payment);
-        // merge the two balance
-        balance::join(&mut share.deposit, coin::into_balance(payment));
         // calculate the end time as a second
         let end_time: u64 = (86400 * 30) * (rental_period);
         // set the contract
@@ -138,15 +134,20 @@ module notary::assets_renting {
             owner: kiosk::owner(owner_kiosk),
             leaser: sender(ctx),
             item: asset_id,
-            deposit: deposit_amount,
+            deposit: balance::zero(),
             rental_period:rental_period,
             rental_count: 1, 
             start: timestamp_ms(clock),
             end: end_time 
         };
-        // keep the contract in protocol
-        table::add( &mut share.contracts, asset_id, contract);
-         // be sure that sender is the owner of kiosk
+        // merge the two balance
+        balance::join(&mut contract.deposit, coin::into_balance(payment));
+        // define the witness
+        let witness = at::get_witness();
+        // keep the contract in owner's bag
+        let owner_bag = ke::storage_mut<NotaryKioskExtWitness>(witness, owner_kiosk);
+        bag::add<ID,Contract>( owner_bag, asset_id, contract);
+        // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // set the on_rent variable to true
         assets::active_rent(&mut asset);
@@ -165,11 +166,14 @@ module notary::assets_renting {
         table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
     }
     // Leasers must pay their rent before the end of the month
-    public fun pay_monthly_rent(share: &mut Contracts, payment: Coin<SUI>, item_id: ID, ctx: &mut TxContext) {
-        // get contract_mut from table
-        let contract = table::borrow_mut(&mut share.contracts, item_id);
+    public fun pay_monthly_rent(owner_kiosk: &mut Kiosk, payment: Coin<SUI>, item_id: ID, ctx: &mut TxContext) {
+        let witness = at::get_witness();
+        // get the owner's bag
+        let owner_bag = ke::storage_mut(witness, owner_kiosk);
+        // get the contract_mut
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
         // check the payment price 
-        assert!(coin::value(&payment) >= contract.deposit, ERROR_INVALID_PRICE);
+        assert!(coin::value(&payment) >= (balance::value(&contract.deposit)), ERROR_INVALID_PRICE);
         // check the leaser address
         assert!(sender(ctx) == contract.leaser, ERROR_INCORRECT_LEASER);
         // increment the rental count 
@@ -192,13 +196,18 @@ module notary::assets_renting {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
-        let contract = table::borrow_mut(&mut share.contracts, item_id);
+        let witness = at::get_witness();
+        // get the owner's bag
+        let owner_bag = ke::storage_mut(witness, kiosk1);
+        // get the contract_mut
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
+
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
 
         let purch_cap = table::remove(&mut share.purchase_cap, item_id);
 
         if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
-            unpaid_rent(listed, share, kiosk1, kiosk2, item_id, purch_cap, policy, payment, ctx);
+            unpaid_rent(listed, kiosk1, kiosk2, item_id, purch_cap, policy, payment, ctx);
         }
         else { 
         // check the time
@@ -215,38 +224,26 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // disable the on_rent boolean
         assets::disable_rent(&mut asset);
-        // place the asset into the kiosk
-        kiosk::place(kiosk1, kiosk_cap, asset);
         // return the contract_balance as u64
-        let contract_value = contract.deposit;
+        let contract_value = (balance::value(&contract.deposit));
         // take the all balance from contract_ deposit
-        let contract_balance = balance::split(&mut share.deposit, contract_value);
+        //let contract_mut = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
+        let contract_balance = balance::split(&mut contract.deposit, contract_value);
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
         transfer::public_transfer(deposit, contract.leaser);
-        // remove the contract from table
-        let contract_remove = table::remove(&mut share.contracts, item_id);
-
-        let Contract {
-            id,
-            owner: _,
-            leaser: _,
-            item: _,
-            deposit: _,
-            rental_period: _,
-            rental_count: _,
-            start: _,
-            end: _
-            } = contract_remove;
-            // delete the contract
-            object::delete(id);
+        // place the asset into the kiosk
+        kiosk::place(kiosk1, kiosk_cap, asset);
         };
     } 
     // owner or leaser can create complain
-    public fun new_complain(share: &mut Contracts, reason_: String, asset_id: ID, ctx: &mut TxContext) {
-        let contract = table::borrow(&share.contracts, asset_id);
-
+    public fun new_complain(share: &mut Contracts, owner_kiosk: &mut Kiosk, reason_: String, asset_id: ID, ctx: &mut TxContext) {
+        let witness = at::get_witness();
+        // get the owner's bag
+        let owner_bag = ke::storage_mut(witness, owner_kiosk);
+        // get the contract_mut
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, asset_id);
         let leaser = contract.leaser;
         let owner = contract.owner;
         let pleader_ = sender(ctx);
@@ -271,11 +268,16 @@ module notary::assets_renting {
     public fun provision(
         _: &AdminCap,
         share: &mut Contracts,
-        item_id : ID,
+        owner_kiosk: &mut Kiosk,
+        asset_id : ID,
         decision: bool,
     ) {
-        let contract = table::borrow_mut(&mut share.contracts, item_id);
-        let complain = table::remove(&mut share.complaints, item_id);
+        let witness = at::get_witness();
+        // get the owner's bag
+        let owner_bag = ke::storage_mut(witness, owner_kiosk);
+        // get the contract_mut
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, asset_id);
+        let complain = table::remove(&mut share.complaints, asset_id);
 
         let leaser = contract.leaser;
         let complainant_ = complain.complainant;
@@ -295,7 +297,6 @@ module notary::assets_renting {
     // if the leaser couldn't pay his rent give the asset to owner 
     fun unpaid_rent(
         listed: &ListedTypes,
-        share: &mut Contracts,
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
         item_id : ID,
@@ -307,7 +308,7 @@ module notary::assets_renting {
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
-        let contract = table::borrow_mut(&mut share.contracts, item_id);
+     
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
@@ -322,30 +323,19 @@ module notary::assets_renting {
         assets::disable_rent(&mut asset);
         // place the asset into the kiosk
         kiosk::place(kiosk1, kiosk_cap, asset);
+
+        let witness = at::get_witness();   
+        let owner_bag = ke::storage_mut(witness, kiosk1);
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
+        assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER); 
        // return the contract_balance as u64
-        let contract_value = contract.deposit;
+        let contract_value = (balance::value(&contract.deposit));
         // take the all balance from contract_ deposit
-        let contract_balance = balance::split(&mut share.deposit, contract_value);
+        let contract_balance = balance::split(&mut contract.deposit, contract_value);
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
         // transfer the deposit to owner
         transfer::public_transfer(deposit, contract.owner);
-        // remove the contract from table
-        let contract_remove = table::remove(&mut share.contracts, item_id);
-
-        let Contract {
-            id,
-            owner: _,
-            leaser: _,
-            item: _,
-            deposit: _,
-            rental_period: _,
-            rental_count: _,
-            start: _,
-            end: _
-            } = contract_remove;
-            // delete the contract
-            object::delete(id);
     }
     
     // =================== Test Only ===================
@@ -356,8 +346,10 @@ module notary::assets_renting {
     }
     #[test_only]
     // call the init function
-    public fun test_get_contract_rental_count(share: &Contracts, item_id: ID) : u64 {
-        let contract = table::borrow(&share.contracts, item_id);
+    public fun test_get_contract_rental_count(self: &Kiosk, item_id: ID) : u64 {
+        let witness = at::get_witness();   
+        let owner_bag = ke::storage(witness, self);
+        let contract = bag::borrow<ID, Contract>(owner_bag, item_id);
         contract.rental_count
     }
 
