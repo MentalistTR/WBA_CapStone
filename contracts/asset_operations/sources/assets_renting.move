@@ -27,6 +27,7 @@ module notary::assets_renting {
     const ERROR_INVALID_PRICE : u64 = 4;
     const ERROR_INCORRECT_LEASER: u64 = 5;
     const ERROR_NOT_ASSET_OWNER: u64 = 6;
+    const ERROR_INVALID_DURATION: u64 = 7;
 
     // =================== Structs ===================
 
@@ -109,7 +110,9 @@ module notary::assets_renting {
         clock: &Clock,
         ctx: &mut TxContext 
     ) {
-        // calculate the payment. It should be greater or equal to total renting price. 
+        // the rental_period should be between 6 and 12
+        assert!(rental_period >= 6 && rental_period <=12, ERROR_INVALID_DURATION);
+        // calculate the payment. It should be greater or equal to total renting price.
         assert!(
             coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * 2), ERROR_INVALID_PRICE);
         // coin for put to purchase_with_cap
