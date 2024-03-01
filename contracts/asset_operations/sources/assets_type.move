@@ -15,6 +15,7 @@ module notary::assets_type {
     use sui::package::{Self, Publisher};
     use sui::transfer_policy::{Self as policy, TransferPolicy};
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
+    use sui::kiosk_extension::{Self as ke};
     use sui::table::{Self, Table}; 
     use sui::coin::{Coin};
     use sui::sui::SUI;
@@ -47,6 +48,9 @@ module notary::assets_type {
     }
     // one time witness 
     struct ASSETS_TYPE has drop {}
+
+    // kiosk_extension witness
+    struct NotaryKioskExtWitness has drop {}
 
     /// Publisher capability object
     struct AssetsTypePublisher has key { id: UID, publisher: Publisher }
@@ -102,9 +106,13 @@ module notary::assets_type {
     // Users will create kiosk and protocol will store these caps in share object
     public fun create_kiosk(share: &mut ListedTypes, ctx: &mut TxContext) {
         let(kiosk, kiosk_cap) = kiosk::new(ctx);
-
-        transfer::public_share_object(kiosk);
-
+        // define the witness
+        let witness = NotaryKioskExtWitness {};
+        // create and extension for using bag
+        ke::add<NotaryKioskExtWitness>(witness, &mut kiosk, &kiosk_cap, 00, ctx);
+        // share the kiosk
+        transfer::public_share_object(kiosk); 
+        // keep kiosk_cap in the protocol
         table::add(&mut share.kiosk_caps, sender(ctx), kiosk_cap);
     }
 

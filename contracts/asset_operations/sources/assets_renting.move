@@ -1,6 +1,6 @@
 module notary::assets_renting {
     use std::string::{String};
-    use std::debug;
+    //use std::debug;
     
     use sui::tx_context::{TxContext, sender};
     use sui::object::{Self, UID, ID};
@@ -35,7 +35,7 @@ module notary::assets_renting {
         purchase_cap: Table<ID, PurchaseCap<Asset>>,
         deposit: Balance<SUI>
     }
-
+    // contract must be shared 
     struct Contract has key, store {
         id: UID,
         owner: address,
@@ -193,8 +193,9 @@ module notary::assets_renting {
         assert!(kiosk::owner(kiosk1) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
         // get the contract between owner and leaser 
         let contract = table::borrow_mut(&mut share.contracts, item_id);
-        let purch_cap = table::remove(&mut share.purchase_cap, item_id);
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
+
+        let purch_cap = table::remove(&mut share.purchase_cap, item_id);
 
         if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
             unpaid_rent(listed, share, kiosk1, kiosk2, item_id, purch_cap, policy, payment, ctx);
