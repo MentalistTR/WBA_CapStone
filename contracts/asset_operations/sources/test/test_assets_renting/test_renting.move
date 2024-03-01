@@ -590,17 +590,17 @@ module notary::test_renting {
         // time has been increased 29 days. 
         next_tx(scenario, TEST_ADDRESS2);
         {
-            let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let payment_ = mint_for_testing<SUI>(1000, ts::ctx(scenario));
             let clock= ts::take_shared_by_id<Clock>(scenario, *clock1_id);
     
             // increment the current time 30 days
             clock::increment_for_testing(&mut clock, (86400 * 29));
             
-            ar::pay_monthly_rent(&mut contracts, payment_, asset_id1, ts::ctx(scenario));
+            ar::pay_monthly_rent(&mut kiosk1_shared, payment_, asset_id1, ts::ctx(scenario));
 
             ts::return_shared(clock);
-            ts::return_shared(contracts);
+            ts::return_shared(kiosk1_shared);
         };
         // Owner trying to get his asset 
         next_tx(scenario, TEST_ADDRESS1); 
@@ -782,9 +782,11 @@ module notary::test_renting {
         {
             let contracts = ts::take_shared<Contracts>(scenario);
             let reason_ = string::utf8(b"asd");
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
-            ar::new_complain(&mut contracts, reason_, asset_id1, ts::ctx(scenario));
+            ar::new_complain(&mut contracts, &mut kiosk1_shared, reason_, asset_id1, ts::ctx(scenario));
 
+            ts::return_shared(kiosk1_shared);
             ts::return_shared(contracts);
         };
         // admin decision is true 
@@ -792,12 +794,14 @@ module notary::test_renting {
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
-            ar::provision(&admin_cap, &mut contracts, asset_id1, true);
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, asset_id1, true);
 
-            let rental_count = ar::test_get_contract_rental_count(&contracts, asset_id1);
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, asset_id1);
             assert_eq(rental_count, 2);
-
+            
+            ts::return_shared(kiosk1_shared);
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(contracts);
         };
@@ -806,9 +810,11 @@ module notary::test_renting {
         {
             let contracts = ts::take_shared<Contracts>(scenario);
             let reason_ = string::utf8(b"asd");
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
-            ar::new_complain(&mut contracts, reason_, asset_id1, ts::ctx(scenario));
+            ar::new_complain(&mut contracts, &mut kiosk1_shared,  reason_, asset_id1, ts::ctx(scenario));
 
+            ts::return_shared(kiosk1_shared);
             ts::return_shared(contracts);
         };
         // admin decision is true 
@@ -816,12 +822,14 @@ module notary::test_renting {
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
-            ar::provision(&admin_cap, &mut contracts, asset_id1, true);
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, asset_id1, true);
 
-            let rental_count = ar::test_get_contract_rental_count(&contracts, asset_id1);
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, asset_id1);
             assert_eq(rental_count, 1);
 
+            ts::return_shared(kiosk1_shared);
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(contracts);
         };
