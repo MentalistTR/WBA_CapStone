@@ -40,7 +40,7 @@ module notary::assets {
         property: VecMap<String, String>,
     }
 
-    struct Wrapper has key {
+    struct Wrapper has key, store {
         id: UID,
         asset: Asset
     }
@@ -53,7 +53,7 @@ module notary::assets {
         rent
     }
 
-    public fun unwrap(w: Wrapper, ctx: &mut TxContext) : Asset {
+    public fun unwrap(w: Wrapper) : Asset {
         let Wrapper {id, asset} = w;
         object::delete(id);
         asset

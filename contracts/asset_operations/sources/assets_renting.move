@@ -15,7 +15,7 @@ module notary::assets_renting {
     use sui::sui::SUI;
     use sui::clock::{Clock, timestamp_ms}; 
 
-    use notary::assets::{Self, Asset};
+    use notary::assets::{Self, Asset, Wrapper};
     use notary::assets_type::{Self as at, ListedTypes, AdminCap, NotaryKioskExtWitness};
 
     // =================== Errors ===================
@@ -33,7 +33,7 @@ module notary::assets_renting {
     struct Contracts has key {
         id: UID,
         complaints: Table<ID, Complaint>,
-        purchase_cap: Table<ID, PurchaseCap<Asset>>,
+        purchase_cap: Table<ID, PurchaseCap<Wrapper>>,
     }
   
     struct Contract has key, store {
@@ -62,7 +62,7 @@ module notary::assets_renting {
         transfer::share_object(Contracts{
             id: object::new(ctx),
             complaints: table::new(ctx),
-            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx),
+            purchase_cap: table::new<ID, PurchaseCap<Wrapper>>(ctx),
         });
     }
 
@@ -82,13 +82,20 @@ module notary::assets_renting {
         // set the kiosk cap 
         let kiosk_cap = at::get_cap(share, sender(ctx));
          // borrow the asset 
-        let asset = kiosk::borrow<Asset>(kiosk, kiosk_cap, asset_id);
-        assert!(assets::is_approved(asset), ERROR_NOT_APPROVED);
-        assert!(!assets::is_renting(asset), ERROR_ASSET_IN_RENTING);
-        let purch_cap = kiosk::list_with_purchase_cap<Asset>(
+        let asset = kiosk::take<Asset>(kiosk, kiosk_cap, asset_id);
+        assert!(assets::is_approved(&asset), ERROR_NOT_APPROVED);
+        assert!(!assets::is_renting(&asset), ERROR_ASSET_IN_RENTING);
+        // wrap the asset 
+        let wrapper = assets::wrap(asset, ctx);
+        // define the wrapper id 
+        let wrapper_id = object::id(&wrapper);
+        // place the wrapper into the kiosk
+        kiosk::place(kiosk, kiosk_cap, wrapper);
+
+        let purch_cap = kiosk::list_with_purchase_cap<Wrapper>(
             kiosk,
             kiosk_cap,
-            asset_id,
+            wrapper_id,
             price,
             ctx
         );
@@ -101,9 +108,9 @@ module notary::assets_renting {
         listed_types: &ListedTypes,
         owner_kiosk: &mut Kiosk,
         leaser_kiosk: &mut Kiosk,
-        policy: &TransferPolicy<Asset>,
-        purch_cap: PurchaseCap<Asset>,
-        asset_id: ID,
+        policy: &TransferPolicy<Wrapper>,
+        purch_cap: PurchaseCap<Wrapper>,
+        wrapper_id: ID,
         payment: Coin<SUI>, // it should be equal to 1 month rental price + deposit price 
         rental_period: u64,
         clock: &Clock,
@@ -117,7 +124,7 @@ module notary::assets_renting {
         // coin for put to purchase_with_cap
         let payment_purchase = coin::split(&mut payment, (kiosk::purchase_cap_min_price(&purch_cap)), ctx);
         // purchase the asset from kiosk
-        let (asset, request) = kiosk::purchase_with_cap<Asset>(
+        let (wrapper, request) = kiosk::purchase_with_cap<Wrapper>(
             owner_kiosk,
             purch_cap,
             payment_purchase
@@ -135,7 +142,7 @@ module notary::assets_renting {
             id: object::new(ctx),
             owner: kiosk::owner(owner_kiosk),
             leaser: sender(ctx),
-            item: asset_id,
+            item: wrapper_id,
             deposit: balance::zero(),
             rental_period:rental_period,
             rental_count: 1, 
@@ -148,24 +155,24 @@ module notary::assets_renting {
         let witness = at::get_witness();
         // keep the contract in owner's bag
         let owner_bag = ke::storage_mut<NotaryKioskExtWitness>(witness, owner_kiosk);
-        bag::add<ID,Contract>( owner_bag, asset_id, contract);
+        bag::add<ID,Contract>( owner_bag, wrapper_id, contract);
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-        // set the on_rent variable to true
-        assets::active_rent(&mut asset);
+        // // set the on_rent variable to true
+        // assets::active_rent(&mut asset);
         // place the asset into the kiosk
         let kiosk_cap = at::get_cap(listed_types, sender(ctx));
         // place the item into the leaser kiosk
-        kiosk::place(leaser_kiosk, kiosk_cap, asset);
+        kiosk::place(leaser_kiosk, kiosk_cap, wrapper);
         // list the asset and keep the pruch_cap in protocol
-        let leaser_purch_cap = kiosk::list_with_purchase_cap<Asset>(
+        let leaser_purch_cap = kiosk::list_with_purchase_cap<Wrapper>(
             leaser_kiosk,
             kiosk_cap,
-            asset_id,
+            wrapper_id,
             1,
             ctx
         );
-        table::add(&mut share.purchase_cap, asset_id, leaser_purch_cap);        
+        table::add(&mut share.purchase_cap, wrapper_id, leaser_purch_cap);        
     }
     // Leasers must pay their rent before the end of the month
     public fun pay_monthly_rent(owner_kiosk: &mut Kiosk, payment: Coin<SUI>, item_id: ID, ctx: &mut TxContext) {
@@ -189,8 +196,8 @@ module notary::assets_renting {
         share: &mut Contracts,
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
-        item_id : ID,
-        policy: &TransferPolicy<Asset>,
+        wrapper_id : ID,
+        policy: &TransferPolicy<Wrapper>,
         payment: Coin<SUI>,
         clock: &Clock,
         ctx: &mut TxContext
@@ -202,14 +209,14 @@ module notary::assets_renting {
         // get the owner's bag
         let owner_bag = ke::storage_mut(witness, kiosk1);
         // get the contract_mut
-        let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
 
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
 
-        let purch_cap = table::remove(&mut share.purchase_cap, item_id);
+        let purch_cap = table::remove(&mut share.purchase_cap, wrapper_id);
 
         if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
-            unpaid_rent(listed, kiosk1, kiosk2, item_id, purch_cap, policy, payment, ctx);
+            unpaid_rent(listed, kiosk1, kiosk2, wrapper_id, purch_cap, policy, payment, ctx);
         }
         else { 
         // check the time
@@ -217,13 +224,15 @@ module notary::assets_renting {
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
-        let(asset, request) = kiosk::purchase_with_cap<Asset>(
+        let(wrapper, request) = kiosk::purchase_with_cap<Wrapper>(
             kiosk2,
             purch_cap,
             payment,
         );
         // confirm the request
         policy::confirm_request(policy, request);
+        //destructure the wrapp
+        let asset = assets::unwrap(wrapper);
         // disable the on_rent boolean
         assets::disable_rent(&mut asset);
         // return the contract_balance as u64
@@ -240,13 +249,13 @@ module notary::assets_renting {
         };
     } 
     // owner or leaser can create complain
-    public fun new_complain(share: &mut Contracts, owner_kiosk: &mut Kiosk, reason_: String, asset_id: ID, ctx: &mut TxContext) {
+    public fun new_complain(share: &mut Contracts, owner_kiosk: &mut Kiosk, reason_: String, wrapper_id: ID, ctx: &mut TxContext) {
         // define the witness
         let witness = at::get_witness();
         // get the owner's bag
         let owner_bag = ke::storage_mut(witness, owner_kiosk);
         // get the contract_mut
-        let contract = bag::borrow_mut<ID, Contract>(owner_bag, asset_id);
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
         let leaser = contract.leaser;
         let owner = contract.owner;
         let pleader_ = sender(ctx);
@@ -265,23 +274,23 @@ module notary::assets_renting {
             reason: reason_,
             decision: false,
         };
-        table::add(&mut share.complaints, asset_id, complain_);
+        table::add(&mut share.complaints, wrapper_id, complain_);
     }
     // admin should judge the complain
     public fun provision(
         _: &AdminCap,
         share: &mut Contracts,
         owner_kiosk: &mut Kiosk,
-        asset_id : ID,
+        wrapper_id : ID,
         decision: bool,
     ) {
         let witness = at::get_witness();
         // get the owner's bag
         let owner_bag = ke::storage_mut(witness, owner_kiosk);
         // get the contract_mut
-        let contract = bag::borrow_mut<ID, Contract>(owner_bag, asset_id);
+        let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
         // remove the complain from table
-        let complain = table::remove(&mut share.complaints, asset_id);
+        let complain = table::remove(&mut share.complaints, wrapper_id);
 
         let leaser = contract.leaser;
         let complainant_ = complain.complainant;
@@ -304,8 +313,8 @@ module notary::assets_renting {
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
         item_id : ID,
-        purch_cap: PurchaseCap<Asset>,
-        policy: &TransferPolicy<Asset>,
+        purch_cap: PurchaseCap<Wrapper>,
+        policy: &TransferPolicy<Wrapper>,
         payment: Coin<SUI>,
         ctx: &mut TxContext
     ) {
@@ -314,13 +323,15 @@ module notary::assets_renting {
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
-        let(asset, request) = kiosk::purchase_with_cap<Asset>(
+        let(wrapper, request) = kiosk::purchase_with_cap<Wrapper>(
             kiosk2,
             purch_cap,
             payment,
         );
         // confirm the request
         policy::confirm_request(policy, request);
+        //destructure the wrapp
+        let asset = assets::unwrap(wrapper);
         // disable the on_rent boolean
         assets::disable_rent(&mut asset);
         // place the asset into the kiosk
