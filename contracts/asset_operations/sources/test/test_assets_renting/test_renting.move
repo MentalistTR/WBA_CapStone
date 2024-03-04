@@ -62,7 +62,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -166,7 +166,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -304,7 +304,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -481,7 +481,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -671,7 +671,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);

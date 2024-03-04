@@ -83,11 +83,11 @@ module notary::assets_type {
         vector::push_back(&mut share.types, type);
     }
     // admin can create new_policy for sales or renting operations. 
-    public fun new_policy(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
+    public fun new_policy<T>(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
         // set the publisher
         let publisher = get_publisher(publish);
         // create an transfer_policy and tp_cap
-        let (transfer_policy, tp_cap) = policy::new<Asset>(publisher, ctx);
+        let (transfer_policy, tp_cap) = policy::new<T>(publisher, ctx);
         // transfer the objects 
         transfer::public_transfer(tp_cap, tx_context::sender(ctx));
         transfer::public_share_object(transfer_policy);

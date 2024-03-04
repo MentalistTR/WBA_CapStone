@@ -87,7 +87,7 @@ module notary::test_assets_type {
         let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
        
         // admin should create an transferpolicy
-        helper_new_policy(scenario);
+        helper_new_policy<Asset>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
