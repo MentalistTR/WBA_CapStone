@@ -215,7 +215,7 @@ module notary::assets_type {
             // place the asset into the kiosk
             let kiosk_cap = table::borrow(&share.kiosk_caps, sender(ctx));
             kiosk::place(kiosk2, kiosk_cap, item);
-        }
+    }
         
     // Kiosk owner's can withdraw the profits
     public fun withdraw_profits(

@@ -28,11 +28,11 @@ module rules::loan_duration {
         policy: &TransferPolicy<T>,
         request: &mut TransferRequest<T>,
         kiosk: &Kiosk,
-        duration: u64
+        duration: u64  
     ) {
         let config: &Config = policy::get_rule(Rule {}, policy);
 
-        assert!(duration >= 6 && duration <=12, ERROR_INVALID_DURATION);
+        assert!(duration >= config.minumum_duration && duration <= config.maximum_duration, ERROR_INVALID_DURATION);
        
         policy::add_receipt(Rule {}, request);
     }

@@ -14,7 +14,6 @@ module notary::assets_renting {
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
     use sui::clock::{Clock, timestamp_ms}; 
-    // use sui::transfer_policy::{Self as policy, TransferPolicy};
 
     use notary::assets::{Self, Asset};
     use notary::assets_type::{Self as at, ListedTypes, AdminCap, NotaryKioskExtWitness};
@@ -357,6 +356,4 @@ module notary::assets_renting {
         let contract = bag::borrow<ID, Contract>(owner_bag, item_id);
         contract.rental_count
     }
-
-
 }

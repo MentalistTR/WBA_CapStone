@@ -40,6 +40,25 @@ module notary::assets {
         property: VecMap<String, String>,
     }
 
+    struct Wrapper has key {
+        id: UID,
+        asset: Asset
+    }
+
+    public fun wrap(empty: Asset, ctx: &mut TxContext) : Wrapper {
+        let rent = Wrapper {
+            id: object::new(ctx),
+            asset:empty
+        };
+        rent
+    }
+
+    public fun unwrap(w: Wrapper, ctx: &mut TxContext) : Asset {
+        let Wrapper {id, asset} = w;
+        object::delete(id);
+        asset
+    }
+
     // create any asset and place it to kiosk. 
     public fun create_asset(
         type: String,
