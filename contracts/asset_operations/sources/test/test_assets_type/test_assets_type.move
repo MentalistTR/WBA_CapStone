@@ -248,8 +248,6 @@ module notary::test_assets_type {
             let kiosk1_ = ts::created(&kiosk1_data);
             let kiosk1_id = vector::borrow(&kiosk1_, 0); 
 
-            let kiosk1_deleted = ts::deleted(&kiosk1_data);
-
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
             let shared = ts::take_shared<ListedTypes>(scenario);
@@ -274,8 +272,6 @@ module notary::test_assets_type {
             ts::return_shared(shared);
         };
 
-        let purchase_data = next_tx(scenario, TEST_ADDRESS1);
-    
         // TEST_ADDRESS2 is going to buy asset from address 1
         next_tx(scenario, TEST_ADDRESS2);
         {
@@ -286,8 +282,7 @@ module notary::test_assets_type {
             let kiosk1_id = vector::borrow(&kiosk1_created, 0);
 
             let kiosk2_created = ts::created(&kiosk2_data);
-            let kiosk2_deleted = ts::deleted(&kiosk2_data);
-
+        
             let kiosk2_id = vector::borrow(&kiosk2_created, 0); 
            
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
@@ -295,9 +290,6 @@ module notary::test_assets_type {
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let asset_id = asset_id1;
-
-            let purchase_written = ts::deleted(&purchase_data);
-            
 
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
 
@@ -361,9 +353,6 @@ module notary::test_assets_type {
             let kiosk2 = ts::created(&kiosk2_data);
             let kiosk2_id = vector::borrow(&kiosk2, 0);
 
-            let kiosk1_deleted = ts::deleted(&kiosk1_data);
-            let kiosk2_deleted = ts::deleted(&kiosk2_data);
-
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
 
             let shared = ts::take_shared<ListedTypes>(scenario);
@@ -394,8 +383,7 @@ module notary::test_assets_type {
             let shared = ts::take_shared<ListedTypes>(scenario);
 
             let kiosk1_created = ts::created(&kiosk1_data);
-            let kiosk1_deleted = ts::deleted(&kiosk1_data);
-
+        
             let kiosk1_id = vector::borrow(&kiosk1_created, 0); 
 
             let kiosk2_created = ts::created(&kiosk2_data);

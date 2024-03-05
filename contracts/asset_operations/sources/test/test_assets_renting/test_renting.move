@@ -1,24 +1,19 @@
 #[test_only]
 module notary::test_renting {
-    use sui::transfer;
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
-    use sui::package::{Publisher};
-    use sui::transfer_policy::{Self as policy, TransferPolicy, TransferPolicyCap};
+    use sui::kiosk::{Self, Kiosk, PurchaseCap};
+    use sui::transfer_policy::{TransferPolicy, TransferPolicyCap};
     use sui::object::{Self};
     use sui::sui::SUI;
     use sui::coin::{mint_for_testing};
-    use sui::coin::{Self, Coin};
-    use sui::table;
     use sui::clock::{Self, Clock};
     
-    use std::string::{Self, String};
+    use std::string::{Self};
     use std::vector::{Self};
     use std::debug;
-    use std::option;
 
-    use notary::assets::{Self, Asset, Wrapper};
+    use notary::assets::{Wrapper};
     use notary::helpers::{init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     use notary::assets_renting::{Self as ar, Contracts};
@@ -60,10 +55,9 @@ module notary::test_renting {
             ts::return_shared(shared);
         };
         // set the kiosk2_data
-        let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
-        let kiosk2_ = ts::created(&kiosk2_data);
-        let kiosk2_id = vector::borrow(&kiosk2_, 0); 
-       
+        // let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
+        // let kiosk2_ = ts::created(&kiosk2_data);
+     
         // admin should create an transferpolicy
         helper_new_policy<Wrapper>(scenario);
 
@@ -480,7 +474,7 @@ module notary::test_renting {
             clock::increment_for_testing(&mut clock, (86400 * 29));
 
             ar::get_asset(
-                &mut listed_shared,
+                & listed_shared,
                 &mut contracts,
                 &mut kiosk1_shared,
                 &mut kiosk2_shared,
@@ -716,7 +710,7 @@ module notary::test_renting {
             clock::increment_for_testing(&mut clock, (86400 * 32));
 
             ar::get_asset(
-                &mut listed_shared,
+                & listed_shared,
                 &mut contracts,
                 &mut kiosk1_shared,
                 &mut kiosk2_shared,
@@ -909,9 +903,9 @@ module notary::test_renting {
             ts::return_shared(listed_shared);
         };
 
-        let clock_data = next_tx(scenario, TEST_ADDRESS2);
-        let clock1_ = ts::created(&clock_data);
-        let clock1_id = vector::borrow(&clock1_, 0); 
+        //let clock_data = next_tx(scenario, TEST_ADDRESS2);
+        //let clock1_ = ts::created(&clock_data);
+        //let clock1_id = vector::borrow(&clock1_, 0); 
 
         // leaser created complain
         next_tx(scenario, TEST_ADDRESS2);

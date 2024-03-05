@@ -141,8 +141,6 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-        // set the amount of deposit_amount before join two balances
-        let deposit_amount = coin::value(&payment);
         // calculate the end time as a second
         let end_time: u64 = (86400 * 30) * (rental_period);
         // set the contract
@@ -272,19 +270,19 @@ module notary::assets_renting {
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
         let leaser = contract.leaser;
         let owner = contract.owner;
-        let pleader_ = sender(ctx);
+        let pleader = sender(ctx);
 
         assert!(leaser == sender(ctx) || owner == sender(ctx), ERROR_INCORRECT_LEASER);
 
         if(sender(ctx) == leaser) {
-            let pleader_ = owner;
+            let pleader = owner;
         } else {
-            let pleader_ = leaser;
+            let pleader = leaser;
         };
         // define the complain
         let complain_ = Complaint{
             complainant: sender(ctx),
-            pleader: pleader_,
+            pleader: pleader,
             reason: reason_,
             decision: false,
         };
