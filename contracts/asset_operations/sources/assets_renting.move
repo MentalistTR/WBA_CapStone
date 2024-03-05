@@ -125,9 +125,6 @@ module notary::assets_renting {
         clock: &Clock,
         ctx: &mut TxContext 
     ) {
-        // the rental_period should be between 6 and 12
-        // assert!(rental_period >= 6 && rental_period <=12, ERROR_INVALID_DURATION);
-
         // calculate the payment. It should be greater or equal to total renting price.
         assert!(
             coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * 2), ERROR_INVALID_PRICE);
@@ -192,6 +189,8 @@ module notary::assets_renting {
         let owner_bag = ke::storage_mut(witness, owner_kiosk);
         // get the contract_mut
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
+        // check the rental count. It should be lower than 12
+        assert!(contract.rental_count < 12, ERROR_INVALID_DURATION);
         // check the payment price 
         assert!(coin::value(&payment) >= (balance::value(&contract.deposit)), ERROR_INVALID_PRICE);
         // check the leaser address

@@ -1,32 +1,19 @@
 #[test_only]
 module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
-    use sui::transfer;
-    use sui::coin::{mint_for_testing};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
-    use sui::transfer_policy::{TransferPolicy};
-    use sui::test_utils::{assert_eq};
-    use sui::object::{Self};
-    use sui::clock::{Self, Clock};
-    use sui::coin::{Self, Coin};
-    use sui::sui::SUI;
-
+ 
     use std::string::{Self};
     // use std::option::{Self};
     // use std::debug;
-    use std::vector;
 
-    use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
+
+    use notary::lira_stable_coin::{return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
-    use notary:: assets_renting::{Self as ar, Contracts, test_renting_init};
-    use notary::assets::{Self, Asset};
+    use notary:: assets_renting::{test_renting_init};
 
     const ADMIN: address = @0xA;
-    const TEST_ADDRESS1: address = @0xB;
-    const TEST_ADDRESS2: address = @0xC;
-    const TEST_ADDRESS3: address = @0xD;
-
+    
     public fun helper_add_types(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {
