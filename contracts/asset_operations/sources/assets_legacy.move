@@ -1,4 +1,5 @@
 module notary::assets_legacy {
+    use sui::object;
 
 
 
@@ -26,7 +27,4 @@ module notary::assets_legacy {
 
 
 
-
-
-    
 }
