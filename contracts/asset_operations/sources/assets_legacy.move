@@ -19,6 +19,12 @@ module notary::assets_legacy {
 
     // =================== Errors ===================
 
+    const ERROR_INVALID_ARRAY_LENGTH: u64 = 0;
+    const ERROR_INVALID_PERCENTAGE_SUM: u64 = 1;
+    const ERROR_YOU_ARE_NOT_SHAREHOLDER:u64 =2;
+    const ERROR_FUNCTION_DISABLED:u64 = 3;
+    const ERROR_YOU_ARE_NOT_OWNER:u64 = 4;
+
 
     // =================== Structs ===================
 
@@ -100,6 +106,36 @@ module notary::assets_legacy {
              // if it is not lets add it.
             bag::add(bag_, name_string, balance);
         }
+    }
+    // 
+    public fun new_heirs(legacy: &mut Legacy, shareholder_address:vector<address>, shareholder_percentage:vector<u64>, ctx: &mut TxContext) {
+        // check the shareobject owner
+        assert!(legacy.owner == sender(ctx), ERROR_YOU_ARE_NOT_OWNER);
+        // check input length >= 1 
+        assert!((vector::length(&shareholder_address) >= 1 && 
+        vector::length(&shareholder_address) == vector::length(&shareholder_percentage)), 
+        ERROR_INVALID_ARRAY_LENGTH);
+        // check percentange sum must be equal to 100 
+        let percentage_sum:u64 = 0;
+
+        while(!vector::is_empty(&legacy.old_heirs)) {
+            // Remove the old shareholders from table. 
+            let shareholder_address = vector::pop_back(&mut legacy.old_heirs);
+            table::remove(&mut legacy.heirs_percentage, shareholder_address);
+        };
+         // add shareholders to table. 
+        while(!vector::is_empty(&shareholder_address)) {
+            let shareholder_address = vector::pop_back(&mut shareholder_address); 
+            let shareholder_percentage = vector::pop_back(&mut shareholder_percentage);
+            // add new shareholders to old_shareholders vector. 
+            vector::push_back(&mut legacy.old_heirs, shareholder_address);   
+            // add table to new shareholders and theirs percentange
+            table::add(&mut legacy.heirs_percentage, shareholder_address , shareholder_percentage);
+             // sum percentage
+            percentage_sum = percentage_sum + shareholder_percentage;
+        };
+            // check percentage is equal to 100.
+            assert!(percentage_sum == 10000, ERROR_INVALID_PERCENTAGE_SUM);
     }
 
 
