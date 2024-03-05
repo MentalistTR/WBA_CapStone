@@ -117,9 +117,9 @@ module notary::assets_legacy {
         ERROR_INVALID_ARRAY_LENGTH);
         // check percentange sum must be equal to 100 
         let percentage_sum:u64 = 0;
-
+        // remove the old heirs
         while(!vector::is_empty(&legacy.old_heirs)) {
-            // Remove the old shareholders from table. 
+            // Remove the old heirs from table. 
             let shareholder_address = vector::pop_back(&mut legacy.old_heirs);
             table::remove(&mut legacy.heirs_percentage, shareholder_address);
         };
@@ -127,9 +127,9 @@ module notary::assets_legacy {
         while(!vector::is_empty(&shareholder_address)) {
             let shareholder_address = vector::pop_back(&mut shareholder_address); 
             let shareholder_percentage = vector::pop_back(&mut shareholder_percentage);
-            // add new shareholders to old_shareholders vector. 
+            // add new heirs to old heirs vector. 
             vector::push_back(&mut legacy.old_heirs, shareholder_address);   
-            // add table to new shareholders and theirs percentange
+            // add table to new heirs and theirs percentange
             table::add(&mut legacy.heirs_percentage, shareholder_address , shareholder_percentage);
              // sum percentage
             percentage_sum = percentage_sum + shareholder_percentage;
