@@ -1,6 +1,7 @@
 module notary::assets_renting {
     use std::string::{String};
-    //use std::debug;
+    use std::debug;
+    use std::vector;
 
     use sui::tx_context::{TxContext, sender};
     use sui::object::{Self, UID, ID};
@@ -34,6 +35,7 @@ module notary::assets_renting {
         id: UID,
         complaints: Table<ID, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Wrapper>>,
+        wrapper: vector<ID> // FIXME: DELETE ME !! 
     }
   
     struct Contract has key, store {
@@ -63,6 +65,7 @@ module notary::assets_renting {
             id: object::new(ctx),
             complaints: table::new(ctx),
             purchase_cap: table::new<ID, PurchaseCap<Wrapper>>(ctx),
+            wrapper: vector::empty()
         });
     }
 
@@ -71,6 +74,7 @@ module notary::assets_renting {
     // list the asset for spesific address
     public fun list_with_purchase_cap(
         share: &mut ListedTypes,
+        contract: &mut Contracts,
         kiosk: &mut Kiosk,
         asset_id: ID,
         price: u64,
@@ -88,10 +92,13 @@ module notary::assets_renting {
         // wrap the asset 
         let wrapper = assets::wrap(asset, ctx);
         // define the wrapper id 
-        let wrapper_id = object::id(&wrapper);
+        let wrapper_id = object::id(&wrapper);  
+        vector::push_back(&mut contract.wrapper, wrapper_id);  // FIXME: DELETE ME !!
+
+        //debug::print(&wrapper_id);
         // place the wrapper into the kiosk
         kiosk::place(kiosk, kiosk_cap, wrapper);
-
+        
         let purch_cap = kiosk::list_with_purchase_cap<Wrapper>(
             kiosk,
             kiosk_cap,
@@ -366,5 +373,11 @@ module notary::assets_renting {
         let owner_bag = ke::storage(witness, self);
         let contract = bag::borrow<ID, Contract>(owner_bag, item_id);
         contract.rental_count
+    }
+    #[test_only]
+    // get wrapper_id
+    public fun test_get_wrapper(self: &Contracts) : ID {
+       let id =  vector::borrow(&self.wrapper, 0);
+       *id
     }
 }

@@ -6,7 +6,7 @@ module notary::test_renting {
     use sui::kiosk::{Self, Kiosk, KioskOwnerCap, PurchaseCap};
     use sui::package::{Publisher};
     use sui::transfer_policy::{Self as policy, TransferPolicy};
-    use sui::object;
+    use sui::object::{Self};
     use sui::sui::SUI;
     use sui::coin::{mint_for_testing};
     use sui::coin::{Self, Coin};
@@ -18,7 +18,7 @@ module notary::test_renting {
     use std::debug;
     use std::option;
 
-    use notary::assets::{Self, Asset};
+    use notary::assets::{Self, Asset, Wrapper};
     use notary::helpers::{init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     use notary::assets_renting::{Self as ar, Contracts};
@@ -62,7 +62,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy<Asset>(scenario);
+        helper_new_policy<Wrapper>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -116,9 +116,11 @@ module notary::test_renting {
         {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let contracts = ts::take_shared<Contracts>(scenario);
 
             ar::list_with_purchase_cap(
                 &mut listed_shared,
+                &mut contracts,
                 &mut kiosk1_shared,
                 asset_id1,
                 1000,
@@ -127,6 +129,8 @@ module notary::test_renting {
             );
             ts::return_shared(listed_shared);
             ts::return_shared(kiosk1_shared);
+            ts::return_shared(contracts);
+
         };
         ts::end(scenario_test);
     }
@@ -166,7 +170,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy<Asset>(scenario);
+        helper_new_policy<Wrapper>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -220,9 +224,11 @@ module notary::test_renting {
         {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let contracts = ts::take_shared<Contracts>(scenario);
 
             ar::list_with_purchase_cap(
                 &mut listed_shared,
+                &mut contracts,
                 &mut kiosk1_shared,
                 asset_id1,
                 1000,
@@ -231,6 +237,7 @@ module notary::test_renting {
             );
             ts::return_shared(listed_shared);
             ts::return_shared(kiosk1_shared);
+            ts::return_shared(contracts);
         };
          // User2 renting the asset 1
         next_tx(scenario, TEST_ADDRESS2);
@@ -239,8 +246,8 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let purch_cap = ts::take_from_sender<PurchaseCap<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
+            let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(1500, ts::ctx(scenario));
             let rental_period = 12;
             let start_time = clock::create_for_testing(ts::ctx(scenario));
@@ -304,7 +311,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy<Asset>(scenario);
+        helper_new_policy<Wrapper>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -358,19 +365,26 @@ module notary::test_renting {
         {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-
+            let contracts = ts::take_shared<Contracts>(scenario);
             ar::list_with_purchase_cap(
                 &mut listed_shared,
+                &mut contracts,
                 &mut kiosk1_shared,
                 asset_id1,
                 1000,
                 TEST_ADDRESS2,
                 ts::ctx(scenario)
             );
-
+        let wrapper_data = next_tx(scenario,TEST_ADDRESS1);
+       // debug::print(&wrapper_data);
+            ts::return_shared(contracts);
             ts::return_shared(listed_shared);
             ts::return_shared(kiosk1_shared);
         };
+        let wrapper_data = next_tx(scenario,TEST_ADDRESS1);
+        // let wrapper_written = ts::transferred_to_account(&wrapper_data);
+        // let wrapper = vector::borrow(&wrapper_written, 1);
+        //debug::print(&wrapper_data);
         // User2 renting the asset 1
         next_tx(scenario, TEST_ADDRESS2);
         {
@@ -378,11 +392,12 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let purch_cap = ts::take_from_sender<PurchaseCap<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
+            let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(2000, ts::ctx(scenario));
             let rental_period = 12;
             let start_time = clock::create_for_testing(ts::ctx(scenario));
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
             ar::rent(
                 &mut contracts,
@@ -391,7 +406,7 @@ module notary::test_renting {
                 &mut kiosk2_shared,
                 &policy,
                 purch_cap,
-                asset_id1,
+                wrapper_id,
                 payment_,
                 rental_period,
                 &start_time,
@@ -415,9 +430,11 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(1, ts::ctx(scenario));
             let clock= ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
             // increment the current time 30 days
             clock::increment_for_testing(&mut clock, (86400 * 29));
 
@@ -426,7 +443,7 @@ module notary::test_renting {
                 &mut contracts,
                 &mut kiosk1_shared,
                 &mut kiosk2_shared,
-                asset_id1,
+                wrapper_id,
                 &policy,
                 payment_,
                 &clock,
@@ -481,7 +498,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy<Asset>(scenario);
+        helper_new_policy<Wrapper>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -535,16 +552,17 @@ module notary::test_renting {
         {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-
+            let contracts = ts::take_shared<Contracts>(scenario);
             ar::list_with_purchase_cap(
                 &mut listed_shared,
+                &mut contracts,
                 &mut kiosk1_shared,
                 asset_id1,
                 1000,
                 TEST_ADDRESS2,
                 ts::ctx(scenario)
             );
-
+            ts::return_shared(contracts);
             ts::return_shared(listed_shared);
             ts::return_shared(kiosk1_shared);
         };
@@ -555,11 +573,12 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let purch_cap = ts::take_from_sender<PurchaseCap<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
+            let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(2000, ts::ctx(scenario));
             let rental_period = 12;
             let start_time = clock::create_for_testing(ts::ctx(scenario));
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
             ar::rent(
                 &mut contracts,
@@ -568,7 +587,7 @@ module notary::test_renting {
                 &mut kiosk2_shared,
                 &policy,
                 purch_cap,
-                asset_id1,
+                wrapper_id,
                 payment_,
                 rental_period,
                 &start_time,
@@ -592,15 +611,17 @@ module notary::test_renting {
         {
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let payment_ = mint_for_testing<SUI>(1000, ts::ctx(scenario));
+            let contracts = ts::take_shared<Contracts>(scenario);
             let clock= ts::take_shared_by_id<Clock>(scenario, *clock1_id);
-    
+            let wrapper_id = ar::test_get_wrapper(&contracts);
             // increment the current time 30 days
             clock::increment_for_testing(&mut clock, (86400 * 29));
             
-            ar::pay_monthly_rent(&mut kiosk1_shared, payment_, asset_id1, ts::ctx(scenario));
+            ar::pay_monthly_rent(&mut kiosk1_shared, payment_, wrapper_id, ts::ctx(scenario));
 
             ts::return_shared(clock);
             ts::return_shared(kiosk1_shared);
+            ts::return_shared(contracts);
         };
         // Owner trying to get his asset 
         next_tx(scenario, TEST_ADDRESS1); 
@@ -609,9 +630,11 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(1, ts::ctx(scenario));
             let clock= ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
             // increment the current time 32 days
             clock::increment_for_testing(&mut clock, (86400 * 32));
 
@@ -620,7 +643,7 @@ module notary::test_renting {
                 &mut contracts,
                 &mut kiosk1_shared,
                 &mut kiosk2_shared,
-                asset_id1,
+                wrapper_id,
                 &policy,
                 payment_,
                 &clock,
@@ -671,7 +694,7 @@ module notary::test_renting {
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
         // admin should create an transferpolicy
-        helper_new_policy<Asset>(scenario);
+        helper_new_policy<Wrapper>(scenario);
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -725,16 +748,17 @@ module notary::test_renting {
         {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-
+            let contracts = ts::take_shared<Contracts>(scenario);
             ar::list_with_purchase_cap(
                 &mut listed_shared,
+                &mut contracts,
                 &mut kiosk1_shared,
                 asset_id1,
                 1000,
                 TEST_ADDRESS2,
                 ts::ctx(scenario)
             );
-
+            ts::return_shared(contracts);
             ts::return_shared(listed_shared);
             ts::return_shared(kiosk1_shared);
         };
@@ -745,11 +769,12 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
-            let purch_cap = ts::take_from_sender<PurchaseCap<Asset>>(scenario);
+            let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
+            let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
             let payment_ = mint_for_testing<SUI>(2000, ts::ctx(scenario));
             let rental_period = 12;
             let start_time = clock::create_for_testing(ts::ctx(scenario));
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
             ar::rent(
                 &mut contracts,
@@ -758,7 +783,7 @@ module notary::test_renting {
                 &mut kiosk2_shared,
                 &policy,
                 purch_cap,
-                asset_id1,
+                wrapper_id,
                 payment_,
                 rental_period,
                 &start_time,
@@ -783,8 +808,9 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let reason_ = string::utf8(b"asd");
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
-            ar::new_complain(&mut contracts, &mut kiosk1_shared, reason_, asset_id1, ts::ctx(scenario));
+            ar::new_complain(&mut contracts, &mut kiosk1_shared, reason_, wrapper_id, ts::ctx(scenario));
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(contracts);
@@ -795,10 +821,11 @@ module notary::test_renting {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
-            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, asset_id1, true);
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
 
-            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, asset_id1);
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
             assert_eq(rental_count, 2);
             
             ts::return_shared(kiosk1_shared);
@@ -811,8 +838,9 @@ module notary::test_renting {
             let contracts = ts::take_shared<Contracts>(scenario);
             let reason_ = string::utf8(b"asd");
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
-            ar::new_complain(&mut contracts, &mut kiosk1_shared,  reason_, asset_id1, ts::ctx(scenario));
+            ar::new_complain(&mut contracts, &mut kiosk1_shared,  reason_, wrapper_id, ts::ctx(scenario));
 
             ts::return_shared(kiosk1_shared);
             ts::return_shared(contracts);
@@ -823,10 +851,11 @@ module notary::test_renting {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let contracts = ts::take_shared<Contracts>(scenario);
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
 
-            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, asset_id1, true);
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
 
-            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, asset_id1);
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
             assert_eq(rental_count, 1);
 
             ts::return_shared(kiosk1_shared);

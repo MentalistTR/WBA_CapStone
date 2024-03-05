@@ -14,9 +14,10 @@ module notary::assets {
     use sui::tx_context::{TxContext};
     use sui::vec_set::{Self, VecSet};
     use sui::vec_map::{Self, VecMap};
-    use std::type_name::{TypeName};
 
+    use std::type_name::{TypeName};
     use std::string::{String};
+   // use std::debug;
 
     // === Friends ===
 
@@ -42,19 +43,23 @@ module notary::assets {
 
     struct Wrapper has key, store {
         id: UID,
+        owner: ID,
         asset: Asset
     }
 
     public fun wrap(empty: Asset, ctx: &mut TxContext) : Wrapper {
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
         let rent = Wrapper {
-            id: object::new(ctx),
+            id: id,
+            owner:inner, 
             asset:empty
         };
         rent
     }
 
     public fun unwrap(w: Wrapper) : Asset {
-        let Wrapper {id, asset} = w;
+        let Wrapper {id, owner: _, asset} = w;
         object::delete(id);
         asset
     }
