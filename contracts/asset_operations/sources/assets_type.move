@@ -23,6 +23,7 @@ module notary::assets_type {
     use notary::assets::{Self, Asset};
 
     friend notary::assets_renting;
+    friend notary::assets_legacy;
 
     // =================== Errors ===================
 
