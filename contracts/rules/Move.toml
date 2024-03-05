@@ -1,8 +1,11 @@
 [package]
 name = "rules"
+version = "0.0.1"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet"}
 
 [addresses]
 rules = "0x0"
+std = "0x1"
+sui="0x2"

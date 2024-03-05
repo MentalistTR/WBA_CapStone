@@ -22,12 +22,13 @@ module rules::time_duration {
         policy: &TransferPolicy<T>,
         request: &mut TransferRequest<T>,
         clock: &Clock,
-        contract_end: u64
-      
+        contract_end: u64,
+        contract_start: u64,
+        contract_rental: u64
     ) {
         let config: &Config = policy::get_rule(Rule {}, policy);
 
-        assert!(timestamp_ms(clock) >= contract_end, ERROR_INVALID_DURATION);
+        assert!(timestamp_ms(clock) >= contract_end || (timestamp_ms(clock) - (contract_start)) / ((86400 * 30)) + 1 > contract_rental, ERROR_INVALID_DURATION);
        
         policy::add_receipt(Rule {}, request);
     }

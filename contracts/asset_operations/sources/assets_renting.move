@@ -222,13 +222,15 @@ module notary::assets_renting {
         // get the contract_mut
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
         let contract_end = contract.end;
+        let contract_start = contract.start; 
+        let contract_rental = contract.rental_count;
 
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
 
         let purch_cap = table::remove(&mut share.purchase_cap, wrapper_id);
 
-        if((timestamp_ms(clock) - (contract.start)) / ((86400 * 30)) + 1 > contract.rental_count) {
-            unpaid_rent(listed, kiosk1, kiosk2, wrapper_id, purch_cap, policy, payment, ctx);
+        if((timestamp_ms(clock) - (contract_start)) / ((86400 * 30)) + 1 > contract_rental) {
+            unpaid_rent(listed, kiosk1, kiosk2, wrapper_id, purch_cap, policy, payment, clock, contract_end, contract_start, contract_rental, ctx);
         }
         else { 
         // check the time
@@ -241,7 +243,7 @@ module notary::assets_renting {
             purch_cap,
             payment,
         );
-        td::prove<Wrapper>(policy, &mut request, clock, contract_end);
+        td::prove<Wrapper>(policy, &mut request, clock, contract_end, contract_start, contract_end);
         // confirm the request
         policy::confirm_request(policy, request);
         //destructure the wrapp
@@ -329,6 +331,10 @@ module notary::assets_renting {
         purch_cap: PurchaseCap<Wrapper>,
         policy: &TransferPolicy<Wrapper>,
         payment: Coin<SUI>,
+        clock: &Clock,
+        contract_end: u64,
+        contract_start: u64,
+        contract_rental: u64,
         ctx: &mut TxContext
     ) {
         // be sure that sender is the owner of kiosk
@@ -341,6 +347,7 @@ module notary::assets_renting {
             purch_cap,
             payment,
         );
+        td::prove<Wrapper>(policy, &mut request, clock, contract_end, contract_start, contract_rental);
         // confirm the request
         policy::confirm_request(policy, request);
         //destructure the wrapp
