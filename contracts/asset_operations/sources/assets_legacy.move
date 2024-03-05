@@ -15,8 +15,6 @@ module notary::assets_legacy {
     use std::vector;
     use std::string;
 
-    
-
     // =================== Errors ===================
 
     const ERROR_INVALID_ARRAY_LENGTH: u64 = 0;
@@ -29,7 +27,6 @@ module notary::assets_legacy {
     // =================== Structs ===================
 
     
-
     /// We will keep the percentages and balances of Heirs here.
     /// 
     /// # Arguments
@@ -107,32 +104,32 @@ module notary::assets_legacy {
             bag::add(bag_, name_string, balance);
         }
     }
-    // 
-    public fun new_heirs(legacy: &mut Legacy, shareholder_address:vector<address>, shareholder_percentage:vector<u64>, ctx: &mut TxContext) {
+    // Users can set new heirs
+    public fun new_heirs(legacy: &mut Legacy, heir_address:vector<address>, heir_percentage:vector<u64>, ctx: &mut TxContext) {
         // check the shareobject owner
         assert!(legacy.owner == sender(ctx), ERROR_YOU_ARE_NOT_OWNER);
         // check input length >= 1 
-        assert!((vector::length(&shareholder_address) >= 1 && 
-        vector::length(&shareholder_address) == vector::length(&shareholder_percentage)), 
+        assert!((vector::length(&heir_address) >= 1 && 
+        vector::length(&heir_address) == vector::length(&heir_percentage)), 
         ERROR_INVALID_ARRAY_LENGTH);
-        // check percentange sum must be equal to 100 
+        // check percentange sum must be equal to 100 "
         let percentage_sum:u64 = 0;
         // remove the old heirs
         while(!vector::is_empty(&legacy.old_heirs)) {
             // Remove the old heirs from table. 
-            let shareholder_address = vector::pop_back(&mut legacy.old_heirs);
-            table::remove(&mut legacy.heirs_percentage, shareholder_address);
+            let heir_address = vector::pop_back(&mut legacy.old_heirs);
+            table::remove(&mut legacy.heirs_percentage, heir_address);
         };
          // add shareholders to table. 
-        while(!vector::is_empty(&shareholder_address)) {
-            let shareholder_address = vector::pop_back(&mut shareholder_address); 
-            let shareholder_percentage = vector::pop_back(&mut shareholder_percentage);
+        while(!vector::is_empty(&heir_address)) {
+            let heir_address = vector::pop_back(&mut heir_address); 
+            let heir_percentage = vector::pop_back(&mut heir_percentage);
             // add new heirs to old heirs vector. 
-            vector::push_back(&mut legacy.old_heirs, shareholder_address);   
+            vector::push_back(&mut legacy.old_heirs, heir_address);   
             // add table to new heirs and theirs percentange
-            table::add(&mut legacy.heirs_percentage, shareholder_address , shareholder_percentage);
+            table::add(&mut legacy.heirs_percentage, heir_address , heir_percentage);
              // sum percentage
-            percentage_sum = percentage_sum + shareholder_percentage;
+            percentage_sum = percentage_sum + heir_percentage;
         };
             // check percentage is equal to 100.
             assert!(percentage_sum == 10000, ERROR_INVALID_PERCENTAGE_SUM);
