@@ -589,7 +589,6 @@ module notary::test_renting {
         helper_new_policy<Wrapper>(scenario);
 
         let policy1_data = next_tx(scenario, TEST_ADDRESS1);
-        debug::print(&policy1_data);
         let policy1_shared = ts::shared(&policy1_data);
         let policy1_id = vector::borrow(&policy1_shared, 0);
 
@@ -738,219 +737,244 @@ module notary::test_renting {
         ts::end(scenario_test);
     }
 
-    // #[test]
-    // public fun test_complain() {
-    //     let scenario_test = init_test_helper();
-    //     let scenario = &mut scenario_test;
+    #[test]
+    public fun test_complain() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
 
-    //      // TEST_ADDRESS1 had created an kiosk
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let shared = ts::take_shared<ListedTypes>(scenario);
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
 
-    //         at::create_kiosk(&mut shared, ts::ctx(scenario));
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
           
-    //         ts::return_shared(shared);
-    //     };
-    //     // set the kiosk1_data
-    //     let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
-    //     let kiosk1_ = ts::created(&kiosk1_data);
-    //     let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0); 
      
-    //     // TEST_ADDRESS2 had created an kiosk
-    //     next_tx(scenario, TEST_ADDRESS2);
-    //     {
-    //         let shared = ts::take_shared<ListedTypes>(scenario);
+        // TEST_ADDRESS2 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
 
-    //         at::create_kiosk(&mut shared, ts::ctx(scenario));
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
 
-    //         ts::return_shared(shared);
-    //     };
-    //     // set the kiosk2_data
-    //     let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
-    //     let kiosk2_ = ts::created(&kiosk2_data);
-    //     let kiosk2_id = vector::borrow(&kiosk2_, 0); 
+            ts::return_shared(shared);
+        };
+        // set the kiosk2_data
+        let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
+        let kiosk2_ = ts::created(&kiosk2_data);
+        let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
-    //     // admin should create an transferpolicy
-    //     helper_new_policy<Wrapper>(scenario);
+     // admin should create an transferpolicy
+        helper_new_policy<Wrapper>(scenario);
 
-    //     // create an asset 1 
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
-    //         let listed_shared = ts::take_shared<ListedTypes>(scenario);
+        let policy1_data = next_tx(scenario, TEST_ADDRESS1);
+        let policy1_shared = ts::shared(&policy1_data);
+        let policy1_id = vector::borrow(&policy1_shared, 0);
 
-    //         let price: u64 = 10000;
-    //         let type = string::utf8(b"House");
-
-    //         at::create_asset(
-    //     &mut listed_shared,
-    //      &mut kiosk1_shared,
-    //                           type,
-    //        ts::ctx(scenario));
-
-    //        let asset_id = object::last_created(ts::ctx(scenario));
-
-    //         assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
-    //         assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
-    //         assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
-
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_shared(listed_shared);
-    //     };
-    //     // define the asset_id1
-    //     let asset_id1 = object::last_created(ts::ctx(scenario));
-
-    //     // ADMIN should approve the asset 1 before users list on kiosk 
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-
-    //         let listed_shared = ts::take_shared<ListedTypes>(scenario);
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-
-    //         at::approve(
-    //             &admin_cap,
-    //             &listed_shared,
-    //             &mut kiosk1_shared,
-    //             asset_id1,
-    //             TEST_ADDRESS1
-    //         );
-
-    //         ts::return_shared(listed_shared);
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_to_sender(scenario, admin_cap);
-    //     };
-    //     // User1 listing asset1 
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let listed_shared = ts::take_shared<ListedTypes>(scenario);
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         ar::list_with_purchase_cap(
-    //             &mut listed_shared,
-    //             &mut contracts,
-    //             &mut kiosk1_shared,
-    //             asset_id1,
-    //             1000,
-    //             TEST_ADDRESS2,
-    //             ts::ctx(scenario)
-    //         );
-    //         ts::return_shared(contracts);
-    //         ts::return_shared(listed_shared);
-    //         ts::return_shared(kiosk1_shared);
-    //     };
-    //     // User2 renting the asset 1
-    //     next_tx(scenario, TEST_ADDRESS2);
-    //     {
-    //         let listed_shared = ts::take_shared<ListedTypes>(scenario);
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
-    //         let policy = ts::take_shared<TransferPolicy<Wrapper>>(scenario);
-    //         let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
-    //         let payment_ = mint_for_testing<SUI>(2000, ts::ctx(scenario));
-    //         let rental_period = 12;
-    //         let start_time = clock::create_for_testing(ts::ctx(scenario));
-    //         let wrapper_id = ar::test_get_wrapper(&contracts);
-
-    //         ar::rent(
-    //             &mut contracts,
-    //             &listed_shared,
-    //             &mut kiosk1_shared,
-    //             &mut kiosk2_shared,
-    //             &policy,
-    //             purch_cap,
-    //             wrapper_id,
-    //             payment_,
-    //             rental_period,
-    //             &start_time,
-    //             ts::ctx(scenario)
-    //         );
-
-    //         clock::share_for_testing(start_time);            
-    //         ts::return_shared(policy);
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_shared(kiosk2_shared);
-    //         ts::return_shared(contracts);
-    //         ts::return_shared(listed_shared);
-    //     };
-
-    //     let clock_data = next_tx(scenario, TEST_ADDRESS2);
-    //     let clock1_ = ts::created(&clock_data);
-    //     let clock1_id = vector::borrow(&clock1_, 0); 
-
-    //     // leaser created complain
-    //     next_tx(scenario, TEST_ADDRESS2);
-    //     {
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         let reason_ = string::utf8(b"asd");
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let wrapper_id = ar::test_get_wrapper(&contracts);
-
-    //         ar::new_complain(&mut contracts, &mut kiosk1_shared, reason_, wrapper_id, ts::ctx(scenario));
-
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_shared(contracts);
-    //     };
-    //     // admin decision is true 
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let wrapper_id = ar::test_get_wrapper(&contracts);
-
-    //         ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
-
-    //         let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
-    //         assert_eq(rental_count, 2);
+        // Admin adds rules for wrapper 
+        next_tx(scenario, ADMIN);
+        {
+            let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy1_id);
+            let cap = ts::take_from_sender<TransferPolicyCap<Wrapper>>(scenario);
             
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_to_sender(scenario, admin_cap);
-    //         ts::return_shared(contracts);
-    //     };
-    //     // owner created complain
-    //     next_tx(scenario, TEST_ADDRESS1);
-    //     {
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         let reason_ = string::utf8(b"asd");
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let wrapper_id = ar::test_get_wrapper(&contracts);
+            ld::add<Wrapper>(&mut policy, &cap, 6, 12);
 
-    //         ar::new_complain(&mut contracts, &mut kiosk1_shared,  reason_, wrapper_id, ts::ctx(scenario));
+            ts::return_shared(policy);
+            ts::return_to_sender(scenario, cap);
+        };
 
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_shared(contracts);
-    //     };
-    //     // admin decision is true 
-    //     next_tx(scenario, ADMIN);
-    //     {
-    //         let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    //         let contracts = ts::take_shared<Contracts>(scenario);
-    //         let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
-    //         let wrapper_id = ar::test_get_wrapper(&contracts);
+        // admin should create an transferpolicy for get_asset operation
+        helper_new_policy<Wrapper>(scenario);
 
-    //         ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
+        let policy2_data = next_tx(scenario, TEST_ADDRESS1);
+        let policy2_shared = ts::shared(&policy2_data);
+        let policy2_id = vector::borrow(&policy2_shared, 0);
+        
+        next_tx(scenario, ADMIN);
+        {
+            let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy2_id);
+            let cap = ts::take_from_sender<TransferPolicyCap<Wrapper>>(scenario);
+            
+            td::add<Wrapper>(&mut policy, &cap);
 
-    //         let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
-    //         assert_eq(rental_count, 1);
+            ts::return_shared(policy);
+            ts::return_to_sender(scenario, cap);
+        };
 
-    //         ts::return_shared(kiosk1_shared);
-    //         ts::return_to_sender(scenario, admin_cap);
-    //         ts::return_shared(contracts);
-    //     };
+        // create an asset 1 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id); 
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
 
+            let price: u64 = 10000;
+            let type = string::utf8(b"House");
 
+            at::create_asset(
+        &mut listed_shared,
+         &mut kiosk1_shared,
+                              type,
+           ts::ctx(scenario));
 
+           let asset_id = object::last_created(ts::ctx(scenario));
 
+            assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
+            assert_eq(kiosk::is_locked(&kiosk1_shared, asset_id), false);
+            assert_eq(kiosk::is_listed(&kiosk1_shared, asset_id), false);
 
-    //     ts::end(scenario_test);
-    // }
+            ts::return_shared(kiosk1_shared);
+            ts::return_shared(listed_shared);
+        };
+        // define the asset_id1
+        let asset_id1 = object::last_created(ts::ctx(scenario));
 
- 
+        // ADMIN should approve the asset 1 before users list on kiosk 
+        next_tx(scenario, ADMIN);
+        {
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
 
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
 
+            at::approve(
+                &admin_cap,
+                &listed_shared,
+                &mut kiosk1_shared,
+                asset_id1,
+                TEST_ADDRESS1
+            );
 
+            ts::return_shared(listed_shared);
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+        };
+        // User1 listing asset1 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let contracts = ts::take_shared<Contracts>(scenario);
+            ar::list_with_purchase_cap(
+                &mut listed_shared,
+                &mut contracts,
+                &mut kiosk1_shared,
+                asset_id1,
+                1000,
+                TEST_ADDRESS2,
+                ts::ctx(scenario)
+            );
+            ts::return_shared(contracts);
+            ts::return_shared(listed_shared);
+            ts::return_shared(kiosk1_shared);
+        };
+        // User2 renting the asset 1
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let listed_shared = ts::take_shared<ListedTypes>(scenario);
+            let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
+            let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy1_id);
+            let purch_cap = ts::take_from_sender<PurchaseCap<Wrapper>>(scenario);
+            let payment_ = mint_for_testing<SUI>(2000, ts::ctx(scenario));
+            let rental_period = 12;
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
+            ar::rent(
+                &mut contracts,
+                &listed_shared,
+                &mut kiosk1_shared,
+                &mut kiosk2_shared,
+                &policy,
+                purch_cap,
+                wrapper_id,
+                payment_,
+                rental_period,
+                &start_time,
+                ts::ctx(scenario)
+            );
+
+            clock::share_for_testing(start_time);            
+            ts::return_shared(policy);
+            ts::return_shared(kiosk1_shared);
+            ts::return_shared(kiosk2_shared);
+            ts::return_shared(contracts);
+            ts::return_shared(listed_shared);
+        };
+
+        let clock_data = next_tx(scenario, TEST_ADDRESS2);
+        let clock1_ = ts::created(&clock_data);
+        let clock1_id = vector::borrow(&clock1_, 0); 
+
+        // leaser created complain
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let contracts = ts::take_shared<Contracts>(scenario);
+            let reason_ = string::utf8(b"asd");
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
+            ar::new_complain(&mut contracts, &mut kiosk1_shared, reason_, wrapper_id, ts::ctx(scenario));
+
+            ts::return_shared(kiosk1_shared);
+            ts::return_shared(contracts);
+        };
+        // admin decision is true 
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
+
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
+            assert_eq(rental_count, 2);
+            
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(contracts);
+        };
+        // owner created complain
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let contracts = ts::take_shared<Contracts>(scenario);
+            let reason_ = string::utf8(b"asd");
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
+            ar::new_complain(&mut contracts, &mut kiosk1_shared,  reason_, wrapper_id, ts::ctx(scenario));
+
+            ts::return_shared(kiosk1_shared);
+            ts::return_shared(contracts);
+        };
+        // admin decision is true 
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let contracts = ts::take_shared<Contracts>(scenario);
+            let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
+            let wrapper_id = ar::test_get_wrapper(&contracts);
+
+            ar::provision(&admin_cap, &mut contracts, &mut kiosk1_shared, wrapper_id, true);
+
+            let rental_count = ar::test_get_contract_rental_count(&kiosk1_shared, wrapper_id);
+            assert_eq(rental_count, 1);
+
+            ts::return_shared(kiosk1_shared);
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(contracts);
+        };
+
+        ts::end(scenario_test);
+    }
 
 }
