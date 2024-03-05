@@ -18,6 +18,9 @@ module notary::assets_renting {
 
     use notary::assets::{Self, Asset, Wrapper};
     use notary::assets_type::{Self as at, ListedTypes, AdminCap, NotaryKioskExtWitness};
+    
+    use rules::loan_duration::{Self as ld};
+    use rules::time_duration::{Self as td};
 
     // =================== Errors ===================
 
@@ -92,10 +95,9 @@ module notary::assets_renting {
         // wrap the asset 
         let wrapper = assets::wrap(asset, ctx);
         // define the wrapper id 
-        let wrapper_id = object::id(&wrapper);  
+        let wrapper_id = object::id(&wrapper);
+        // keep wrapper id for local test  
         vector::push_back(&mut contract.wrapper, wrapper_id);  // FIXME: DELETE ME !!
-
-        //debug::print(&wrapper_id);
         // place the wrapper into the kiosk
         kiosk::place(kiosk, kiosk_cap, wrapper);
         
@@ -124,7 +126,8 @@ module notary::assets_renting {
         ctx: &mut TxContext 
     ) {
         // the rental_period should be between 6 and 12
-        assert!(rental_period >= 6 && rental_period <=12, ERROR_INVALID_DURATION);
+        // assert!(rental_period >= 6 && rental_period <=12, ERROR_INVALID_DURATION);
+
         // calculate the payment. It should be greater or equal to total renting price.
         assert!(
             coin::value(&payment) >= (kiosk::purchase_cap_min_price(&purch_cap) * 2), ERROR_INVALID_PRICE);
@@ -136,6 +139,7 @@ module notary::assets_renting {
             purch_cap,
             payment_purchase
         );
+        ld::prove<Wrapper>(policy, &mut request, owner_kiosk, rental_period);
         // confirm the request. Destroye the hot potato
         policy::confirm_request(policy, request);
         // be sure that sender is the owner of kiosk
@@ -217,6 +221,7 @@ module notary::assets_renting {
         let owner_bag = ke::storage_mut(witness, kiosk1);
         // get the contract_mut
         let contract = bag::borrow_mut<ID, Contract>(owner_bag, wrapper_id);
+        let contract_end = contract.end;
 
         assert!(sender(ctx) == contract.owner, ERROR_NOT_ASSET_OWNER);
 
@@ -227,7 +232,7 @@ module notary::assets_renting {
         }
         else { 
         // check the time
-        assert!(timestamp_ms(clock) >= contract.end, ERROR_ASSET_IN_RENTING);
+        // assert!(timestamp_ms(clock) >= contract_end, ERROR_ASSET_IN_RENTING);
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
 
@@ -236,6 +241,7 @@ module notary::assets_renting {
             purch_cap,
             payment,
         );
+        td::prove<Wrapper>(policy, &mut request, clock, contract_end);
         // confirm the request
         policy::confirm_request(policy, request);
         //destructure the wrapp

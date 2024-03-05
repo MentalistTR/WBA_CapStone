@@ -53,8 +53,7 @@ module notary::helpers {
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let publisher_share = ts::take_shared<AssetsTypePublisher>(scenario);
-            //let publisher = at::get_publisher(&publisher_share);
-
+    
             at::new_policy<T>(&admin_cap, &publisher_share, ts::ctx(scenario));
 
             ts::return_to_sender(scenario, admin_cap);

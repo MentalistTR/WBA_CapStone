@@ -1,4 +1,4 @@
-module notary::lock_rule { 
+module rules::lock_rule { 
     use sui::kiosk::{Self, Kiosk};
     use sui::transfer_policy::{
         Self as policy,
