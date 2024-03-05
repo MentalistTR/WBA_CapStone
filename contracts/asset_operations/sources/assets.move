@@ -14,12 +14,17 @@ module notary::assets {
     use sui::tx_context::{TxContext};
     use sui::vec_set::{Self, VecSet};
     use sui::vec_map::{Self, VecMap};
+
     use std::type_name::{TypeName};
-
-
     use std::string::{String};
-    //use std::vector;
+   // use std::debug;
+
+    // === Friends ===
+
+    friend notary::assets_type;
+    friend notary::assets_renting;
     
+  
     // /// # Arguments
     // /// 
     // /// * `type ` - is the type of the asset such as house, car, plane
@@ -34,6 +39,29 @@ module notary::assets {
         on_rent: bool,
         rules: VecSet<TypeName>,
         property: VecMap<String, String>,
+    }
+
+    struct Wrapper has key, store {
+        id: UID,
+        owner: ID,
+        asset: Asset
+    }
+
+    public fun wrap(empty: Asset, ctx: &mut TxContext) : Wrapper {
+        let id = object::new(ctx);
+        let inner = object::uid_to_inner(&id);
+        let rent = Wrapper {
+            id: id,
+            owner:inner, 
+            asset:empty
+        };
+        rent
+    }
+
+    public fun unwrap(w: Wrapper) : Asset {
+        let Wrapper {id, owner: _, asset} = w;
+        object::delete(id);
+        asset
     }
 
     // create any asset and place it to kiosk. 
@@ -55,15 +83,18 @@ module notary::assets {
         };
         asset
     }
-
-    public fun new_property(item: &mut Asset, property_name: String, property: String) {
+    // The owner of asset can make new property 
+    public(friend) fun new_property(item: &mut Asset, property_name: String, property: String) {
         vec_map::insert(&mut item.property, property_name, property);
     }
-
+    // The owner of asset can remove property 
+    public(friend) fun remove_property(item: &mut Asset, property_name: String) {
+        vec_map::remove(&mut item.property, &property_name);
+    }
 
     // helper functions 
 
-    public fun borrow_id(asset: &Asset) : ID {
+    public(friend) fun borrow_id(asset: &Asset) : ID {
         asset.owner
     }
 
@@ -75,30 +106,18 @@ module notary::assets {
         asset.on_rent
     }
 
-    public fun approve_asset(asset: &mut Asset)  {
+    public(friend) fun approve_asset(asset: &mut Asset)  {
         asset.approve = true;
     }
-    public fun disapprove_asset(asset: &mut Asset) {
-        asset.approve = false;
-    }
-
-    public fun disable_approve(asset:&mut Asset)  {
-        asset.approve = false;
-    }
-
-    // public(friend) fun transfer_asset(asset: Asset, owner: address) {
-    //     transfer::public_transfer(asset, owner);
-    // }
     
+    public(friend) fun disapprove_asset(asset: &mut Asset) {
+        asset.approve = false;
+    }
 
-    // public fun get_accessory_vector_id(asset: &Asset) : ID {
-    //    let asd =  vector::borrow(&asset.property_id, 0);
-    //    *asd
-    // }
+    public(friend) fun disable_rent(asset: &mut Asset)  {
+        asset.on_rent = false;
+    }
 
-    // public fun destructure_accessory(acc: Accessory) : (UID, ID, String) {
-    //     let Accessory {id, inner, property} = acc;
-    //     (id, inner, property)
-    // }
-
-}
+    public(friend) fun active_rent(asset: &mut Asset)  {
+        asset.on_rent = true;
+    }}

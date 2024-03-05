@@ -1,28 +1,19 @@
 #[test_only]
 module notary::helpers {
     use sui::test_scenario::{Self as ts, next_tx, Scenario};
-    use sui::transfer;
-    use sui::coin::{mint_for_testing};
-    use sui::kiosk::{Self, Kiosk, KioskOwnerCap};
-    use sui::transfer_policy::{TransferPolicy};
-    use sui::test_utils::{assert_eq};
-    use sui::object::{ID};
-    
+ 
     use std::string::{Self};
     // use std::option::{Self};
     // use std::debug;
-    use std::vector;
 
-    use notary::lira_stable_coin::{LIRA_STABLE_COIN, return_init_lira};
+
+    use notary::lira_stable_coin::{return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
-    use notary::assets::{Self, Asset};
+    use notary:: assets_renting::{test_renting_init};
 
     const ADMIN: address = @0xA;
-    const TEST_ADDRESS1: address = @0xB;
-    const TEST_ADDRESS2: address = @0xC;
-    const TEST_ADDRESS3: address = @0xD;
-
+    
     public fun helper_add_types(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {
@@ -44,14 +35,13 @@ module notary::helpers {
         };
     }
     
-    public fun helper_new_policy(scenario: &mut Scenario) {
+    public fun helper_new_policy<T>(scenario: &mut Scenario) {
         next_tx(scenario, ADMIN);
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
             let publisher_share = ts::take_shared<AssetsTypePublisher>(scenario);
-            //let publisher = at::get_publisher(&publisher_share);
-
-            at::new_policy(&admin_cap, &publisher_share, ts::ctx(scenario));
+    
+            at::new_policy<T>(&admin_cap, &publisher_share, ts::ctx(scenario));
 
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(publisher_share);
@@ -67,9 +57,12 @@ module notary::helpers {
             test_init(ts::ctx(scenario));
        };
        {
+            test_renting_init(ts::ctx(scenario));
+       };
+       {
             return_init_lira(ts::ctx(scenario));
        };
        scenario_val
-}
+    }
 
 }
