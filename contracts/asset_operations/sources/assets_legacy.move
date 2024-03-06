@@ -22,9 +22,9 @@ module notary::assets_legacy {
 
     const ERROR_INVALID_ARRAY_LENGTH: u64 = 0;
     const ERROR_INVALID_PERCENTAGE_SUM: u64 = 1;
-    const ERROR_YOU_ARE_NOT_SHAREHOLDER:u64 =2;
-    const ERROR_FUNCTION_DISABLED:u64 = 3;
-    const ERROR_YOU_ARE_NOT_OWNER:u64 = 4;
+    const ERROR_YOU_ARE_NOT_SHAREHOLDER: u64 =2;
+    const ERROR_YOU_ARE_NOT_OWNER: u64 = 3;
+    const ERROR_INVALID_TIME :u64 = 4;
 
 
     // =================== Structs ===================
@@ -164,13 +164,16 @@ module notary::assets_legacy {
             // check percentage is equal to 100.
             assert!(percentage_sum == 10000, ERROR_INVALID_PERCENTAGE_SUM);
     }
-
+    // only admin can distribute the legacy if 1 month has passed
     public fun distribute<T>(
         _: &AdminCap,
         legacy: &mut Legacy,
         kiosk: &mut Kiosk,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
+        // check the remaining is more than 1 month
+        assert!((timestamp_ms(clock) - legacy.remaining) > (86400 * 30), ERROR_INVALID_TIME);
         // set the witness
         let witness = get_witness();
         // get user bag from kiosk
@@ -215,5 +218,19 @@ module notary::assets_legacy {
                 j = j + 1;
             };       
     }
-
+    // Heirs can withdraw funds
+    public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Balance<T> {
+        let sender = sender(ctx);
+        // firstly, check that  Is sender shareholder? 
+        assert!(
+           table::contains(&legacy.heirs_amount, sender),
+            ERROR_YOU_ARE_NOT_SHAREHOLDER   
+        );
+        // let take heir's bag from table 
+        let bag_ = table::borrow_mut<address, Bag>(&mut legacy.heirs_amount, sender);
+        // calculate withdraw balance 
+        let coin_value = bag::remove<String, Balance<T>>( bag_, coin_name);
+        // return the withdraw balance
+        coin_value
+    }
 }
