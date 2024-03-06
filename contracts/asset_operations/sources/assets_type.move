@@ -4,7 +4,7 @@
 // The admin should be able to add new transfer policy to share object
 // create update and read and destroye 
 module notary::assets_type {
-    use std::string::{String};
+    use std::string::{Self, String};
     use std::vector;
     use std::option::{Option};
   //use std::debug;
@@ -19,6 +19,8 @@ module notary::assets_type {
     use sui::table::{Self, Table}; 
     use sui::coin::{Coin};
     use sui::sui::SUI;
+    use sui::bag::{Self, Bag};
+    use sui::balance::{Self, Balance};
 
     use notary::assets::{Self, Asset};
 
@@ -248,6 +250,26 @@ module notary::assets_type {
     public(friend) fun get_witness() : NotaryKioskExtWitness {
         let witness = NotaryKioskExtWitness {};
         witness
+    }
+    public fun test_get_bag(kiosk: &Kiosk) :&Bag {
+        let witness = get_witness();
+        let bag_ = ke::storage<NotaryKioskExtWitness>(witness, kiosk);
+        bag_
+    }
+    public fun test_get_coin_name(kiosk: &Kiosk, index: u64) : String {
+        let witness = get_witness();
+        let bag_ = ke::storage<NotaryKioskExtWitness>(witness, kiosk);
+        let coin_names = string::utf8(b"coins");
+        let coin_vector = bag::borrow<String, vector<String>>(bag_, coin_names);
+        let name = vector::borrow(coin_vector, index);
+        *name
+    }
+    public fun test_get_coin_amount<T>(kiosk: &Kiosk, coin: String) : u64 {
+        let witness = get_witness();
+        let bag_ = ke::storage<NotaryKioskExtWitness>(witness, kiosk);
+        let coin = bag::borrow<String, Balance<T>>(bag_, coin);
+        let amount = balance::value(coin);
+        amount 
     }
 
     // =================== Test Only ===================

@@ -15,7 +15,7 @@ module notary::assets_legacy {
     use std::debug;
     use std::string::{Self, String};
 
-    use notary::assets_type::{NotaryKioskExtWitness, AdminCap, get_witness};
+    use notary::assets_type::{Self as at, NotaryKioskExtWitness, AdminCap, get_witness};
 
 
     // =================== Errors ===================
@@ -230,4 +230,7 @@ module notary::assets_legacy {
         // return the withdraw balance
         coin_value
     }
+
+    // TEST ONLY 
+
 }

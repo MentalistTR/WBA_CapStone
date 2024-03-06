@@ -14,7 +14,7 @@ module notary::test_asset_legacy {
     use std::debug;
 
     use notary::assets::{Wrapper};
-    use notary::helpers::{init_test_helper, helper_new_policy};
+    use notary::helpers::{Self, init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     use notary::assets_renting::{Self as ar, Contracts};
     use notary::lira::{LIRA};
@@ -26,6 +26,8 @@ module notary::test_asset_legacy {
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
+    const TEST_ADDRESS3: address = @0xD;
+
 
     #[test]
     #[expected_failure(abort_code = al::ERROR_INVALID_TIME)]
@@ -83,7 +85,7 @@ module notary::test_asset_legacy {
     }
 
     #[test]
-    public fun test_deposit_legacy() {
+    public fun test_deposit_legacy_add_heirs() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
 
@@ -116,6 +118,7 @@ module notary::test_asset_legacy {
         let clock1_ = ts::shared(&clock_data);
         let clock1_id = vector::borrow(&clock1_, 1);
 
+        // deposit 10000 LIRA for legacy
         next_tx(scenario, TEST_ADDRESS1);
         {
             let kiosk = ts::take_shared<Kiosk>(scenario);
@@ -124,16 +127,105 @@ module notary::test_asset_legacy {
 
             al::deposit_legacy<LIRA>(&mut kiosk, deposit, &lira_metadata);
 
+            let coin_name = at::test_get_coin_name(&kiosk, 0);
+            let coin_amount = at::test_get_coin_amount<LIRA>(&kiosk, coin_name);
+
+            assert_eq(coin_amount, 10000);
+
             ts::return_immutable(lira_metadata);
             ts::return_shared(kiosk);
         };
+        // ADD 4 heirs both have %25
+        helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
+        // add new heirs
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+    
+            let heirs_address  = vector::empty();   
+            let heirs_percentage = vector::empty(); 
 
+            vector::push_back(&mut heirs_address, TEST_ADDRESS2);
+            vector::push_back(&mut heirs_address, TEST_ADDRESS3); 
 
+            vector::push_back(&mut heirs_percentage, 5000);
+            vector::push_back(&mut heirs_percentage, 5000);
+ 
+            al::new_heirs(&mut legacy, heirs_address, heirs_percentage, ts::ctx(scenario));  
+    
+            ts::return_shared(legacy);  
+        };
 
-
-   
         ts::end(scenario_test);
     }
+
+    #[test]
+    public fun test_distribute() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
+          
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);
+
+        // create an legacy share object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+
+            al::new_legacy(ts::ctx(scenario), &start_time);
+
+            clock::share_for_testing(start_time);
+        };
+        // keep clock data for using later
+        let clock_data = next_tx(scenario, TEST_ADDRESS1);
+        //debug::print(&clock_data);
+        let clock1_ = ts::shared(&clock_data);
+        let clock1_id = vector::borrow(&clock1_, 1);
+
+        // deposit 10000 LIRA for legacy
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let lira_metadata = ts::take_immutable<CoinMetadata<LIRA>>(scenario);
+            let deposit = mint_for_testing<LIRA>(10000, ts::ctx(scenario));
+
+            al::deposit_legacy<LIRA>(&mut kiosk, deposit, &lira_metadata);
+
+            let coin_name = at::test_get_coin_name(&kiosk, 0);
+            let coin_amount = at::test_get_coin_amount<LIRA>(&kiosk, coin_name);
+
+            assert_eq(coin_amount, 10000);
+
+            ts::return_immutable(lira_metadata);
+            ts::return_shared(kiosk);
+        };
+        // ADD 4 heirs both have %25
+        helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
+
+        
+      
+    
+
+
+
+
+
+
+        ts::end(scenario_test);
+    }
+
+
 
 
 
