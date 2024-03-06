@@ -27,6 +27,8 @@ module notary::test_asset_legacy {
     const TEST_ADDRESS1: address = @0xB;
     const TEST_ADDRESS2: address = @0xC;
     const TEST_ADDRESS3: address = @0xD;
+    const TEST_ADDRESS4: address = @0xE; 
+    const TEST_ADDRESS5: address = @0xF;
 
 
     #[test]
@@ -212,8 +214,49 @@ module notary::test_asset_legacy {
         };
         // ADD 4 heirs both have %25
         helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
+        // increment current time 31 days
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let clock = ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            clock::increment_for_testing(&mut clock, (86400 * 31));
 
-        
+            al::distribute<LIRA>(
+                &admin_cap,
+                &mut legacy,
+                &mut kiosk,
+                &clock,
+                ts::ctx(scenario)
+            );
+
+            let coin_name = string::utf8(b"Tr Lira");
+
+            let amount1 = al::test_get_heir_balance<LIRA>(&legacy, TEST_ADDRESS2, coin_name);
+            assert_eq(amount1, 2500);
+
+            let amount2 = al::test_get_heir_balance<LIRA>(&legacy, TEST_ADDRESS3, coin_name);
+            assert_eq(amount1, 2500);
+
+            let amount3 = al::test_get_heir_balance<LIRA>(&legacy, TEST_ADDRESS4, coin_name);
+            assert_eq(amount3, 2500);
+
+            let amount4 = al::test_get_heir_balance<LIRA>(&legacy, TEST_ADDRESS5, coin_name);
+            assert_eq(amount4, 2500);
+
+            // legacy should be zero now
+            let coin_amount = at::test_get_coin_amount<LIRA>(&kiosk, coin_name);
+            assert_eq(coin_amount, 0);
+
+            ts::return_shared(clock);
+            ts::return_shared(kiosk);
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(legacy);  
+        };
+
+
+
       
     
 

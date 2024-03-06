@@ -185,6 +185,10 @@ module notary::assets_legacy {
         let heirs_length = vector::length(&legacy.old_heirs); 
 
         let j: u64 = 0;
+        // set the total balance
+        let total_balance = bag::borrow<String, Balance<T>>(bag_, coin_name);
+        // define the total balance as u64
+        let total_amount = balance::value(total_balance);
 
             while(j < heirs_length) {
                 // take address from oldshareholder vector
@@ -193,19 +197,17 @@ module notary::assets_legacy {
                     let bag = bag::new(ctx);
                     table::add(&mut legacy.heirs_amount,*heir_address,bag);
                  };  
-                // take share_holder percentage from table
+                // take heir percentage from table
                 let heir_percentage = table::borrow(&legacy.heirs_percentage, *heir_address);
                 // set the total balance
                 let total_balance = bag::borrow_mut<String, Balance<T>>(bag_, coin_name);
-                // define the total balance as u64
-                let total_amount = balance::value(total_balance); 
-                // calculate shareholder withdraw tokens
+                // calculate heir withdraw tokens
                 let heir_legacy =  (total_amount * *heir_percentage ) / 10000;
                 // calculate the distribute coin value to shareholder           
                 let withdraw_coin = balance::split<T>( total_balance, heir_legacy);
                 // get heir's bag from share object
                 let heir_bag = table::borrow_mut<address, Bag>( &mut legacy.heirs_amount, *heir_address);
-                // add to share_holder amount
+                // add heir's amount to table
                 if(bag::contains(heir_bag, coin_name) == true) { 
                     let coin_value = bag::borrow_mut( heir_bag, coin_name);
                     balance::join(coin_value, withdraw_coin);
@@ -232,5 +234,14 @@ module notary::assets_legacy {
     }
 
     // TEST ONLY 
+
+    #[test_only]
+    public fun test_get_heir_balance<T>(legacy: &Legacy, heir: address, coin: String) : u64 {
+        let bag_ = table::borrow<address, Bag>(&legacy.heirs_amount, heir);
+        let coin = bag::borrow<String, Balance<T>>(bag_, coin);
+        let amount = balance::value(coin);
+        amount
+
+    }
 
 }
