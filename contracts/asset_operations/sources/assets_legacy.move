@@ -7,13 +7,16 @@ module notary::assets_legacy {
     use sui::kiosk::{Self, Kiosk, PurchaseCap};
     use sui::kiosk_extension::{Self as ke};
     use sui::coin::{Self, Coin, CoinMetadata};
-    use sui::balance::{Self};
+    use sui::balance::{Self, Balance};
     use sui::sui::{SUI};
-
-    use notary::assets_type::{NotaryKioskExtWitness, get_witness};
+    use sui::clock::{Self, Clock, timestamp_ms};
 
     use std::vector;
-    use std::string;
+    use std::debug;
+    use std::string::{Self, String};
+
+    use notary::assets_type::{NotaryKioskExtWitness, AdminCap, get_witness};
+
 
     // =================== Errors ===================
 
@@ -40,6 +43,8 @@ module notary::assets_legacy {
         heirs_percentage: Table<address, u64>, 
         heirs_amount: Table<address, Bag>,    
         old_heirs: vector<address>,
+       // coin_names: vector<String>,
+        remaining: u64
     } 
 
     // =================== Initializer ===================
@@ -50,7 +55,7 @@ module notary::assets_legacy {
 
     // =================== Functions ===================
 
-    public fun new_legacy(ctx: &mut TxContext) {
+    public fun new_legacy(ctx: &mut TxContext, clock: &Clock) {
         // share object
         transfer::share_object(
             Legacy {
@@ -59,9 +64,17 @@ module notary::assets_legacy {
                 heirs_percentage:table::new(ctx),
                 heirs_amount:table::new(ctx),
                 old_heirs:vector::empty(),
+                //coin_names: vector::empty(),
+                remaining: timestamp_ms(clock)
             },
         );
     }
+    // Legacy owner must update his remaining per a month
+    public fun update_remaining(legacy: &mut Legacy, clock: &Clock, ctx: &mut TxContext) {
+        assert!(sender(ctx) == legacy.owner, ERROR_YOU_ARE_NOT_OWNER);
+        legacy.remaining = timestamp_ms(clock);
+    }
+
     // Deposit any token for legacy
     public fun deposit_legacy<T>(kiosk: &mut Kiosk, coin:Coin<T>, coin_metadata: &CoinMetadata<T>) {
         // set the witness
@@ -72,6 +85,12 @@ module notary::assets_legacy {
         let balance = coin::into_balance(coin);
         // define the name of coin
         let name = coin::get_name(coin_metadata);
+        // we should create a key value pair in our bag for first time.
+        let coin_names = string::utf8(b"coins");
+        // check if coin_names vector key value is not in bag create one time.
+        if(!bag::contains(bag_, coin_names)) {
+            bag::add<String, vector<String>>(bag_, coin_names, vector::empty());
+        };
         // lets check is there any same token in our bag
         if(bag::contains(bag_, name)) { 
         // if there is a same token in our bag we will sum it.
@@ -79,8 +98,11 @@ module notary::assets_legacy {
             balance::join(coin_value, balance);
         }
             // if it is not lets add it.
-        else { 
+        else {
+             // add fund into the bag 
              bag::add(bag_, name, balance);
+             // add coin_name into the bag
+             bag::add(bag_, coin_names, name);
         }
     }
     // It is the same function with deposit_to_bag but we cant read sui token metadata. So we have to split it. 
@@ -92,16 +114,24 @@ module notary::assets_legacy {
         // lets define balance
         let balance = coin::into_balance(coin);
         // set the sui as a string
-        let name_string = string::utf8(b"sui");
-            // lets check is there any sui token in bag
-        if(bag::contains(bag_, name_string)) { 
-            let coin_value = bag::borrow_mut(bag_, name_string);
-            // if there is a sui token in our bag we will sum it.
+        let name = string::utf8(b"sui");
+        // we should create a key value pair in our bag for first time.
+        let coin_names = string::utf8(b"coins");
+        // check if coin_names vector key value is not in bag create one time.
+        if(!bag::contains(bag_, coin_names)) {
+            bag::add<String, vector<String>>(bag_, coin_names, vector::empty());
+        };
+        // lets check is there any sui token in bag
+        if(bag::contains(bag_, name)) { 
+            let coin_value = bag::borrow_mut(bag_, name);
+             // if there is a sui token in our bag we will sum it.
              balance::join(coin_value, balance);
         }
         else { 
-             // if it is not lets add it.
-            bag::add(bag_, name_string, balance);
+            // add fund into the bag 
+            bag::add(bag_, name, balance);
+            // add coin_name into the bag
+            bag::add(bag_, coin_names, name);
         }
     }
     // Users can set new heirs
@@ -135,26 +165,55 @@ module notary::assets_legacy {
             assert!(percentage_sum == 10000, ERROR_INVALID_PERCENTAGE_SUM);
     }
 
+    public fun distribute<T>(
+        _: &AdminCap,
+        legacy: &mut Legacy,
+        kiosk: &mut Kiosk,
+        ctx: &mut TxContext
+    ) {
+        // set the witness
+        let witness = get_witness();
+        // get user bag from kiosk
+        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(witness, kiosk);
+        // get the coin names
+        let coin_names = string::utf8(b"coins");
 
+        let coins = bag::borrow_mut<String, vector<String>>(bag_, coin_names);
+        let heirs = legacy.old_heirs;
 
+        let coin_name = vector::remove(coins, 0);
+        let heirs_length = vector::length(&legacy.old_heirs); 
 
+        let j: u64 = 0;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            while(j < heirs_length) {
+                // take address from oldshareholder vector
+                let heir_address = vector::borrow(&heirs, j);
+                if (!table::contains(&legacy.heirs_amount, *heir_address)) {
+                    let bag = bag::new(ctx);
+                    table::add(&mut legacy.heirs_amount,*heir_address,bag);
+                 };  
+                // take share_holder percentage from table
+                let heir_percentage = table::borrow(&legacy.heirs_percentage, *heir_address);
+                // set the total balance
+                let total_balance = bag::borrow_mut<String, Balance<T>>(bag_, coin_name);
+                // define the total balance as u64
+                let total_amount = balance::value(total_balance); 
+                // calculate shareholder withdraw tokens
+                let heir_legacy =  (total_amount * *heir_percentage ) / 10000;
+                // calculate the distribute coin value to shareholder           
+                let withdraw_coin = balance::split<T>( total_balance, heir_legacy);
+                // get heir's bag from share object
+                let heir_bag = table::borrow_mut<address, Bag>( &mut legacy.heirs_amount, *heir_address);
+                // add to share_holder amount
+                if(bag::contains(heir_bag, coin_name) == true) { 
+                    let coin_value = bag::borrow_mut( heir_bag, coin_name);
+                    balance::join(coin_value, withdraw_coin);
+                }   else { 
+                        bag::add(heir_bag, coin_name, withdraw_coin);
+                     };
+                j = j + 1;
+            };       
+    }
 
 }
