@@ -34,24 +34,20 @@ module notary::assets_legacy {
     /// 
     /// # Arguments
     /// 
-    /// * `shareholders_percentage` - admin will decide shareholder percantage here. 
-    /// * `shareholders_amount` -  We keep the shareholders Balance here like Table<address, <String, Balance<T>>>
-    /// * `old_shareholders` - We keep the shareholders address in a vector for using in while loop.
+    /// * `heirs_percentage` - admin will decide heirs percantage here. 
+    /// * `heirs_amount` -  We keep the heirs Balance here like Table<address, <String, Balance<T>>>
+    /// * `old_heirs` - We keep the heirs address in a vector for using in while loop.
     struct Legacy has key {
         id: UID,
         owner: address,
         heirs_percentage: Table<address, u64>, 
         heirs_amount: Table<address, Bag>,    
         old_heirs: vector<address>,
-       // coin_names: vector<String>,
         remaining: u64
     } 
 
     // =================== Initializer ===================
 
-    fun init(ctx:&mut TxContext) {
-
-    }
 
     // =================== Functions ===================
 
@@ -64,7 +60,6 @@ module notary::assets_legacy {
                 heirs_percentage:table::new(ctx),
                 heirs_amount:table::new(ctx),
                 old_heirs:vector::empty(),
-                //coin_names: vector::empty(),
                 remaining: timestamp_ms(clock)
             },
         );
