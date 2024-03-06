@@ -92,12 +92,14 @@ module notary::assets_legacy {
             let coin_value = bag::borrow_mut( bag_, name);
             balance::join(coin_value, balance);
         }
-            // if it is not lets add it.
+        // if it is not lets add it.
         else {
              // add fund into the bag 
              bag::add(bag_, name, balance);
-             // add coin_name into the bag
-             bag::add(bag_, coin_names, name);
+             // get coins vector from bag 
+             let coins = bag::borrow_mut<String, vector<String>>(bag_, coin_names);
+             // Add coins name into the vector
+             vector::push_back(coins, name);
         }
     }
     // It is the same function with deposit_to_bag but we cant read sui token metadata. So we have to split it. 

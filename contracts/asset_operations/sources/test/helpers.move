@@ -7,7 +7,7 @@ module notary::helpers {
     // use std::debug;
 
 
-    use notary::lira_stable_coin::{return_init_lira};
+    use notary::lira::{return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
     use notary:: assets_renting::{test_renting_init};
