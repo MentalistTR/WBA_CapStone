@@ -102,35 +102,6 @@ module notary::assets_legacy {
              vector::push_back(coins, name);
         }
     }
-    // It is the same function with deposit_to_bag but we cant read sui token metadata. So we have to split it. 
-    public fun deposit_legacy_sui(kiosk: &mut Kiosk, coin:Coin<SUI>) {
-        // set the witness
-        let witness = get_witness();
-        // get user bag from kiosk
-        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(witness, kiosk);
-        // lets define balance
-        let balance = coin::into_balance(coin);
-        // set the sui as a string
-        let name = string::utf8(b"sui");
-        // we should create a key value pair in our bag for first time.
-        let coin_names = string::utf8(b"coins");
-        // check if coin_names vector key value is not in bag create one time.
-        if(!bag::contains(bag_, coin_names)) {
-            bag::add<String, vector<String>>(bag_, coin_names, vector::empty());
-        };
-        // lets check is there any sui token in bag
-        if(bag::contains(bag_, name)) { 
-            let coin_value = bag::borrow_mut(bag_, name);
-             // if there is a sui token in our bag we will sum it.
-             balance::join(coin_value, balance);
-        }
-        else { 
-            // add fund into the bag 
-            bag::add(bag_, name, balance);
-            // add coin_name into the bag
-            bag::add(bag_, coin_names, name);
-        }
-    }
     // Users can set new heirs
     public fun new_heirs(legacy: &mut Legacy, heir_address:vector<address>, heir_percentage:vector<u64>, ctx: &mut TxContext) {
         // check the shareobject owner
@@ -233,7 +204,37 @@ module notary::assets_legacy {
         coin_value
     }
 
-    // TEST ONLY 
+    // TEST ONLY
+    #[test_only]
+    // It is the same function with deposit_to_bag but we cant read sui token metadata. So we have to split it. 
+    public fun deposit_legacy_sui(kiosk: &mut Kiosk, coin:Coin<SUI>) {
+        // set the witness
+        let witness = get_witness();
+        // get user bag from kiosk
+        let bag_ = ke::storage_mut<NotaryKioskExtWitness>(witness, kiosk);
+        // lets define balance
+        let balance = coin::into_balance(coin);
+        // set the sui as a string
+        let name = string::utf8(b"sui");
+        // we should create a key value pair in our bag for first time.
+        let coin_names = string::utf8(b"coins");
+        // check if coin_names vector key value is not in bag create one time.
+        if(!bag::contains(bag_, coin_names)) {
+            bag::add<String, vector<String>>(bag_, coin_names, vector::empty());
+        };
+        // lets check is there any sui token in bag
+        if(bag::contains(bag_, name)) { 
+            let coin_value = bag::borrow_mut(bag_, name);
+             // if there is a sui token in our bag we will sum it.
+             balance::join(coin_value, balance);
+        }
+        else { 
+            // add fund into the bag 
+            bag::add(bag_, name, balance);
+            // add coin_name into the bag
+            bag::add(bag_, coin_names, name);
+        }
+    }
 
     #[test_only]
     public fun test_get_heir_balance<T>(legacy: &Legacy, heir: address, coin: String) : u64 {

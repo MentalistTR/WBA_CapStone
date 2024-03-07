@@ -254,17 +254,6 @@ module notary::test_asset_legacy {
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(legacy);  
         };
-
-
-
-      
-    
-
-
-
-
-
-
         ts::end(scenario_test);
     }
 

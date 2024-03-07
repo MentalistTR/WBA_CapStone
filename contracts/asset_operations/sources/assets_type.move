@@ -22,7 +22,7 @@ module notary::assets_type {
     use sui::bag::{Self, Bag};
     use sui::balance::{Self, Balance};
 
-    use notary::assets::{Self, Asset};
+    use notary::assets::{Self, Asset, Wrapper};
 
     friend notary::assets_renting;
     friend notary::assets_legacy;
