@@ -22,7 +22,7 @@ module notary::assets_legacy {
 
     const ERROR_INVALID_ARRAY_LENGTH: u64 = 0;
     const ERROR_INVALID_PERCENTAGE_SUM: u64 = 1;
-    const ERROR_YOU_ARE_NOT_SHAREHOLDER: u64 =2;
+    const ERROR_YOU_ARE_NOT_HEIR: u64 =2;
     const ERROR_YOU_ARE_NOT_OWNER: u64 = 3;
     const ERROR_INVALID_TIME :u64 = 4;
 
@@ -194,7 +194,7 @@ module notary::assets_legacy {
         // firstly, check that  Is sender shareholder? 
         assert!(
            table::contains(&legacy.heirs_amount, sender),
-            ERROR_YOU_ARE_NOT_SHAREHOLDER   
+            ERROR_YOU_ARE_NOT_HEIR
         );
         // let take heir's bag from table 
         let bag_ = table::borrow_mut<address, Bag>(&mut legacy.heirs_amount, sender);
@@ -231,8 +231,9 @@ module notary::assets_legacy {
         else { 
             // add fund into the bag 
             bag::add(bag_, name, balance);
-            // add coin_name into the bag
-            bag::add(bag_, coin_names, name);
+            let coins = bag::borrow_mut<String, vector<String>>(bag_, coin_names);
+            // Add coins name into the vector
+            vector::push_back(coins, name);
         }
     }
 
@@ -242,7 +243,5 @@ module notary::assets_legacy {
         let coin = bag::borrow<String, Balance<T>>(bag_, coin);
         let amount = balance::value(coin);
         amount
-
     }
-
 }

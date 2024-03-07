@@ -2,12 +2,11 @@
 module notary::test_asset_legacy {
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
-    use sui::kiosk::{Self, Kiosk, PurchaseCap};
-    use sui::transfer_policy::{TransferPolicy, TransferPolicyCap};
-    use sui::object::{Self};
+    use sui::kiosk::{Self, Kiosk,};
     use sui::sui::SUI;
-    use sui::coin::{mint_for_testing, CoinMetadata};
+    use sui::coin::{Self, mint_for_testing, from_balance, Coin, CoinMetadata};
     use sui::clock::{Self, Clock};
+    use sui::transfer;
     
     use std::string::{Self};
     use std::vector::{Self};
@@ -16,12 +15,8 @@ module notary::test_asset_legacy {
     use notary::assets::{Wrapper};
     use notary::helpers::{Self, init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
-    use notary::assets_renting::{Self as ar, Contracts};
     use notary::lira::{LIRA};
     use notary::assets_legacy::{Self as al, Legacy};
-
-    use rules::loan_duration::{Self as ld};
-    use rules::time_duration::{Self as td};
     
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
@@ -162,6 +157,7 @@ module notary::test_asset_legacy {
     }
 
     #[test]
+    #[expected_failure(abort_code = al::ERROR_YOU_ARE_NOT_HEIR)]
     public fun test_distribute() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
@@ -212,9 +208,24 @@ module notary::test_asset_legacy {
             ts::return_immutable(lira_metadata);
             ts::return_shared(kiosk);
         };
+        // deposit 10000 SUI for legacy
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let deposit = mint_for_testing<SUI>(10000, ts::ctx(scenario));
+
+            al::deposit_legacy_sui(&mut kiosk, deposit);
+
+            let coin_name = at::test_get_coin_name(&kiosk, 0);
+            let coin_amount = at::test_get_coin_amount<LIRA>(&kiosk, coin_name);
+
+            //assert_eq(coin_amount, 10000);
+
+            ts::return_shared(kiosk);
+        };
         // ADD 4 heirs both have %25
         helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
-        // increment current time 31 days
+        // increment current time 31 days and distribute legacy
         next_tx(scenario, ADMIN);
         {
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
@@ -254,6 +265,86 @@ module notary::test_asset_legacy {
             ts::return_to_sender(scenario, admin_cap);
             ts::return_shared(legacy);  
         };
+        // Distribute SUI to heirs
+        next_tx(scenario, ADMIN);
+        {
+            let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let kiosk = ts::take_shared<Kiosk>(scenario);
+            let clock = ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            //clock::increment_for_testing(&mut clock, (86400 * 31));
+
+            al::distribute<SUI>(
+                &admin_cap,
+                &mut legacy,
+                &mut kiosk,
+                &clock,
+                ts::ctx(scenario)
+            );
+
+            let coin_name = string::utf8(b"sui");
+
+            let amount1 = al::test_get_heir_balance<SUI>(&legacy, TEST_ADDRESS2, coin_name);
+            assert_eq(amount1, 2500);
+
+            let amount2 = al::test_get_heir_balance<SUI>(&legacy, TEST_ADDRESS3, coin_name);
+            assert_eq(amount1, 2500);
+
+            let amount3 = al::test_get_heir_balance<SUI>(&legacy, TEST_ADDRESS4, coin_name);
+            assert_eq(amount3, 2500);
+
+            let amount4 = al::test_get_heir_balance<SUI>(&legacy, TEST_ADDRESS5, coin_name);
+            assert_eq(amount4, 2500);
+
+            // legacy should be zero now
+            let coin_amount = at::test_get_coin_amount<SUI>(&kiosk, coin_name);
+            assert_eq(coin_amount, 0);
+
+            ts::return_shared(clock);
+            ts::return_shared(kiosk);
+            ts::return_to_sender(scenario, admin_cap);
+            ts::return_shared(legacy);  
+        };
+        // user2 withdraw his legacy
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let coin_name = string::utf8(b"Tr Lira");
+
+            let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
+            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
+
+            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+
+            ts::return_shared(legacy);  
+        };
+        // check the user balance
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let balance = ts::take_from_sender<Coin<LIRA>>(scenario);
+
+            assert_eq(coin::value(&balance), 2500);
+
+            ts::return_to_sender(scenario, balance);
+        };
+        // user1 withdraw his legacy and we are expecting error because he is not heir.
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let coin_name = string::utf8(b"Tr Lira");
+
+            let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
+            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
+
+            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+
+            ts::return_shared(legacy);  
+        };
+
+
+
+
+
         ts::end(scenario_test);
     }
 
