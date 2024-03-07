@@ -80,6 +80,117 @@ module notary::test_asset_legacy {
         };
         ts::end(scenario_test);
     }
+    
+    #[test]
+    #[expected_failure(abort_code = al::ERROR_YOU_ARE_NOT_OWNER)]
+    public fun test_update_remaining() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
+          
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);
+
+        // create an legacy share object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+
+            al::new_legacy(ts::ctx(scenario), &start_time);
+
+            clock::share_for_testing(start_time);
+        };
+        // keep clock data for using later
+        let clock_data = next_tx(scenario, TEST_ADDRESS1);
+        let clock1_ = ts::shared(&clock_data);
+        let clock1_id = vector::borrow(&clock1_, 1);
+
+        next_tx(scenario, TEST_ADDRESS2);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let clock = ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+
+            al::update_remaining(&mut legacy, &clock, ts::ctx(scenario));
+
+            ts::return_shared(legacy);
+            ts::return_shared(clock);
+        };
+
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    public fun test_update_remaining2() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
+          
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);
+
+        // create an legacy share object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+
+            al::new_legacy(ts::ctx(scenario), &start_time);
+
+            clock::share_for_testing(start_time);
+        };
+        // keep clock data for using later
+        let clock_data = next_tx(scenario, TEST_ADDRESS1);
+        let clock1_ = ts::shared(&clock_data);
+        let clock1_id = vector::borrow(&clock1_, 1);
+
+        // update the conctract time 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+            let clock = ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            clock::increment_for_testing(&mut clock, (86400 * 29));
+
+            al::update_remaining(&mut legacy, &clock, ts::ctx(scenario));
+
+            ts::return_shared(legacy);
+            ts::return_shared(clock);
+        };
+        // check the legacy remaining time 
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+
+            let remaining =  al::test_get_remaining(&legacy);
+            let clock = ts::take_shared_by_id<Clock>(scenario, *clock1_id);
+            let current_time = clock::timestamp_ms(&clock);
+
+            assert_eq(current_time, remaining);
+
+            ts::return_shared(clock);
+            ts::return_shared(legacy);
+        };
+
+        ts::end(scenario_test);
+    }
 
     #[test]
     public fun test_deposit_legacy_add_heirs() {
@@ -296,7 +407,6 @@ module notary::test_asset_legacy {
         };
         // keep clock data for using later
         let clock_data = next_tx(scenario, TEST_ADDRESS1);
-        //debug::print(&clock_data);
         let clock1_ = ts::shared(&clock_data);
         let clock1_id = vector::borrow(&clock1_, 1);
 

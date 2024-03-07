@@ -244,4 +244,8 @@ module notary::assets_legacy {
         let amount = balance::value(coin);
         amount
     }
+    #[test_only]
+    public fun test_get_remaining(legacy: &Legacy) : u64 {
+        legacy.remaining
+    }
 }
