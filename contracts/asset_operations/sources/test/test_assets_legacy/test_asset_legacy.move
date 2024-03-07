@@ -157,6 +157,115 @@ module notary::test_asset_legacy {
     }
 
     #[test]
+    #[expected_failure(abort_code = al::ERROR_INVALID_ARRAY_LENGTH)]
+    public fun test_heirs() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
+          
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);
+
+        // create an legacy share object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+
+            al::new_legacy(ts::ctx(scenario), &start_time);
+
+            clock::share_for_testing(start_time);
+        };
+        // ADD 4 heirs both have %25
+        helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
+
+        // add new heirs
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+    
+            let heirs_address  = vector::empty();   
+            let heirs_percentage = vector::empty(); 
+
+            vector::push_back(&mut heirs_address, TEST_ADDRESS2);
+            vector::push_back(&mut heirs_address, TEST_ADDRESS3); 
+
+            vector::push_back(&mut heirs_percentage, 5000);
+            vector::push_back(&mut heirs_percentage, 5000);
+            vector::push_back(&mut heirs_percentage, 5000);
+ 
+            al::new_heirs(&mut legacy, heirs_address, heirs_percentage, ts::ctx(scenario));  
+    
+            ts::return_shared(legacy);  
+        };
+
+        ts::end(scenario_test);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = al::ERROR_INVALID_PERCENTAGE_SUM)]
+    public fun test_heirs_percentage() {
+        let scenario_test = init_test_helper();
+        let scenario = &mut scenario_test;
+
+         // TEST_ADDRESS1 had created an kiosk
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let shared = ts::take_shared<ListedTypes>(scenario);
+
+            at::create_kiosk(&mut shared, ts::ctx(scenario));
+          
+            ts::return_shared(shared);
+        };
+        // set the kiosk1_data
+        let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
+        let kiosk1_ = ts::created(&kiosk1_data);
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);
+
+        // create an legacy share object
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let start_time = clock::create_for_testing(ts::ctx(scenario));
+
+            al::new_legacy(ts::ctx(scenario), &start_time);
+
+            clock::share_for_testing(start_time);
+        };
+        // ADD 4 heirs both have %25
+        helpers::add_heirs(scenario, 2500, 2500, 2500, 2500);
+        
+        // add new heirs
+        next_tx(scenario, TEST_ADDRESS1);
+        {
+            let legacy = ts::take_shared<Legacy>(scenario);
+    
+            let heirs_address  = vector::empty();   
+            let heirs_percentage = vector::empty(); 
+
+            vector::push_back(&mut heirs_address, TEST_ADDRESS2);
+            vector::push_back(&mut heirs_address, TEST_ADDRESS3); 
+
+            vector::push_back(&mut heirs_percentage, 5000);
+            vector::push_back(&mut heirs_percentage, 4500);
+ 
+            al::new_heirs(&mut legacy, heirs_address, heirs_percentage, ts::ctx(scenario));  
+    
+            ts::return_shared(legacy);  
+        };
+
+        ts::end(scenario_test);
+    }
+
+    #[test]
     #[expected_failure(abort_code = al::ERROR_YOU_ARE_NOT_HEIR)]
     public fun test_distribute() {
         let scenario_test = init_test_helper();
@@ -219,7 +328,7 @@ module notary::test_asset_legacy {
             let coin_name = at::test_get_coin_name(&kiosk, 0);
             let coin_amount = at::test_get_coin_amount<LIRA>(&kiosk, coin_name);
 
-            //assert_eq(coin_amount, 10000);
+            assert_eq(coin_amount, 10000);
 
             ts::return_shared(kiosk);
         };
@@ -341,19 +450,6 @@ module notary::test_asset_legacy {
             ts::return_shared(legacy);  
         };
 
-
-
-
-
         ts::end(scenario_test);
     }
-
-
-
-
-
-
-
-
-
 }
