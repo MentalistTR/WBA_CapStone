@@ -54,10 +54,7 @@ module notary::test_renting {
 
             ts::return_shared(shared);
         };
-        // set the kiosk2_data
-        // let kiosk2_data = next_tx(scenario, TEST_ADDRESS2);
-        // let kiosk2_ = ts::created(&kiosk2_data);
-     
+
         // admin should create an transferpolicy
         helper_new_policy<Wrapper>(scenario);
 
@@ -166,9 +163,6 @@ module notary::test_renting {
         let kiosk2_ = ts::created(&kiosk2_data);
         let kiosk2_id = vector::borrow(&kiosk2_, 0); 
        
-        // admin should create an transferpolicy
-        helper_new_policy<Wrapper>(scenario);
-
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
         {
@@ -216,6 +210,9 @@ module notary::test_renting {
             ts::return_shared(kiosk1_shared);
             ts::return_to_sender(scenario, admin_cap);
         };
+        // admin should create an transferpolicy
+        helper_new_policy<Wrapper>(scenario);
+        
         // Admin adds rules for wrapper 
         next_tx(scenario, ADMIN);
         {
@@ -370,6 +367,12 @@ module notary::test_renting {
         // admin should create an transferpolicy for renting operations
         helper_new_policy<Wrapper>(scenario);
 
+        let policy1 = next_tx(scenario, TEST_ADDRESS1);
+        let policy1_shared = ts::shared(&policy1);
+        let policy1_created = ts::created(&policy1);
+        let policy1_cap_id = vector::borrow(&policy1_created, 0);
+        let policy1_id = vector::borrow(&policy1_shared, 0);
+
         // Admin adds rules for wrapper 
         next_tx(scenario, ADMIN);
         {
@@ -445,12 +448,14 @@ module notary::test_renting {
 
         let policy2 = next_tx(scenario, TEST_ADDRESS1);
         let policy2_data = ts::shared(&policy2);
+        let policy2_created = ts::created(&policy2);
+        let policy2_cap_id = vector::borrow(&policy2_created, 0);
         let policy2_id = vector::borrow(&policy2_data, 0);
         
         next_tx(scenario, ADMIN);
         {
-            let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy2_id);
-            let cap = ts::take_from_sender<TransferPolicyCap<Wrapper>>(scenario);
+            let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy1_id);
+            let cap = ts::take_from_sender_by_id<TransferPolicyCap<Wrapper>>(scenario, *policy1_cap_id);
             
             td::add<Wrapper>(&mut policy, &cap);
 
@@ -579,11 +584,13 @@ module notary::test_renting {
             ts::return_shared(kiosk1_shared);
             ts::return_to_sender(scenario, admin_cap);
         };
-        // admin should create an transferpolicy
+        // admin should create an transferpolicy for sales operations
         helper_new_policy<Wrapper>(scenario);
 
-        let policy1_data = next_tx(scenario, TEST_ADDRESS1);
-        let policy1_shared = ts::shared(&policy1_data);
+        let policy1 = next_tx(scenario, TEST_ADDRESS1);
+        let policy1_shared = ts::shared(&policy1);
+        let policy1_created = ts::created(&policy1);
+        let policy1_cap_id = vector::borrow(&policy1_created, 0);
         let policy1_id = vector::borrow(&policy1_shared, 0);
 
         // Admin adds rules for wrapper 
@@ -603,12 +610,14 @@ module notary::test_renting {
 
         let policy2 = next_tx(scenario, TEST_ADDRESS1);
         let policy2_data = ts::shared(&policy2);
-        let policy2_id = vector::borrow(&policy2_data, 0);
+        let policy2_created = ts::created(&policy2);
+        let policy2_cap_id = vector::borrow(&policy2_created, 0);
+        let policy2_id = vector::borrow(&policy2_data, 0);      
         
         next_tx(scenario, ADMIN);
         {
             let policy = ts::take_shared_by_id<TransferPolicy<Wrapper>>(scenario, *policy2_id);
-            let cap = ts::take_from_sender<TransferPolicyCap<Wrapper>>(scenario);
+            let cap = ts::take_from_sender_by_id<TransferPolicyCap<Wrapper>>(scenario, *policy2_cap_id);
             
             td::add<Wrapper>(&mut policy, &cap);
 

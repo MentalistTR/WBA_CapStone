@@ -1,4 +1,4 @@
-module notary::lira_stable_coin {
+module notary::lira {
   use std::option;
 
   use sui::transfer;
@@ -10,18 +10,18 @@ module notary::lira_stable_coin {
 
   // === Structs ===  
 
-  struct LIRA_STABLE_COIN has drop {}
+  struct LIRA has drop {}
 
   struct CapWrapper has key {
     id: UID,
-    cap: TreasuryCap<LIRA_STABLE_COIN>
+    cap: TreasuryCap<LIRA>
   }
 
   // === Init ===  
 
   #[lint_allow(share_owned)]
-  fun init(witness: LIRA_STABLE_COIN, ctx: &mut TxContext) {
-      let (treasury_cap, metaNotaryData) = coin::create_currency<LIRA_STABLE_COIN>(
+  fun init(witness: LIRA, ctx: &mut TxContext) {
+      let (treasury, metadata) = coin::create_currency<LIRA>(
             witness, 
             9, 
             b"LIRA",
@@ -31,19 +31,19 @@ module notary::lira_stable_coin {
             ctx
         );
 
-      transfer::share_object(CapWrapper { id: object::new(ctx), cap: treasury_cap });
-      transfer::public_share_object(metaNotaryData);
+      transfer::share_object(CapWrapper { id: object::new(ctx), cap: treasury });
+      transfer::public_freeze_object(metadata);
   }
 
   // === Public-Mutative Functions ===  
 
-  public fun burn(cap: &mut CapWrapper, coin_in: Coin<LIRA_STABLE_COIN>): u64 {
+  public fun burn(cap: &mut CapWrapper, coin_in: Coin<LIRA>): u64 {
     coin::burn(&mut cap.cap, coin_in)
   }
 
   // === Public-Friend Functions ===  
 
-  public(friend) fun mint(cap: &mut CapWrapper, value: u64, ctx: &mut TxContext): Coin<LIRA_STABLE_COIN> {
+  public(friend) fun mint(cap: &mut CapWrapper, value: u64, ctx: &mut TxContext): Coin<LIRA> {
     coin::mint(&mut cap.cap, value, ctx)
   }
 
@@ -51,6 +51,6 @@ module notary::lira_stable_coin {
 
   #[test_only]
   public fun return_init_lira(ctx: &mut TxContext) {
-    init(LIRA_STABLE_COIN {}, ctx);
+    init(LIRA {}, ctx);
   }
 }
