@@ -1,0 +1,14 @@
+{
+    "packageId": "0xc4acba0e1b5ed0f67a508bccea81961299bbffc8d7a020e8c9b7d0b69f5f0a1f",
+    "rules": {
+        "package": "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
+    },
+    "assets_sales": {
+        "listedTypes": "0x9a60aa86035944a2974c8cc3a53bd248596453e9fef9113e0cec562335017b05",
+        "AdminCap": "0x00407bff3105c52cb6d99796fa05f0c0aa419db4ef4ba1ecab620fd1128a844d",
+        "Publisher": "0xfed008e1b46552294e81a82e7051c1c252b87ce1e97e33ca30c3d7609ebd8d49",
+        "PolicySale": "",
+        "PolicyRenting": "",
+        "PolicyRentingBack": ""
+    }
+}

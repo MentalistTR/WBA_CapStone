@@ -4,7 +4,7 @@ import { fromB64 } from "@mysten/sui.js/utils";
 import dotenv from "dotenv";
 import type { SuiObjectChange } from "@mysten/sui.js/client";
 import * as fs from "fs";
-// import data from '../deployed_objects.json';
+import data from '../deployed_objects.json';
 
 dotenv.config();
 

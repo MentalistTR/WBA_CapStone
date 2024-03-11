@@ -9,7 +9,6 @@ const { execSync } = require('child_process');
 const keypair =  keyPair();
 
 const path_to_scripts = dirname(fileURLToPath(import.meta.url))
-
 const path_to_contracts = path.join(path_to_scripts, "../../contracts/asset_operations/sources")
 
 console.log("Building move code...")
@@ -77,6 +76,9 @@ export const deployed_address = {
         listedTypes:"",
         AdminCap:"",
         Publisher:"",
+        PolicySale: "",
+        PolicyRenting: "",
+        PolicyRentingBack: ""
     },
 }
 

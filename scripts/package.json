@@ -9,7 +9,9 @@
   },
   "scripts": {
     "publish_notary": "bun ./src/publish_notary.ts",
-    "publish_rules": "bun ./src/publish_rules.ts"
+    "publish_rules": "bun ./src/publish_rules.ts",
+    "create_type": "bun ./src/assets_sales/create_type",
+    "create_policy": "bun ./src/assets_sales/create_policy"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
