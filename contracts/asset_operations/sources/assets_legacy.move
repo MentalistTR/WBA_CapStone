@@ -51,7 +51,8 @@ module notary::assets_legacy {
 
     // =================== Functions ===================
 
-    public fun new_legacy(ctx: &mut TxContext, clock: &Clock) {
+    public fun new_legacy(ctx: &mut TxContext, remaining: u64, clock: &Clock) {
+        let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
         // share object
         transfer::share_object(
             Legacy {
@@ -60,14 +61,9 @@ module notary::assets_legacy {
                 heirs_percentage:table::new(ctx),
                 heirs_amount:table::new(ctx),
                 old_heirs:vector::empty(),
-                remaining: timestamp_ms(clock)
+                remaining: remaining_
             },
         );
-    }
-    // Legacy owner must update his remaining per a month
-    public fun update_remaining(legacy: &mut Legacy, clock: &Clock, ctx: &mut TxContext) {
-        assert!(sender(ctx) == legacy.owner, ERROR_YOU_ARE_NOT_OWNER);
-        legacy.remaining = timestamp_ms(clock);
     }
 
     // Deposit any token for legacy
@@ -141,7 +137,7 @@ module notary::assets_legacy {
         ctx: &mut TxContext
     ) {
         // check the remaining is more than 1 month
-        assert!((timestamp_ms(clock) - legacy.remaining) > (86400 * 30), ERROR_INVALID_TIME);
+        assert!(timestamp_ms(clock) >= legacy.remaining, ERROR_INVALID_TIME);
         // set the witness
         let witness = get_witness();
         // get user bag from kiosk
