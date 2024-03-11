@@ -12,11 +12,9 @@ module notary::assets_legacy {
     use sui::clock::{Self, Clock, timestamp_ms};
 
     use std::vector;
-    use std::debug;
     use std::string::{Self, String};
 
     use notary::assets_type::{Self as at, NotaryKioskExtWitness, AdminCap, get_witness};
-
 
     // =================== Errors ===================
 
@@ -47,7 +45,6 @@ module notary::assets_legacy {
     } 
 
     // =================== Initializer ===================
-
 
     // =================== Functions ===================
 

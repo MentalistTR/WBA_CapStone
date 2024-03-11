@@ -7,7 +7,6 @@ module notary::assets_type {
     use std::string::{Self, String};
     use std::vector;
     use std::option::{Option};
-  //use std::debug;
 
     use sui::tx_context::{Self, TxContext, sender};
     use sui::object::{Self, UID, ID};
@@ -168,7 +167,6 @@ module notary::assets_type {
             assets::remove_property(item, property_name);
             // if the user change asset propertys. It should be removed.
             assets::disapprove_asset(item);
-
     }
 
     // User1 has to list with purchase so he can send the person who wants to buy him own asset
@@ -233,7 +231,6 @@ module notary::assets_type {
         let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
         // take profits from kiosk
         let profits = kiosk::withdraw(kiosk, kiosk_cap, amount, ctx);
-
         profits
     }
 

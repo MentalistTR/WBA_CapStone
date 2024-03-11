@@ -1,6 +1,5 @@
 module notary::assets_renting {
     use std::string::{String};
-    use std::debug;
     use std::vector;
 
     use sui::tx_context::{TxContext, sender};
