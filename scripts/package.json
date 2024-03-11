@@ -1,9 +1,15 @@
 {
-  "name": "scripts",
-  "module": "index.ts",
+  "name": "notary",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "publish_notary": "bun ./src/publish_notary.ts",
+    "publish_rules": "bun ./src/publish_rules.ts"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

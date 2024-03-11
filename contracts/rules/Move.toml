@@ -1,11 +1,12 @@
 [package]
 name = "rules"
 version = "0.0.1"
+published-at = "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet"}
 
 [addresses]
-rules = "0x0"
 std = "0x1"
 sui="0x2"
+rules = "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
