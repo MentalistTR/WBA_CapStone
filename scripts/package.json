@@ -18,7 +18,11 @@
     "create_asset2": "bun ./src/assets_sales/create_asset2",
     "approve": "bun ./src/assets_sales/approve",
     "new_property": "bun ./src/assets_sales/new_property",
-    "list": "bun ./src/assets_sales/list"
+    "list": "bun ./src/assets_sales/list",
+    "purchase": "bun ./src/assets_sales/purchase"
+
+
+
 
     
 
