@@ -7,12 +7,12 @@
     "listedTypes": "0xfcd2714e5660bad894d90aaeda68a7c43c2ffc9872e9c769e98f9cfb9fdded2c",
     "AdminCap": "0x4658340194c6201f01225f69486ef666c03f66b2ddfa7938ae7d0a3017d5f989",
     "Publisher": "0xe15faf300c2a37ccad449ef205bf944adfbc11d04f85fb35718f03e72ed090c8",
-    "PolicySale": "",
+    "PolicySale": "0x5c9bf98c584513105524496280516421b6371a02b88814217d76116773d7e557",
     "PolicyRenting": "",
     "PolicyRentingBack": "",
     "Kiosk1": "0xd5bff1d2563f593588244a07308e5324ebf4b1e1fdc719633aebc9465af7873e",
     "Kiosk2": "0x92e4ac0532bc9ea81187fea03ada55302ca07ff3b63ca9729675736366a80163",
     "Asset1": "0xa6dbf29185085b94e7c379c78dda6f6a9e417d90957cc12df7d1f4a9956835e9",
-    "Asset2": ""
+    "Asset2": "0xcce49fa65d1874ce631cc362e243737f070924b4522f7fffb430337b61e2032b"
   }
 }
