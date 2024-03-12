@@ -9,49 +9,33 @@ import data from '../../deployed_objects.json';
 import fs from 'fs';
 import { fromHEX } from "@mysten/bcs";
 
-const keypair = keyPair();
+const keypair1 = keyPair1();
 
 const packageId = data.packageId;
-const admincap = data.assets_sales.AdminCap;
 const ListedTypes = data.assets_sales.listedTypes;
+const contracts = data.assets_renting.Contracts;
 const kiosk1 = data.assets_sales.Kiosk1;
-const kiosk2 = data.assets_sales.Kiosk2;
-const asset1 = data.assets_sales.Asset1;
 const asset2 = data.assets_sales.Asset2;
-
 
 (async () => {
     const txb = new TransactionBlock
-    const user1address: String = "0x863d379fac323bf4caf9b881711a0f41c8ec88db68226ab75287476aa5b4b920"
     const user2address: String = "0xf903b21b9cdabd89003b25d29c4c2189f44ca0a1cc85f8fe242eb612b0e6be47"
-
-    console.log("Admin approve asset1")
-
-    txb.moveCall({
-        target: `${packageId}::assets_type::approve`,
-        arguments: [
-            txb.object(admincap),
-            txb.object(ListedTypes),
-            txb.object(kiosk1),
-            txb.pure(asset1),
-            txb.pure(user1address)
-        ],
-    });
-    console.log("Admin approve asset2")
+    console.log("Address1 listing Asset2")
 
     txb.moveCall({
-        target: `${packageId}::assets_type::approve`,
+        target: `${packageId}::assets_renting::list_with_purchase_cap`,
         arguments: [
-            txb.object(admincap),
             txb.object(ListedTypes),
+            txb.object(contracts),
             txb.object(kiosk1),
             txb.pure(asset2),
-            txb.pure(user1address)
+            txb.pure([100]),
+            txb.pure(user2address)
         ],
     });
 
     const {objectChanges}= await client.signAndExecuteTransactionBlock({
-        signer: keypair,
+        signer: keypair1,
         transactionBlock: txb,
         options: {showObjectChanges: true}
     })
@@ -60,5 +44,30 @@ const asset2 = data.assets_sales.Asset2;
         console.log("Error: objectChanges is null or undefined");
         process.exit(1);
     }
+
     console.log(objectChanges);
+
+       // Get Policy Share Object 
+	const filePath = path.join(__dirname, '../../deployed_objects.json');
+    const deployed_address = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+	const PurchaseCap = `0x2::kiosk::PurchaseCap<${deployed_address.packageId}::assets::Wrapper>`
+    console.log(PurchaseCap)
+
+	const purchasecap_id = find_one_by_type(objectChanges, PurchaseCap)
+	if (!purchasecap_id) {
+	    console.log("Error: Could not find Policy")
+	    process.exit(1)
+	}
+
+	deployed_address.assets_renting.PurchaseCap = purchasecap_id;
+
+	fs.writeFile(filePath, JSON.stringify(deployed_address, null, 2), 'utf8', (err) => {
+		if (err) {
+			console.error('false', err);
+			return;
+		}
+		console.log('true');
+	});
+
 })()
