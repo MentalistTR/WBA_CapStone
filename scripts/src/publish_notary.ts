@@ -78,7 +78,12 @@ export const deployed_address = {
         Publisher:"",
         PolicySale: "",
         PolicyRenting: "",
-        PolicyRentingBack: ""
+        PolicyRentingBack: "",
+        Kiosk1: "",
+        Kiosk2: "",
+        Asset1: "",
+        Asset2: "",
+
     },
 }
 
