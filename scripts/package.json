@@ -12,7 +12,8 @@
     "publish_rules": "bun ./src/publish_rules.ts",
     "create_type": "bun ./src/assets_sales/create_type",
     "create_policy": "bun ./src/assets_sales/create_policy",
-    "create_kiosk1": "bun ./src/assets_sales/create_kiosk1"
+    "create_kiosk1": "bun ./src/assets_sales/create_kiosk1",
+    "create_kiosk2": "bun ./src/assets_sales/create_kiosk2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
