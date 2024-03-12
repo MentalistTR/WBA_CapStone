@@ -83,8 +83,12 @@ export const deployed_address = {
         Kiosk2: "",
         Asset1: "",
         Asset2: "",
-
     },
+    assets_renting: {
+        Contracts: "",
+        PurchaseCap : "",
+        Wrapper : ""
+      }
 }
 
 // Get listed_types shareobjects
@@ -119,6 +123,19 @@ if (!Publisher_id) {
 }
 
 deployed_address.assets_sales.Publisher = Publisher_id;
+
+// Get Contracts share object 
+
+const Contracts = `${deployed_address.packageId}::assets_renting::Contracts`
+
+const Contracts_id = find_one_by_type(objectChanges, Contracts)
+
+if (!Contracts_id) {
+    console.log("Error: Could not find Admin object ")
+    process.exit(1)
+}
+
+deployed_address.assets_renting.Contracts = Contracts_id;
 
 
 writeFileSync(path.join(path_to_scripts, "../deployed_objects.json"), JSON.stringify(deployed_address, null, 4))
