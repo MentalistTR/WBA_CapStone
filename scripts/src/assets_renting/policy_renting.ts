@@ -56,6 +56,17 @@ const wrapper = `${packageId}::assets::Wrapper`;
 
 	deployed_address.assets_sales.PolicyRenting = wrapper1_id;
 
+    // Get PolicyCap Share Object 
+	const PolicyCap = `0x2::transfer_policy::TransferPolicyCap<${deployed_address.packageId}::assets::Wrapper>`
+
+	const policy_cap_id = find_one_by_type(objectChanges, PolicyCap)
+	if (!policy_cap_id) {
+	    console.log("Error: Could not find Policy")
+	    process.exit(1)
+	}
+
+	deployed_address.assets_sales.PolicyCapRenting = policy_cap_id;
+
 	fs.writeFile(filePath, JSON.stringify(deployed_address, null, 2), 'utf8', (err) => {
 		if (err) {
 			console.error('false', err);

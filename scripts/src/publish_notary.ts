@@ -79,6 +79,8 @@ export const deployed_address = {
         PolicySale: "",
         PolicyRenting: "",
         PolicyRentingBack: "",
+        PolicyCapRenting: "",
+        PolicyCapRentingBack: "",
         Kiosk1: "",
         Kiosk2: "",
         Asset1: "",

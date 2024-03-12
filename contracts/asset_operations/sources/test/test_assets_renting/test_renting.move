@@ -14,7 +14,7 @@ module notary::test_renting {
     use std::debug;
 
     use notary::assets::{Wrapper};
-    use notary::helpers::{init_test_helper, helper_new_policy};
+    use notary::helpers::{init_test_helper, helper_new_policy,  helper_add_types};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
     use notary::assets_renting::{Self as ar, Contracts};
 
@@ -57,7 +57,7 @@ module notary::test_renting {
 
         // admin should create an transferpolicy
         helper_new_policy<Wrapper>(scenario);
-
+        helper_add_types(scenario);
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
         {
@@ -134,6 +134,8 @@ module notary::test_renting {
     public fun test_list_rent() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
+
+         helper_add_types(scenario);
 
         // TEST_ADDRESS1 had created an kiosk
         next_tx(scenario, TEST_ADDRESS1);
@@ -286,6 +288,8 @@ module notary::test_renting {
     public fun test_list_renting() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
+
+        helper_add_types(scenario);
 
          // TEST_ADDRESS1 had created an kiosk
         next_tx(scenario, TEST_ADDRESS1);
@@ -508,6 +512,8 @@ module notary::test_renting {
     public fun test_list_rent_get_asset() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
+
+        helper_add_types(scenario);
 
          // TEST_ADDRESS1 had created an kiosk
         next_tx(scenario, TEST_ADDRESS1);
@@ -744,6 +750,8 @@ module notary::test_renting {
     public fun test_complain() {
         let scenario_test = init_test_helper();
         let scenario = &mut scenario_test;
+        
+        helper_add_types(scenario);
 
          // TEST_ADDRESS1 had created an kiosk
         next_tx(scenario, TEST_ADDRESS1);
@@ -757,7 +765,7 @@ module notary::test_renting {
         // set the kiosk1_data
         let kiosk1_data = next_tx(scenario, TEST_ADDRESS1);
         let kiosk1_ = ts::created(&kiosk1_data);
-        let kiosk1_id = vector::borrow(&kiosk1_, 0); 
+        let kiosk1_id = vector::borrow(&kiosk1_, 0);    
      
         // TEST_ADDRESS2 had created an kiosk
         next_tx(scenario, TEST_ADDRESS2);
