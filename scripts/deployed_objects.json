@@ -1,22 +1,22 @@
 {
-  "packageId": "0x42e4eb5aa2d5056699c4903452c7e2081ce82e36e410bccaadae1332141b3247",
+  "packageId": "0x49befa248ec0fc79936d87cb6a84bf06c643ebc37eb3db891a7ef3a6ad737f04",
   "rules": {
     "package": "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
   },
   "assets_sales": {
-    "listedTypes": "0x007c13cfeec2d803bc81c5e06309a6078b5953f21ce3a34830bc44beba28b750",
-    "AdminCap": "0xdcd8da0a00bac133d70e9abf5ed23b661710250641bb9d665da8cfc23da72f8b",
-    "Publisher": "0x76ed1d119fd2c1e63ada484cfb6202ad25a00e9b15d3e2e4f608a5f52563e705",
-    "PolicySale": "",
-    "PolicyRenting": "0x211c13bcab1109e664baa2a79ff4bd00045860edcbbb4ce2977199608188e782",
-    "PolicyRentingBack": "0xb583d044d300b482a99bd061980bbd19ba563fd6f2d4124c0445e7999210ef60",
-    "Kiosk1": "",
-    "Kiosk2": "",
-    "Asset1": "",
-    "Asset2": ""
+    "listedTypes": "0xb249d4b93166906fc21484c206855e59b2ff287f07924e2d50268e1feded76cc",
+    "AdminCap": "0xc92c88cc4cd8835da4974e01dbdd46ca67348abfed35a995feb69f1de2a1acb8",
+    "Publisher": "0xc783dfa7554ef3b2730e5b9d1f309bc94c887da3a0f8f8317d8e0d699c2dde12",
+    "PolicySale": "0x21512d03bde4570eef29d24d7d0375a06648ba2d1190d10d5e63ab7377bb89fc",
+    "PolicyRenting": "0xd061781ea5d076309a21dc6432a02e7b9abe74c3e697dc938af97abb0fa9422d",
+    "PolicyRentingBack": "0xa157a9c9b9b47915e27b8656f12cc0c36a1c3c3f030e59574bbd3546b21cdcad",
+    "Kiosk1": "0x5c92934f8cbe508a48c3bc12ad29de736649c31dac1cb00f090972a05364a0a0",
+    "Kiosk2": "0x9f35d28c8891c0a15a1daf52f213f5b55f18bf8b9c289825a441731282d6fa43",
+    "Asset1": "0xea40a0403ad2a2727cbf5d88f7c76180e30c2668ed2dc4df4ae996e0ef2d5612",
+    "Asset2": "0x012f122f41098087bfa58cfae978ac23a32bbdd8c83d2fd763a0ca533c8e9566"
   },
   "assets_renting": {
-    "Contracts": "0xab12e9f8c24a4cc2266842ecc5503d78f5f2d7313ca2fa0e164733186c61b5b7",
+    "Contracts": "0x28a8527df1933d55750fbc6ef7197fe381bc8e44b517f7d685f88cc9e0534c91",
     "PurchaseCap": "",
     "Wrapper": ""
   }

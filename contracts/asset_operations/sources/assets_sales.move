@@ -81,7 +81,7 @@ module notary::assets_type {
 
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
-        assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
+       // assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
     // admin can create new_policy for sales or renting operations. 
@@ -120,12 +120,12 @@ module notary::assets_type {
 
     // Users can create asset
     public fun create_asset(
-        shared: &mut ListedTypes,
+        shared: &ListedTypes,
         kiosk: &mut Kiosk,
         type: String,
         ctx :&mut TxContext,
         ) {
-            assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
+            //assert!(vector::contains(&shared.types, &type) == true, ERROR_INVALID_TYPE);
 
             let asset = assets::create_asset(type, ctx);
             let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));

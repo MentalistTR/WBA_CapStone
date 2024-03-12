@@ -4,7 +4,6 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { writeFileSync } from "fs";
 
-
 const { execSync } = require('child_process');
 const keypair =  keyPair();
 

@@ -28,7 +28,7 @@ const kiosk1 = data.assets_sales.Kiosk1;
             txb.pure(type)
         ],
     });
-
+ 
     const {objectChanges}= await client.signAndExecuteTransactionBlock({
         signer: keypair1,
         transactionBlock: txb,
@@ -42,7 +42,7 @@ const kiosk1 = data.assets_sales.Kiosk1;
 
     console.log(objectChanges);
 
-    // Get Kiosk1 share object  
+    // Get Asset1
 	const filePath = path.join(__dirname, '../../deployed_objects.json');
     const deployed_address = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
