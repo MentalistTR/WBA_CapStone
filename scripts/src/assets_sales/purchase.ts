@@ -22,7 +22,7 @@ const asset1 = data.assets_sales.Asset1;
     const txb = new TransactionBlock
     const  [coin] = txb.splitCoins(txb.gas, ["1000"]);
 
-    console.log("Address1 purchase Asset1")
+    console.log("Address2 purchase Asset1")
 
     txb.moveCall({
         target: `${packageId}::assets_type::purchase`,

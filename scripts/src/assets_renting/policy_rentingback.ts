@@ -17,7 +17,7 @@ const wrapper = `${packageId}::assets::Wrapper`;
 (async () => {
     const txb = new TransactionBlock
 
-    console.log("admin creates new policy....")
+    console.log("admin creates new policy for rentingback....")
 
     txb.moveCall({
         target: `${packageId}::assets_type::new_policy`,

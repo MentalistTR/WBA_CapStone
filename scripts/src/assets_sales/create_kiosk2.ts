@@ -18,7 +18,7 @@ const ListedTypes = data.assets_sales.listedTypes;
 (async () => {
     const txb = new TransactionBlock
 
-    console.log("Address1 creates his kiosk")
+    console.log("Address2 creates his kiosk")
 
     txb.moveCall({
         target: `${packageId}::assets_type::create_kiosk`,

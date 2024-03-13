@@ -18,7 +18,7 @@ const kiosk1 = data.assets_sales.Kiosk1;
 (async () => {
     const txb = new TransactionBlock
     const type: String = "House";
-    console.log("Address1 creates asset1")
+    console.log("Address1 creates asset1 for sales")
 
     txb.moveCall({
         target: `${packageId}::assets_type::create_asset`,

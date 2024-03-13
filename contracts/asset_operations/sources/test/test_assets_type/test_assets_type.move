@@ -85,7 +85,7 @@ module notary::test_assets_type {
        
         // admin should create an transferpolicy
         helper_new_policy<Asset>(scenario);
-           // create types such as House, Car, Land, Shop
+        // create types such as House, Car, Land, Shop
         helper_add_types(scenario);
 
         // create an asset 1 
