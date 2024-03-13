@@ -95,7 +95,9 @@ export const deployed_address = {
         Legacy: "",
       },
       lira: {
-        CapWrapper: ""
+        CapWrapper: "",
+        liraCoinType: `${package_id}::lira::LIRA`,
+        coinmetadata: ""
       }
 }
 
@@ -157,6 +159,19 @@ if (!capwrapper_id) {
 }
 
 deployed_address.lira.CapWrapper = capwrapper_id;
+
+// Get Coinmetadata share from lira 
+
+const Coinmetadata = `0x2::coin::CoinMetadata<${deployed_address.packageId}::lira::LIRA>`
+
+const Coinmetadata_id = find_one_by_type(objectChanges, Coinmetadata)
+
+if (!Coinmetadata_id) {
+    console.log("Error: Could not find Admin object ")
+    process.exit(1)
+}
+
+deployed_address.lira.coinmetadata = Coinmetadata_id;
 
 
 writeFileSync(path.join(path_to_scripts, "../deployed_objects.json"), JSON.stringify(deployed_address, null, 4))
