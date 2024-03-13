@@ -29,7 +29,7 @@
     "create_rule_rentingback": "bun ./src/assets_renting/create_rule_rentingback",
     "rent": "bun ./src/assets_renting/rent",
     "pay_monthly_rent": "bun ./src/assets_renting/pay_monthly_rent",
-
+    "get_asset": "bun ./src/assets_renting/get_asset",
 
 
 
