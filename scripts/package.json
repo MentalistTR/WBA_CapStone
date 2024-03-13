@@ -28,12 +28,12 @@
     "create_rule_renting": "bun ./src/assets_renting/create_rule_renting",
     "create_rule_rentingback": "bun ./src/assets_renting/create_rule_rentingback",
     "rent": "bun ./src/assets_renting/rent",
+    "pay_monthly_rent": "bun ./src/assets_renting/pay_monthly_rent",
 
 
 
 
-
-    "run_all": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent"
+    "run_all": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent pay_monthly_rent"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
