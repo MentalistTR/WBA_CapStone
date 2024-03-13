@@ -140,8 +140,11 @@ module notary::assets_renting {
         policy::confirm_request(policy, request);
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-        // calculate the end time as a second
-        let end_time: u64 = (86400 * 30) * (rental_period);
+        // // calculate the end time as a second
+        //  let end_time: u64 = ((86400 * 30) * (rental_period) + timestamp_ms(clock));
+        // set to testnet 
+         let end_time: u64 = timestamp_ms(clock) + 45;
+
         // set the contract
         let contract = Contract {
             id: object::new(ctx),
