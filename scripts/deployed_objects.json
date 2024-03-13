@@ -1,33 +1,33 @@
 {
-    "packageId": "0x9d342907718e3ec7f8e3e94a5ce82d73a4502e366cd7bb7a06bb96be1dba11d1",
-    "rules": {
-        "package": "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
-    },
-    "assets_sales": {
-        "listedTypes": "0x63554ae7cf5b4b956fb2b8a929ffb6eefff68d2b43f1edab03c096a2c156f23c",
-        "AdminCap": "0x9c78f86ad03068e879dea7cb68fb430e6054a4daa4cb0cc30a3e8b2b8e6e2d05",
-        "Publisher": "0x4760a0080bada9f1e42cade857d9fec5b52dd506da02ae5bbd5d4a160e532f4f",
-        "PolicySale": "",
-        "PolicyRenting": "",
-        "PolicyRentingBack": "",
-        "PolicyCapRenting": "",
-        "PolicyCapRentingBack": "",
-        "Kiosk1": "",
-        "Kiosk2": "",
-        "Asset1": "",
-        "Asset2": ""
-    },
-    "assets_renting": {
-        "Contracts": "0xe7a40c04ddaddeed7bdbc5324e1e1f0e7507bc492647531906146aea6da88395",
-        "PurchaseCap": "",
-        "Wrapper": ""
-    },
-    "assets_legacy": {
-        "Legacy": ""
-    },
-    "lira": {
-        "CapWrapper": "0xed8db00a732c7a005174ac5e7f437f79209d44ea2cc0a0e31a8d18129668acd9",
-        "liraCoinType": "0x9d342907718e3ec7f8e3e94a5ce82d73a4502e366cd7bb7a06bb96be1dba11d1::lira::LIRA",
-        "coinmetadata": "0x3e38b2e2fcb587226cd39f98be2d86ce03ebfebbb52631f54c46c45c3722c28a"
-    }
+  "packageId": "0x45a52425faf99ec1b2d616bddcceb99a06951bef8a68e6f1ba6339b6cf65e700",
+  "rules": {
+    "package": "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
+  },
+  "assets_sales": {
+    "listedTypes": "0x82d354dbe3c66d1cbc72a2b7562743377460c046aec00a6d0c38830682ce9bd3",
+    "AdminCap": "0x771aa35ba5fa21afc415ec1b9e2eadb7c40bcc9edb8aef9a2dc5140ea38fd3b4",
+    "Publisher": "0x3dd56081b3512953681b8b89071a218905e0f946fdd38f2e2dc6406417bf2878",
+    "PolicySale": "0xefddbc68f83beb620238d9516523e9c65f072ce287259ec1a59e85baab31a306",
+    "PolicyRenting": "0x286326772e8ca96dda86da060f9ebea941dc760d54c8ba423e37fbb5f6df1fe0",
+    "PolicyRentingBack": "0xcd27ba91e9aa4877546586db1f07b9449b2305177fdb5b24b60dee2a34572fd0",
+    "PolicyCapRenting": "0xd374fd8af232efb02d8628cc756876002961917f7205c973869fb6fedbafea39",
+    "PolicyCapRentingBack": "0xb1331b2230bb63b170558e279ebf87b848b39938871ae18936e95f2edd273709",
+    "Kiosk1": "0x8d30a3e84e711c34c09e3912695f8eba7444f0a0ca03381d52fc3e6190bb9d36",
+    "Kiosk2": "0xd7a1952ab99ddc00a548eb78428f5734ae98e3c465906022ca67702e35c97d7f",
+    "Asset1": "0xb6bbd2c86a73090b9770c375d839113ac9bce56a11083cdfcb268169ecaeac14",
+    "Asset2": "0xc99eef6a5d096623780b0e71281700e2b1390f223a9c4af3d9eb7da8a546161a"
+  },
+  "assets_renting": {
+    "Contracts": "0xaecd497581f344702629621a083c9a82cc8ba5f112553641dcb425fd9f5b6d30",
+    "PurchaseCap": "0x4d88a718ccaa49753f7f5c818013678da5b283130371cac27d6873d188b5e66b",
+    "Wrapper": "0x2fa194c6932e29805b1e61cbdc03f78b99594c5b8ee7aa0b66e29264b3a78aae"
+  },
+  "assets_legacy": {
+    "Legacy": "0xaa5f344b060c45616df8a6bb9149241bdc12df8207d44193480a16da1f663cea"
+  },
+  "lira": {
+    "CapWrapper": "0x137ea319a2b1c5dc28540dd29814219e192dc39e58ae580face096bff292ed2b",
+    "liraCoinType": "0x45a52425faf99ec1b2d616bddcceb99a06951bef8a68e6f1ba6339b6cf65e700::lira::LIRA",
+    "coinmetadata": "0xb06f84bf4dc154101d2343f1de3b126f859be42c0e501ca0ce3c6027a2a4cea6"
+  }
 }
