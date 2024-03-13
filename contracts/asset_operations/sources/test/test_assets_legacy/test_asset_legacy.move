@@ -430,9 +430,8 @@ module notary::test_asset_legacy {
             let coin_name = string::utf8(b"Tr Lira");
 
             let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
-            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
 
-            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+            transfer::public_transfer(amount, TEST_ADDRESS2);
 
             ts::return_shared(legacy);  
         };
@@ -452,9 +451,8 @@ module notary::test_asset_legacy {
             let coin_name = string::utf8(b"Tr Lira");
 
             let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
-            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
 
-            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+            transfer::public_transfer(amount, TEST_ADDRESS2);
 
             ts::return_shared(legacy);  
         };

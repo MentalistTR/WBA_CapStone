@@ -183,7 +183,7 @@ module notary::assets_legacy {
             };       
     }
     // Heirs can withdraw funds
-    public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Balance<T> {
+    public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Coin<T> {
         let sender = sender(ctx);
         // firstly, check that  Is sender shareholder? 
         assert!(
@@ -193,8 +193,9 @@ module notary::assets_legacy {
         // let take heir's bag from table 
         let bag_ = table::borrow_mut<address, Bag>(&mut legacy.heirs_amount, sender);
         // calculate withdraw balance 
-        let coin_value = bag::remove<String, Balance<T>>( bag_, coin_name);
+        let balance_value = bag::remove<String, Balance<T>>( bag_, coin_name);
         // return the withdraw balance
+        let coin_value = coin::from_balance(balance_value, ctx);
         coin_value
     }
 
