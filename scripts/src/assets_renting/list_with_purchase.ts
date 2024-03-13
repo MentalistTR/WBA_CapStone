@@ -16,6 +16,8 @@ const ListedTypes = data.assets_sales.listedTypes;
 const contracts = data.assets_renting.Contracts;
 const kiosk1 = data.assets_sales.Kiosk1;
 const asset2 = data.assets_sales.Asset2;
+const wrapper = `${packageId}::assets::Wrapper`;
+
 
 (async () => {
     const txb = new TransactionBlock
@@ -47,12 +49,11 @@ const asset2 = data.assets_sales.Asset2;
 
     console.log(objectChanges);
 
-       // Get Policy Share Object 
+    // Get PurchaseCap
 	const filePath = path.join(__dirname, '../../deployed_objects.json');
     const deployed_address = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
 	const PurchaseCap = `0x2::kiosk::PurchaseCap<${deployed_address.packageId}::assets::Wrapper>`
-    console.log(PurchaseCap)
 
 	const purchasecap_id = find_one_by_type(objectChanges, PurchaseCap)
 	if (!purchasecap_id) {
@@ -61,6 +62,18 @@ const asset2 = data.assets_sales.Asset2;
 	}
 
 	deployed_address.assets_renting.PurchaseCap = purchasecap_id;
+
+    
+    // Get Wrapper ID
+	const Wrapper = `${packageId}::assets::Wrapper`
+
+	const Wrapper_id = find_one_by_type(objectChanges, Wrapper)
+	if (!Wrapper_id) {
+	    console.log("Error: Could not find Policy")
+	    process.exit(1)
+	}
+
+	deployed_address.assets_renting.Wrapper = Wrapper_id;
 
 	fs.writeFile(filePath, JSON.stringify(deployed_address, null, 2), 'utf8', (err) => {
 		if (err) {
