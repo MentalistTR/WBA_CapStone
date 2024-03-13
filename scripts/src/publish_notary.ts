@@ -93,6 +93,9 @@ export const deployed_address = {
       },
       assets_legacy: {
         Legacy: "",
+      },
+      lira: {
+        CapWrapper: ""
       }
 }
 
@@ -141,6 +144,19 @@ if (!Contracts_id) {
 }
 
 deployed_address.assets_renting.Contracts = Contracts_id;
+
+// Get Capwrapper share from lira 
+
+const Capwrapper = `${deployed_address.packageId}::assets_renting::Contracts`
+
+const capwrapper_id = find_one_by_type(objectChanges, Capwrapper)
+
+if (!capwrapper_id) {
+    console.log("Error: Could not find Admin object ")
+    process.exit(1)
+}
+
+deployed_address.lira.CapWrapper = capwrapper_id;
 
 
 writeFileSync(path.join(path_to_scripts, "../deployed_objects.json"), JSON.stringify(deployed_address, null, 4))

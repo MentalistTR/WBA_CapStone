@@ -13,17 +13,18 @@ import {SUI_CLOCK_OBJECT_ID} from '@mysten/sui.js/utils';
 const keypair1 = keyPair1();
 
 const packageId = data.packageId;
+const capwrapper = data.lira.CapWrapper;
 
 (async () => {
     const txb = new TransactionBlock
-    const remaining = 5;
-    console.log("Address1 creates Legacy")
 
-    txb.moveCall({
-        target: `${packageId}::assets_legacy::new_legacy`,
+    console.log("Address1 mints lira")
+
+    const amount = txb.moveCall({
+        target: `${packageId}::lira::mint`,
         arguments: [
-           txb.pure(remaining),
-           txb.object(SUI_CLOCK_OBJECT_ID)
+           txb.object(capwrapper),
+           txb.pure(10000000000000),
         ],
     });
 
@@ -39,27 +40,5 @@ const packageId = data.packageId;
     }
 
     console.log(objectChanges);
-
-    // Get Legacy share id 
-	const filePath = path.join(__dirname, '../../deployed_objects.json');
-    const deployed_address = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-
-	const Legacy = `${deployed_address.packageId}::assets_legacy::Legacy`
-
-	const legacy_id = find_one_by_type(objectChanges, Legacy)
-	if (!legacy_id) {
-	    console.log("Error: Could not find Policy")
-	    process.exit(1)
-	}
-
-	deployed_address.assets_legacy.Legacy = legacy_id;
-
-	fs.writeFile(filePath, JSON.stringify(deployed_address, null, 2), 'utf8', (err) => {
-		if (err) {
-			console.error('false', err);
-			return;
-		}
-		console.log('true');
-	});
 
 })()
