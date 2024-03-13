@@ -147,7 +147,7 @@ deployed_address.assets_renting.Contracts = Contracts_id;
 
 // Get Capwrapper share from lira 
 
-const Capwrapper = `${deployed_address.packageId}::assets_renting::Contracts`
+const Capwrapper = `${deployed_address.packageId}::lira::CapWrapper`
 
 const capwrapper_id = find_one_by_type(objectChanges, Capwrapper)
 

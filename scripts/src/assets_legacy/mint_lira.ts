@@ -28,6 +28,8 @@ const capwrapper = data.lira.CapWrapper;
         ],
     });
 
+    txb.transferObjects([amount], keypair1.getPublicKey().toSuiAddress());
+
     const {objectChanges}= await client.signAndExecuteTransactionBlock({
         signer: keypair1,
         transactionBlock: txb,

@@ -21,7 +21,7 @@ const decision: boolean = true;
 (async () => {
     const txb = new TransactionBlock
 
-    console.log("Address1 creates Complain")
+    console.log("Admin make provision")
 
     txb.moveCall({
         target: `${packageId}::assets_renting::provision`,
