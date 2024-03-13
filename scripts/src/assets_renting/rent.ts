@@ -57,5 +57,4 @@ const wrapper = data.assets_renting.Wrapper;
         process.exit(1);
     }
     console.log(objectChanges);
-
 })()
