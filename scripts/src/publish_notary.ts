@@ -90,6 +90,9 @@ export const deployed_address = {
         Contracts: "",
         PurchaseCap : "",
         Wrapper : ""
+      },
+      assets_legacy: {
+        Legacy: "",
       }
 }
 

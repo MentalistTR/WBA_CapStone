@@ -53,7 +53,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -109,7 +109,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -187,7 +187,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -244,7 +244,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -300,7 +300,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
