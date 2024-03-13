@@ -15,7 +15,6 @@ const packageId = data.packageId;
 const policy = data.assets_sales.PolicyRenting;
 const policy_cap = data.assets_sales.PolicyCapRenting;
 const rules_package = data.rules.package;
-console.log(rules_package);
 const wrapper = `${packageId}::assets::Wrapper`;
 
 (async () => {

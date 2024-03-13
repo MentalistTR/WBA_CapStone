@@ -26,9 +26,9 @@
     "policy_rentingback": "bun ./src/assets_renting/policy_rentingback",
     "list_with_purchase": "bun ./src/assets_renting/list_with_purchase",
     "create_rule_renting": "bun ./src/assets_renting/create_rule_renting",
+    "create_rule_rentingback": "bun ./src/assets_renting/create_rule_rentingback",
 
-
-    "run_all": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits policy_renting policy_rentingback"
+    "run_all": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
