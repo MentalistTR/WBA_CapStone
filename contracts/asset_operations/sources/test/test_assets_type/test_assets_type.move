@@ -90,7 +90,7 @@ module notary::test_assets_type {
         helper_new_policy<Asset>(scenario);
         // create types such as House, Car, Land, Shop
         helper_add_types(scenario);
-
+        // Admin adds new rules for royalty
         next_tx(scenario, ADMIN);
         {
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
@@ -192,7 +192,7 @@ module notary::test_assets_type {
             let listed_shared = ts::take_shared<ListedTypes>(scenario);
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
 
-           at::approve(
+            at::approve(
                 &admin_cap,
                 &listed_shared,
                 &mut kiosk1_shared,

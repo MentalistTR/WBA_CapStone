@@ -20,6 +20,8 @@ module notary::assets_renting {
     
     use rules::loan_duration::{Self as ld};
     use rules::time_duration::{Self as td};
+    use rules::royalty_rule::{Self as rr, NotaryFee};
+    use rules::lira::{LIRA};
 
     // =================== Errors ===================
 
@@ -114,12 +116,14 @@ module notary::assets_renting {
     public fun rent(
         share: &mut Contracts,
         listed_types: &ListedTypes,
+        notary: &mut NotaryFee,
         owner_kiosk: &mut Kiosk,
         leaser_kiosk: &mut Kiosk,
         policy: &TransferPolicy<Wrapper>,
         purch_cap: PurchaseCap<Wrapper>,
         wrapper_id: ID,
         payment: Coin<SUI>, // it should be equal to 1 month rental price + deposit price 
+        fee: Coin<LIRA>,
         rental_period: u64,
         clock: &Clock,
         ctx: &mut TxContext 
@@ -136,6 +140,7 @@ module notary::assets_renting {
             payment_purchase
         );
         ld::prove<Wrapper>(policy, &mut request, owner_kiosk, rental_period);
+        rr::pay<Wrapper>(policy, &mut request, notary, fee, ctx);
         // confirm the request. Destroye the hot potato
         policy::confirm_request(policy, request);
         // be sure that sender is the owner of kiosk
