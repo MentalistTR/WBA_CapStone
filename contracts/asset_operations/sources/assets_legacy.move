@@ -49,8 +49,8 @@ module notary::assets_legacy {
     // =================== Functions ===================
 
     public fun new_legacy(remaining: u64, clock: &Clock, ctx: &mut TxContext) {
-        let remaining_ :u64 = 1 + timestamp_ms(clock);
-        //let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
+        //let remaining_ :u64 = 1 + timestamp_ms(clock);
+        let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
         // share object
         transfer::share_object(
             Legacy {

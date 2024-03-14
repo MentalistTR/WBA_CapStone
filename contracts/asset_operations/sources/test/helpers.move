@@ -7,8 +7,7 @@ module notary::helpers {
     // use std::option::{Self};
     // use std::debug;
 
-
-    use notary::lira::{return_init_lira};
+    use rules::lira::{return_init_lira};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
     use notary:: assets_renting::{test_renting_init};

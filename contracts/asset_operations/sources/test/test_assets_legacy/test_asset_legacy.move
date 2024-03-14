@@ -15,7 +15,7 @@ module notary::test_asset_legacy {
     use notary::assets::{Wrapper};
     use notary::helpers::{Self, init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
-    use notary::lira::{LIRA};
+    use rules::lira::{LIRA};
     use notary::assets_legacy::{Self as al, Legacy};
     
     const ADMIN: address = @0xA;

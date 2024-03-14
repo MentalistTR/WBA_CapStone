@@ -22,7 +22,7 @@ module notary::assets_type {
     use sui::balance::{Self, Balance};
 
     use notary::assets::{Self, Asset};
-    use notary::lira::{LIRA};
+    use rules::lira::{LIRA};
 
     friend notary::assets_renting;
     friend notary::assets_legacy;
