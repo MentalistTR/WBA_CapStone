@@ -54,7 +54,7 @@ const wrapper = `${packageId}::assets::Wrapper`;
 
 	deployed_address.assets_sales.PolicyRenting = wrapper1_id;
 
-    // Get PolicyCap Share Object 
+    // Get PolicyCap Object 
 	const PolicyCap = `0x2::transfer_policy::TransferPolicyCap<${deployed_address.packageId}::assets::Wrapper>`
 
 	const policy_cap_id = find_one_by_type(objectChanges, PolicyCap)

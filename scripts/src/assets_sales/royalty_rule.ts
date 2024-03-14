@@ -2,30 +2,27 @@ import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { client, keyPair} from '../helpers.js';
 import data from '../../deployed_objects.json';
 
+
 const keypair1 = keyPair();
 
 const packageId = data.packageId;
-const policy = data.assets_sales.PolicyRenting;
-const policy_cap = data.assets_sales.PolicyCapRenting;
+const policy = data.assets_sales.PolicySale;
+const policy_cap = data.assets_sales.PolicySaleCap;
 const rules_package = data.rules.package;
-const wrapper = `${packageId}::assets::Wrapper`;
+const asset = `${packageId}::assets::Asset`;
 
 (async () => {
     const txb = new TransactionBlock
 
-    console.log("Admin adds loan_duration rule for renting operations")
-    const min = 6;
-    const max = 12;
+    console.log("Admin adds royalty rule for sales operations")
 
     txb.moveCall({
-        target: `${rules_package}::loan_duration::add`,
+        target: `${rules_package}::royalty_rule::add`,
         arguments: [
             txb.object(policy),
             txb.object(policy_cap),
-            txb.pure(min),
-            txb.pure(max)
         ],
-        typeArguments: [wrapper]
+        typeArguments: [asset]
     });
 
     const {objectChanges}= await client.signAndExecuteTransactionBlock({

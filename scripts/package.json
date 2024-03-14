@@ -13,6 +13,7 @@
     "publish_rules": "bun ./src/publish_rules.ts",
     "create_type": "bun ./src/assets_sales/create_type",
     "create_policy": "bun ./src/assets_sales/create_policy",
+    "create_royalty": "bun ./src/assets_sales/royalty_rule",
     "create_kiosk1": "bun ./src/assets_sales/create_kiosk1",
     "create_kiosk2": "bun ./src/assets_sales/create_kiosk2",
     "create_asset1": "bun ./src/assets_sales/create_asset1",
@@ -39,7 +40,7 @@
     "distribute": "bun ./src/assets_legacy/distribute",
     "withdraw_legacy": "bun ./src/assets_legacy/withdraw_legacy",
     
-    "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits",
+    "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_royalty create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits",
     "run_assets_renting": "policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent pay_monthly_rent create_complain provision",
     "run_assets_legacy": " create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
   },

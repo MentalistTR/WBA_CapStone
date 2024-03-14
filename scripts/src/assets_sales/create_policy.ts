@@ -11,7 +11,6 @@ const admincap = data.assets_sales.AdminCap;
 const publisher = data.assets_sales.Publisher;
 
 const asset = `${packageId}::assets::Asset`;
-const wrapper = `${packageId}::assets::Wrapper`;
 
 (async () => {
     const txb = new TransactionBlock
@@ -54,6 +53,17 @@ const wrapper = `${packageId}::assets::Wrapper`;
 	}
 
 	deployed_address.assets_sales.PolicySale = policy1_id;
+
+    // Get PolicyCap Share Object 
+	const PolicyCap = `0x2::transfer_policy::TransferPolicyCap<${deployed_address.packageId}::assets::Asset>`
+
+	const policy_cap_id = find_one_by_type(objectChanges, PolicyCap)
+	if (!policy_cap_id) {
+	    console.log("Error: Could not find Policy")
+	    process.exit(1)
+	}
+
+	deployed_address.assets_sales.PolicySaleCap = policy_cap_id;
 
 	fs.writeFile(filePath, JSON.stringify(deployed_address, null, 2), 'utf8', (err) => {
 		if (err) {
