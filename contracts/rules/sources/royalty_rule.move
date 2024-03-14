@@ -108,6 +108,7 @@ module rules::royalty_rule {
         // add receipt
         policy::add_receipt(Rule {}, request);
         // transfer the rest of lira to sender if it is exist
+        assert!(coin::value(&payment) > 0, EInsufficientAmount);
         transfer::public_transfer(payment, sender(ctx));
     }
 
