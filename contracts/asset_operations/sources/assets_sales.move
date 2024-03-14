@@ -21,7 +21,8 @@ module notary::assets_type {
     use sui::bag::{Self, Bag};
     use sui::balance::{Self, Balance};
 
-    use notary::assets::{Self, Asset, Wrapper};
+    use notary::assets::{Self, Asset};
+    use notary::lira::{LIRA};
 
     friend notary::assets_renting;
     friend notary::assets_legacy;
@@ -41,7 +42,8 @@ module notary::assets_type {
         id: UID,
         types: vector<String>,
         kiosk_caps: Table<address, KioskOwnerCap>,
-        purchase_cap: Table<ID, PurchaseCap<Asset>>
+        purchase_cap: Table<ID, PurchaseCap<Asset>>,
+        balance: Balance<LIRA>
     }
     
     // Only owner of this module can access it.
@@ -65,7 +67,8 @@ module notary::assets_type {
             id:object::new(ctx),
             types: vector::empty(),
             kiosk_caps: table::new<address, KioskOwnerCap>(ctx),
-            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
+            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx),
+            balance: balance::zero() 
         });
         // define the publisher
         let publisher_ = package::claim<ASSETS_TYPE>(otw, ctx);

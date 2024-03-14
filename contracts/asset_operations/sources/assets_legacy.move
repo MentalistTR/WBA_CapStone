@@ -1,20 +1,20 @@
 module notary::assets_legacy {
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::table::{Self, Table};
     use sui::bag::{Self, Bag};
     use sui::transfer;
     use sui::tx_context::{TxContext, sender};
-    use sui::kiosk::{Self, Kiosk, PurchaseCap};
+    use sui::kiosk::{Kiosk};
     use sui::kiosk_extension::{Self as ke};
     use sui::coin::{Self, Coin, CoinMetadata};
     use sui::balance::{Self, Balance};
     use sui::sui::{SUI};
-    use sui::clock::{Self, Clock, timestamp_ms};
+    use sui::clock::{Clock, timestamp_ms};
 
     use std::vector;
     use std::string::{Self, String};
 
-    use notary::assets_type::{Self as at, NotaryKioskExtWitness, AdminCap, get_witness};
+    use notary::assets_type::{NotaryKioskExtWitness, AdminCap, get_witness};
 
     // =================== Errors ===================
 
