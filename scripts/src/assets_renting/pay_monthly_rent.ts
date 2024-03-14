@@ -11,7 +11,7 @@ const asset2 = data.assets_renting.Wrapper;
 (async () => {
     const txb = new TransactionBlock
     console.log("Address2 pays monthly rent")
-    const  [coin] = txb.splitCoins(txb.gas, ["100"]);
+    const  [coin] = txb.splitCoins(txb.gas, ["1000"]);
 
     txb.moveCall({
         target: `${packageId}::assets_renting::pay_monthly_rent`,
