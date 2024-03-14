@@ -9,7 +9,6 @@
 /// 1. Define structures
 /// 2. Return structs variables
 module notary::assets {
-
     use sui::object::{Self,UID,ID};
     use sui::tx_context::{TxContext};
     use sui::vec_set::{Self, VecSet};
@@ -17,20 +16,18 @@ module notary::assets {
 
     use std::type_name::{TypeName};
     use std::string::{String};
-   // use std::debug;
-
+  
     // === Friends ===
 
     friend notary::assets_type;
     friend notary::assets_renting;
     
-  
-    // /// # Arguments
-    // /// 
-    // /// * `type ` - is the type of the asset such as house, car, plane
-    // /// * `price` -    Defines the price of asset 
-    // /// * `on_rent` -  Defines the rentable
-    // /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
+    /// # Arguments
+    /// 
+    /// * `type ` - is the type of the asset such as house, car, plane
+    /// * `price` -    Defines the price of asset 
+    /// * `on_rent` -  Defines the rentable
+    /// * `approve` -  Defines the object is the reel asset. It is approved by admin. 
     struct Asset has key, store {
         id: UID,
         owner: ID,
@@ -40,13 +37,13 @@ module notary::assets {
         rules: VecSet<TypeName>,
         property: VecMap<String, String>,
     }
-
+    /// We will wrap the asset for another transferPolicy
     struct Wrapper has key, store {
         id: UID,
         owner: ID,
         asset: Asset
     }
-
+    // Wrap the asset
     public fun wrap(empty: Asset, ctx: &mut TxContext) : Wrapper {
         let id = object::new(ctx);
         let inner = object::uid_to_inner(&id);
@@ -57,14 +54,18 @@ module notary::assets {
         };
         rent
     }
-
+    // unwrap the asset 
     public fun unwrap(w: Wrapper) : Asset {
         let Wrapper {id, owner: _, asset} = w;
         object::delete(id);
         asset
     }
 
-    // create any asset and place it to kiosk. 
+    /// Users can create assets from assets_sales module.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `type` - the type of asset such as Car, House, Land. 
     public fun create_asset(
         type: String,
         ctx :&mut TxContext,
