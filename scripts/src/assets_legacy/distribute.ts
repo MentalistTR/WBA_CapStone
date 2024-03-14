@@ -1,5 +1,5 @@
 import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { client, keyPair, keyPair1, keyPair2, parse_amount, find_one_by_type } from '../helpers.js';
+import { client, keyPair } from '../helpers.js';
 import data from '../../deployed_objects.json';
 import {SUI_CLOCK_OBJECT_ID} from '@mysten/sui.js/utils';
 

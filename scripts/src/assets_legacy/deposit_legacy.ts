@@ -1,8 +1,6 @@
 import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { client, keyPair, keyPair1, keyPair2, parse_amount, find_one_by_type } from '../helpers.js';
-import path, { dirname } from "path";
+import { client, keyPair1 } from '../helpers.js';
 import data from '../../deployed_objects.json';
-import fs from 'fs';
 import { getCoinOfValue } from '@polymedia/suits';
 
 const keypair1 = keyPair1();

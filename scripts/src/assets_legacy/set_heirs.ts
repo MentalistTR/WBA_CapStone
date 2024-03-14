@@ -2,7 +2,6 @@ import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { client, keyPair1} from '../helpers.js';
 import data from '../../deployed_objects.json';
 
-
 const keypair1 = keyPair1();
 
 const packageId = data.packageId;
