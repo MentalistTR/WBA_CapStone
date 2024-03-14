@@ -1,7 +1,7 @@
 [package]
 name = "rules"
 version = "0.0.1"
-published-at = "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
+published-at = "0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet"}
@@ -9,4 +9,4 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 [addresses]
 std = "0x1"
 sui="0x2"
-rules = "0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
+rules = "0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74"

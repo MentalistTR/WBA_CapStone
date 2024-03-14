@@ -69,7 +69,7 @@ export const deployed_address = {
     packageId: published_change.packageId,
     
     rules: {
-        package:"0xa282ff0efdf348f951e9b0d9ea7deeb67c1d39055b9fbf630ec1f714d675cb49"
+        package:"0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74"
     },
 
     assets_sales: {
@@ -95,9 +95,11 @@ export const deployed_address = {
         Legacy: "",
       },
       lira: {
-        CapWrapper: "",
+        CapWrapper: "0x0076da9f678fe788c1a117c2108820f7d1f81b3327168449d7db4bd2403d628c",
         liraCoinType: `${package_id}::lira::LIRA`,
-        coinmetadata: ""
+        OwnerCap: "0xb0f7f90fcea31bb8b599f0d9b73c7549d4e2eac80035d3c27a0eaa903a32d424",
+        NotaryFee: "0xb28b6880daeb92374a2265a9a4016cf741c060371039aeb7edd264f5aa09b098",
+        coinmetadata: "0xcf8ad062b239462e84b4f4a04a5bb634a70ebb942323c11991a0a6051b2c0248"
       }
 }
 
@@ -146,32 +148,5 @@ if (!Contracts_id) {
 }
 
 deployed_address.assets_renting.Contracts = Contracts_id;
-
-// Get Capwrapper share from lira 
-
-const Capwrapper = `${deployed_address.packageId}::lira::CapWrapper`
-
-const capwrapper_id = find_one_by_type(objectChanges, Capwrapper)
-
-if (!capwrapper_id) {
-    console.log("Error: Could not find Admin object ")
-    process.exit(1)
-}
-
-deployed_address.lira.CapWrapper = capwrapper_id;
-
-// Get Coinmetadata share from lira 
-
-const Coinmetadata = `0x2::coin::CoinMetadata<${deployed_address.packageId}::lira::LIRA>`
-
-const Coinmetadata_id = find_one_by_type(objectChanges, Coinmetadata)
-
-if (!Coinmetadata_id) {
-    console.log("Error: Could not find Admin object ")
-    process.exit(1)
-}
-
-deployed_address.lira.coinmetadata = Coinmetadata_id;
-
 
 writeFileSync(path.join(path_to_scripts, "../deployed_objects.json"), JSON.stringify(deployed_address, null, 4))

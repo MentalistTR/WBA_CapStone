@@ -2,6 +2,7 @@ import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { client, keyPair, parse_amount, find_one_by_type } from './helpers.js';
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import fs from 'fs';
 
 const { execSync } = require('child_process');
 const keypair =  keyPair();
@@ -57,12 +58,3 @@ if (published_change?.type !== "published") {
     console.log("Error: Did not find correct published change")
     process.exit(1)
 }
-
-// get package_id
-// const package_id = published_change.packageId
-
-// export const deployed_address: any = {
-//     packageId: published_change.packageId,
-// }
-
-// writeFileSync(path.join(path_to_scripts, "../deployed_objects.json"), JSON.stringify(deployed_address, null, 4))
