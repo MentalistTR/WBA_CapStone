@@ -35,6 +35,7 @@
     "get_asset": "bun ./src/assets_renting/get_asset",
     "create_complain": "bun ./src/assets_renting/create_complain",
     "provision": "bun ./src/assets_renting/provision",
+    "withdraw_fee": "bun ./src/assets_renting/withdraw_fee",
     "create_legacy": "bun ./src/assets_legacy/create_legacy",
     "set_heirs": "bun ./src/assets_legacy/set_heirs",
     "mint_lira": "bun ./src/assets_legacy/mint_lira",
@@ -43,7 +44,7 @@
     "withdraw_legacy": "bun ./src/assets_legacy/withdraw_legacy",
     
     "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_royalty create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve mint_lira_sales list purchase withdraw_profits",
-    "run_assets_renting": " npm-run-all -s policy_renting policy_rentingback royalty_rule_renting  create_rule_renting create_rule_rentingback list_with_purchase rent pay_monthly_rent create_complain provision",
+    "run_assets_renting": " npm-run-all -s policy_renting policy_rentingback royalty_rule_renting  create_rule_renting create_rule_rentingback list_with_purchase rent pay_monthly_rent create_complain provision withdraw_fee",
     "run_assets_legacy": "npm-run-all -s create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
   },
   "peerDependencies": {
