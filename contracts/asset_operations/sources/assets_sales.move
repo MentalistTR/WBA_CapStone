@@ -1,8 +1,12 @@
-// CRUD Module 
-// define asset types  > House Car Land 
-// define share object for listedtypes allow types 
-// The admin should be able to add new transfer policy to share object
-// create update and read and destroye 
+/// Assets Sales module is responsible for managing the Asset, Kiosk and their operations
+/// 
+/// There are three main operations in this module:
+/// 
+/// 1. Admin can creates types, transferpolicy and rules 
+/// 2. Admin can approve any asset 
+/// 3. Users can create kiosk and assets
+/// 4. Users can make new property for their own assets.
+/// 5. Users can rent theirs assets
 module notary::assets_type {
     use std::string::{Self, String};
     use std::vector;
@@ -31,7 +35,6 @@ module notary::assets_type {
 
     // =================== Errors ===================
 
-    // It can be only one type 
     const ERROR_INVALID_TYPE: u64 = 1;
     const ERROR_NOT_APPROVED: u64 = 2;
     const ERROR_NOT_KIOSK_OWNER: u64 = 3;
@@ -39,7 +42,7 @@ module notary::assets_type {
 
     // =================== Structs ===================
 
-    // share object 
+    // ListedTypes is used to keep assets types, kiosk caps, purchaseCap and fees 
     struct ListedTypes has key, store {
         id: UID,
         types: vector<String>,
@@ -84,12 +87,21 @@ module notary::assets_type {
     }
     // =================== Functions ===================
 
-    // create types for mint an nft 
+    /// Creates a new Type for asset 
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we keep types data
+    /// * `type` - defines the asset type 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
         assert!(!vector::contains(&share.types, &type), ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
-    // admin can create new_policy for sales or renting operations. 
+    /// Creates a new policy for sales, renting operations 
+    /// 
+    /// # Arguments
+    /// 
+    /// * `publish` - the Publisher that we use to create policy
     public fun new_policy<T>(_: &AdminCap, publish: &AssetsTypePublisher, ctx: &mut TxContext ) {
         // set the publisher
         let publisher = get_publisher(publish);
@@ -100,7 +112,14 @@ module notary::assets_type {
         transfer::public_share_object(transfer_policy);
     }
 
-    // admin must approve the asset
+    /// Admin can approve any assset from user's kiosk
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we reach the users kioskownercaps
+    /// * `kiosk` - defines the user's kiosk
+    /// * `item` - defines the assets ID
+    /// * `user` - defines the kiosk's owner address
     public fun approve(_: &AdminCap, share: &ListedTypes, kiosk: &mut Kiosk, item: ID, user: address) {
         // take the kiosk cap from table 
         let kiosk_cap = table::borrow(&share.kiosk_caps, user);
@@ -109,8 +128,11 @@ module notary::assets_type {
         // approve the asset.
         assets::approve_asset(item);
     }
-    
-    // Users will create kiosk and protocol will store these caps in share object
+    /// Users can create only 1 times kiosk.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we keep the users kioskownercaps
     public fun create_kiosk(share: &mut ListedTypes, ctx: &mut TxContext) {
         let(kiosk, kiosk_cap) = kiosk::new(ctx);
         // define the witness
@@ -123,7 +145,13 @@ module notary::assets_type {
         table::add(&mut share.kiosk_caps, sender(ctx), kiosk_cap);
     }
 
-    // Users can create asset
+    /// Users can create any asset
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we check the type of asset
+    /// * `kiosk` - defines the user's kiosk
+    /// * `type` - defines the asset type 
     public fun create_asset(
         shared: &ListedTypes,
         kiosk: &mut Kiosk,
@@ -137,7 +165,13 @@ module notary::assets_type {
 
             kiosk::place(kiosk, kiosk_cap, asset);  
     }
-    // Users can make new property 
+    /// Users can create any property for the asset
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we check the type of asset
+    /// * `kiosk` - defines the user's kiosk
+    /// * `item` - defines the assets ID
     public fun new_property(
         share: &ListedTypes,
         kiosk: &mut Kiosk,
@@ -156,7 +190,13 @@ module notary::assets_type {
             assets::disapprove_asset(item);
     }
 
-    // Users can remove the property
+    /// Users can remove any property for the asset
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we check the type of asset
+    /// * `kiosk` - defines the user's kiosk
+    /// * `item` - defines the assets ID
     public fun remove_property(
         share: &ListedTypes,
         kiosk: &mut Kiosk,
@@ -174,7 +214,13 @@ module notary::assets_type {
             assets::disapprove_asset(item);
     }
 
-    // User1 has to list with purchase so he can send the person who wants to buy him own asset
+    /// Users can list the asset for sales operations
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we reach the users kioskownercaps
+    /// * `kiosk` - defines the user's kiosk
+    /// * `asset_id` - defines the assets ID
     public fun list(
         share: &mut ListedTypes,
         kiosk: &mut Kiosk,
@@ -197,8 +243,17 @@ module notary::assets_type {
                 price,
             );     
     }
-
-    // User2 can buy another person assets and it has to be directy placed in his kiosk. 
+    /// Users can purchase any asset from the marketplace
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we reach the users kioskownercaps
+    /// * `kiosk1` - defines the asset's owner kiosk
+    /// * `kiosk2` - defines the buyer kiosk
+    /// * `notary` - defines notary_fee storage
+    /// * `policy` - defines transferpolicy for purchase process.
+    /// * `payment` - the amount of asset price 
+    /// * `fee` - the notary fee for every process
     public fun purchase(
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
@@ -226,7 +281,12 @@ module notary::assets_type {
             kiosk::place(kiosk2, kiosk_cap, item);
     }
         
-    // Kiosk owner's can withdraw the profits
+    /// Users can withdraw profits from own kiosk
+    /// 
+    /// # Arguments
+    /// 
+    /// * `ListedTypes` - the shareobject that we reach the users kioskownercaps
+    /// * `kiosk` - defines the user's kiosk
     public fun withdraw_profits(
         kiosk: &mut Kiosk,
         shared: &ListedTypes,
