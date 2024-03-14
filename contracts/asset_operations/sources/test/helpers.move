@@ -8,6 +8,7 @@ module notary::helpers {
     // use std::debug;
 
     use rules::lira::{return_init_lira};
+    use rules::royalty_rule::{return_royalty_init};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes, AssetsTypePublisher, test_init};
     use notary:: assets_renting::{test_renting_init};
@@ -92,6 +93,9 @@ module notary::helpers {
        };
        {
             return_init_lira(ts::ctx(scenario));
+       };
+       {
+            return_royalty_init(ts::ctx(scenario));
        };
        scenario_val
     }

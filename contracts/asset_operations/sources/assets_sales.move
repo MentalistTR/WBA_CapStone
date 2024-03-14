@@ -22,7 +22,9 @@ module notary::assets_type {
     use sui::balance::{Self, Balance};
 
     use notary::assets::{Self, Asset};
+
     use rules::lira::{LIRA};
+    use rules::royalty_rule::{Self as rr, NotaryFee};
 
     friend notary::assets_renting;
     friend notary::assets_legacy;
@@ -201,9 +203,11 @@ module notary::assets_type {
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
         share: &mut ListedTypes,
+        notary: &mut NotaryFee,
         policy: &TransferPolicy<Asset>,
         asset_id: ID,
         payment: Coin<SUI>,
+        fee: Coin<LIRA>,
         ctx: &mut TxContext
         ) {
             // purchase the asset from kiosk
@@ -212,6 +216,7 @@ module notary::assets_type {
                 asset_id,
                 payment
                 );
+            rr::pay<Asset>(policy, &mut request, notary, fee, ctx);
             // confirm the request. Destroye the hot potato
             policy::confirm_request(policy, request);
             // be sure that sender is the owner of kiosk

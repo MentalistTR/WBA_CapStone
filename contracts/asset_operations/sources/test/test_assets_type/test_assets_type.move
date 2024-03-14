@@ -4,7 +4,7 @@ module notary::test_assets_type {
     use sui::test_scenario::{Self as ts, next_tx};
     use sui::test_utils::{assert_eq};
     use sui::kiosk::{Self, Kiosk};
-    use sui::transfer_policy::{TransferPolicy};
+    use sui::transfer_policy::{TransferPolicy, TransferPolicyCap};
     use sui::object;
     use sui::sui::SUI;
     use sui::coin::{mint_for_testing};
@@ -20,6 +20,9 @@ module notary::test_assets_type {
     helper_new_policy};
 
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
+
+    use rules::royalty_rule::{Self as rr, NotaryFee, return_notary_fee};
+    use rules::lira::{LIRA};
     
     const ADMIN: address = @0xA;
     const TEST_ADDRESS1: address = @0xB;
@@ -87,6 +90,17 @@ module notary::test_assets_type {
         helper_new_policy<Asset>(scenario);
         // create types such as House, Car, Land, Shop
         helper_add_types(scenario);
+
+        next_tx(scenario, ADMIN);
+        {
+            let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
+            let cap = ts::take_from_sender<TransferPolicyCap<Asset>>(scenario);
+            
+            rr::add<Asset>(&mut policy, &cap);
+
+            ts::return_shared(policy);
+            ts::return_to_sender(scenario, cap);
+        };
 
         // create an asset 1 
         next_tx(scenario, TEST_ADDRESS1);
@@ -289,11 +303,13 @@ module notary::test_assets_type {
            
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
+            let notary_fee = ts::take_shared<NotaryFee>(scenario);
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
             let asset_id = asset_id1;
 
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
+            let fee = mint_for_testing<LIRA>(1000000001, ts::ctx(scenario));
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), true);
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), false);
@@ -302,19 +318,25 @@ module notary::test_assets_type {
                 &mut kiosk1_shared,
                 &mut kiosk2_shared ,
                 &mut shared,
+                &mut notary_fee,
                 &policy,
                 asset_id1,
                 payment,
+                fee,
                 ts::ctx(scenario)
             );
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id), false);
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id), true);
 
+            let lira = return_notary_fee(&notary_fee);
+            assert_eq(lira,1_000_000_000);
+
             ts::return_shared(policy);
             ts::return_shared(kiosk1_shared);
             ts::return_shared(kiosk2_shared);
             ts::return_shared(shared);
+            ts::return_shared(notary_fee);
         };
         // withdraw the profits from kiosk
         next_tx(scenario, TEST_ADDRESS1);
@@ -393,10 +415,12 @@ module notary::test_assets_type {
 
             let kiosk1_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk1_id);
             let kiosk2_shared = ts::take_shared_by_id<Kiosk>(scenario, *kiosk2_id);
+            let notary_fee = ts::take_shared<NotaryFee>(scenario);
 
             let policy = ts::take_shared<TransferPolicy<Asset>>(scenario);
 
             let payment = mint_for_testing<SUI>(10000, ts::ctx(scenario));
+            let fee = mint_for_testing<LIRA>(1000000001, ts::ctx(scenario));
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id1), false);
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id1), true);
@@ -405,11 +429,16 @@ module notary::test_assets_type {
                 &mut kiosk2_shared,
                 &mut kiosk1_shared ,
                 &mut shared,
+                &mut notary_fee,
                 &policy,
                 asset_id1,
                 payment,
+                fee,
                 ts::ctx(scenario)
             );
+
+            let lira = return_notary_fee(&notary_fee);
+            assert_eq(lira,2_000_000_000);
 
             assert_eq(kiosk::has_item(&kiosk1_shared, asset_id1), true);
             assert_eq(kiosk::has_item(&kiosk2_shared, asset_id1), false);
@@ -418,6 +447,8 @@ module notary::test_assets_type {
             ts::return_shared(kiosk1_shared);
             ts::return_shared(kiosk2_shared);
             ts::return_shared(shared);
+            ts::return_shared(notary_fee);
+
         };
         next_tx(scenario, TEST_ADDRESS1);
         {

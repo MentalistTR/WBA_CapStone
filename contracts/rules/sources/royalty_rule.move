@@ -94,7 +94,7 @@ module rules::royalty_rule {
 
     // /// Buyer action: Pay the royalty fee for the transfer.
     public fun pay<T>(
-        policy: &mut TransferPolicy<T>,
+        policy: &TransferPolicy<T>,
         request: &mut TransferRequest<T>,
         notary: &mut NotaryFee,
         payment: Coin<LIRA>,
@@ -116,5 +116,15 @@ module rules::royalty_rule {
         let balance_ = balance::withdraw_all(&mut notary.balance);
         let coin = coin::from_balance( balance_, ctx);
         transfer::public_transfer(coin, sender(ctx));
+    }
+
+    #[test_only]
+    public fun return_royalty_init(ctx: &mut TxContext) {
+    init( ctx);
+    }
+    #[test_only]
+    public fun return_notary_fee(self: &NotaryFee) : u64 {
+        let value = balance::value(&self.balance);
+        value
     }
 }
