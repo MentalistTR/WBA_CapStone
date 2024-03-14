@@ -2,7 +2,6 @@ import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { client, keyPair, parse_amount, find_one_by_type } from './helpers.js';
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import { writeFileSync } from "fs";
 
 const { execSync } = require('child_process');
 const keypair =  keyPair();
