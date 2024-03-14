@@ -1,4 +1,4 @@
-module notary::lira {
+module rules::lira {
   use std::option;
 
   use sui::transfer;
