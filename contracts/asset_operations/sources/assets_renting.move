@@ -1,3 +1,11 @@
+/// Assets Sales module is responsible for renting the Asset and contracts
+/// 
+/// There are four main operations in this module:
+/// 
+/// 1. Users can list any asset
+/// 2. Users can rent the asset
+/// 3. Users can create complain
+/// 4. Admin can provision if there is a problem between leaser and owner
 module notary::assets_renting {
     use std::string::{String};
     use std::vector;
@@ -35,13 +43,15 @@ module notary::assets_renting {
 
     // =================== Structs ===================
 
+    // The shareobject that we keep complaints and purchaseCaps in the module.
     struct Contracts has key {
         id: UID,
         complaints: Table<ID, Complaint>,
         purchase_cap: Table<ID, PurchaseCap<Wrapper>>,
         wrapper: vector<ID> // FIXME: DELETE ME !! 
     }
-  
+    // Contract is the aggrement between leaser and owner 
+    // We will keep 1 month deposit amount, item_id and rental periods. 
     struct Contract has key, store {
         id: UID,
         owner: address,
@@ -53,7 +63,7 @@ module notary::assets_renting {
         start: u64,
         end: u64, 
     }
-
+    // Leaser or owner can create an comlaint
     struct Complaint has store, copy, drop {
         complainant: address,
         pleader: address,
@@ -75,7 +85,14 @@ module notary::assets_renting {
 
     // =================== Functions ===================
 
-    // list the asset for spesific address
+    /// Users can list the asset for to specific address
+    /// 
+    /// # Arguments
+    /// 
+    /// * `share` - the shareobject that we reach to kioskownerCap
+    /// * `kiosk` - defines the user's kiosk
+    /// * `price` - the asset's 1 monthly price 
+    /// * `buyer` - the address of leaser 
     public fun list_with_purchase_cap(
         share: &mut ListedTypes,
         contract: &mut Contracts,
@@ -112,7 +129,18 @@ module notary::assets_renting {
         // send the purchase_cap to leaser
         transfer::public_transfer(purch_cap, buyer);
     }
-    // rent the asset
+    /// Users can rent the wrapped asset if they had purchasecap
+    /// 
+    /// # Arguments
+    /// 
+    /// * `share` - the shareobject that we keep the purchasecap
+    /// * `listed_types` - the shareobject that we keep the KioskOwnerCap
+    /// * `notary` - the storage for notary's fee.
+    /// * `purch_cap` - the purch_cap that leaser can rent the wrapped asset
+    /// * `payment` - the sum of 1 month price and deposit price
+    /// * `fee` - the notary fee for every process 
+    /// * `rental_period` - the rental month date
+    /// * `clock` - the share object that we initiliaze the current time.
     public fun rent(
         share: &mut Contracts,
         listed_types: &ListedTypes,
@@ -187,7 +215,13 @@ module notary::assets_renting {
         );
         table::add(&mut share.purchase_cap, wrapper_id, leaser_purch_cap);        
     }
-    // Leasers must pay their rent before the end of the month
+    /// Users can deposit rental monthly price 
+    /// 
+    /// # Arguments
+    /// 
+    /// * `owner_kiosk` - the asset's owner kiosk
+    /// * `payment` - the amount of 1 monthly rental price 
+    /// * `item_id` - the wrapped object id
     public fun pay_monthly_rent(owner_kiosk: &mut Kiosk, payment: Coin<SUI>, item_id: ID, ctx: &mut TxContext) {
         let witness = at::get_witness();
         // get the owner's bag
@@ -205,7 +239,17 @@ module notary::assets_renting {
         // transfer payment to owner of asset 
         transfer::public_transfer(payment, contract.owner); 
     }
-    // owner take the asset back
+    /// Asset's owner can get asset
+    /// Theere are two condition. First one is the unpaid rent
+    /// Second is the rental period 
+    /// 
+    /// # Arguments
+    /// 
+    /// * `listed_types` - the shareobject that we keep the KioskOwnerCap
+    /// * `share` - the shareobject that we keep the purchasecap
+    /// * `policy` - the transferPolicy for the rules
+    /// * `payment` - The zero sui for execute the function
+    /// * `clock` - the share object that we initiliaze the current time.
     public fun get_asset(
         listed: &ListedTypes,
         share: &mut Contracts,
@@ -267,7 +311,13 @@ module notary::assets_renting {
         kiosk::place(kiosk1, kiosk_cap, asset);
         };
     } 
-    // owner or leaser can create complain
+    /// Leaser or owner can create complain if there is a problem about asset
+    /// 
+    /// # Arguments
+    /// 
+    /// * `share` - the shareobject that we keep the complains
+    /// * `owner_kiosk` - the asset's owner kiosk
+    /// * `reason_` - defines the problem
     public fun new_complain(share: &mut Contracts, owner_kiosk: &mut Kiosk, reason_: String, wrapper_id: ID, ctx: &mut TxContext) {
         // define the witness
         let witness = at::get_witness();
@@ -295,7 +345,13 @@ module notary::assets_renting {
         };
         table::add(&mut share.complaints, wrapper_id, complain_);
     }
-    // admin should judge the complain
+    /// admin must decide to who is right
+    /// 
+    /// # Arguments
+    /// 
+    /// * `share` - the shareobject that we keep the complains
+    /// * `owner_kiosk` - the asset's owner kiosk
+    /// * `decision` - the bool type for provision
     public fun provision(
         _: &AdminCap,
         share: &mut Contracts,
@@ -326,7 +382,7 @@ module notary::assets_renting {
 
     // =================== Helper Functions ===================
 
-    // if the leaser couldn't pay his rent give the asset to owner 
+    // Helper function that we use in get_asset function to condition 1
     fun unpaid_rent(
         listed: &ListedTypes,
         kiosk1: &mut Kiosk,

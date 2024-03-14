@@ -1,8 +1,8 @@
 /// Assets Sales module is responsible for managing the Asset, Kiosk and their operations
 /// 
-/// There are three main operations in this module:
+/// There are five main operations in this module:
 /// 
-/// 1. Admin can creates types, transferpolicy and rules 
+/// 1. Admin can creates types and transferpolicy
 /// 2. Admin can approve any asset 
 /// 3. Users can create kiosk and assets
 /// 4. Users can make new property for their own assets.
