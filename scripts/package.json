@@ -39,8 +39,9 @@
     "distribute": "bun ./src/assets_legacy/distribute",
     "withdraw_legacy": "bun ./src/assets_legacy/withdraw_legacy",
     
-
-    "run_all": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent pay_monthly_rent create_complain provision create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
+    "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve list purchase withdraw_profits",
+    "run_assets_renting": "policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent pay_monthly_rent create_complain provision",
+    "run_assets_legacy": " create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
