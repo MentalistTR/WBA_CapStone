@@ -26,6 +26,7 @@
     "withdraw_profits": "bun ./src/assets_sales/withdraw_profits",
     "policy_renting": "bun ./src/assets_renting/policy_renting",
     "policy_rentingback": "bun ./src/assets_renting/policy_rentingback",
+    "royalty_rule_renting": "bun ./src/assets_renting/royalty_rule_renting",
     "list_with_purchase": "bun ./src/assets_renting/list_with_purchase",
     "create_rule_renting": "bun ./src/assets_renting/create_rule_renting",
     "create_rule_rentingback": "bun ./src/assets_renting/create_rule_rentingback",
@@ -42,8 +43,8 @@
     "withdraw_legacy": "bun ./src/assets_legacy/withdraw_legacy",
     
     "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_royalty create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve mint_lira_sales list purchase withdraw_profits",
-    "run_assets_renting": "policy_renting policy_rentingback list_with_purchase create_rule_renting create_rule_rentingback rent pay_monthly_rent create_complain provision",
-    "run_assets_legacy": " create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
+    "run_assets_renting": " npm-run-all -s policy_renting policy_rentingback royalty_rule_renting  create_rule_renting create_rule_rentingback list_with_purchase rent pay_monthly_rent create_complain provision",
+    "run_assets_legacy": "npm-run-all -s create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
