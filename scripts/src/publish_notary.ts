@@ -96,7 +96,7 @@ export const deployed_address = {
       },
       lira: {
         CapWrapper: "0x0076da9f678fe788c1a117c2108820f7d1f81b3327168449d7db4bd2403d628c",
-        liraCoinType: `${package_id}::lira::LIRA`,
+        liraCoinType: `0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74::lira::LIRA`,
         OwnerCap: "0xb0f7f90fcea31bb8b599f0d9b73c7549d4e2eac80035d3c27a0eaa903a32d424",
         NotaryFee: "0xb28b6880daeb92374a2265a9a4016cf741c060371039aeb7edd264f5aa09b098",
         coinmetadata: "0xcf8ad062b239462e84b4f4a04a5bb634a70ebb942323c11991a0a6051b2c0248"
