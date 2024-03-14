@@ -1,0 +1,36 @@
+{
+  "packageId": "0xb95f735a58aee66147d7e267b2561c288408d25fd8369484bb107961eb4661dc",
+  "rules": {
+    "package": "0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74"
+  },
+  "assets_sales": {
+    "listedTypes": "0x95333e6f54840b759c70fcf289dbb4511a8b30b11319e8ad5d3c52e76f25332a",
+    "AdminCap": "0xcf62450cba5bfeccfe5ea17057c93f81c29fd0303a490293a1dbaf41a50708a5",
+    "Publisher": "0xb56a7ad2c56306b236213f01b4963c01dba24ba8ce3eae34edcc2d617c422c5c",
+    "PolicySale": "0xeb24e71f36e047b6a4ef341aafb3ad46fca0564eebedec95c382a9211f50099b",
+    "PolicyRenting": "0xca50c3093f86ba28d287ce21d18ab9c51601460a5e98afcc5a11b311c01351ed",
+    "PolicyRentingBack": "0xfc4c871c894369ecf85fa2101e0c38cbd829d8017fe6003d09aed580841643af",
+    "PolicyCapRenting": "0x4243c2a28c2acf93a60b5a3df2c3ad6c126a1631ad1beda53bb9e2dd7f2b2cb8",
+    "PolicyCapRentingBack": "0x67693ba361b1fc22680219c9994ff0e1ca93717a4942fe5c66fd954d0314e100",
+    "Kiosk1": "0x31fa4e0e5dc6fbda731c561c2e12ad87cc0a38abcdf66ef95b50683ea8872687",
+    "Kiosk2": "0x5dfad45a65734ff2328fd93c5329ed68ed057fac8872f590ae82484dde5e723b",
+    "Asset1": "0x8d8f2b643e4389797d998124cfeef5fffd2a73bb53d1e6d49a757c2794cb1cf0",
+    "Asset2": "0x0ec94e7dd8e2f7c30a644d5e9b41b9edfeaf55db418f381af60d42aefc7b0a47",
+    "PolicySaleCap": "0xeb645130a40267fc2d1ef9a99397a4511e77e197f9d671ab3200ffb6b1253133"
+  },
+  "assets_renting": {
+    "Contracts": "0x037be6133186c753ee1fc93e68afec18243c1c6b24c22d95fbe0d046176c7062",
+    "PurchaseCap": "0x83048128d90206963adf1fb29b9b366f5a0d1e537ac2e28db2da64ebdf742963",
+    "Wrapper": "0x2c726112805588232c6436d425329627b5d33da2945d64495ec8b7176bc93749"
+  },
+  "assets_legacy": {
+    "Legacy": ""
+  },
+  "lira": {
+    "CapWrapper": "0x0076da9f678fe788c1a117c2108820f7d1f81b3327168449d7db4bd2403d628c",
+    "liraCoinType": "0x23dcee092b89edbe5497cad416c1af2d8fed789c7ff1c7232a4b82b366782d74::lira::LIRA",
+    "OwnerCap": "0xb0f7f90fcea31bb8b599f0d9b73c7549d4e2eac80035d3c27a0eaa903a32d424",
+    "NotaryFee": "0xb28b6880daeb92374a2265a9a4016cf741c060371039aeb7edd264f5aa09b098",
+    "coinmetadata": "0xcf8ad062b239462e84b4f4a04a5bb634a70ebb942323c11991a0a6051b2c0248"
+  }
+}

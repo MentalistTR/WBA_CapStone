@@ -1,20 +1,20 @@
 module notary::assets_legacy {
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::table::{Self, Table};
     use sui::bag::{Self, Bag};
     use sui::transfer;
     use sui::tx_context::{TxContext, sender};
-    use sui::kiosk::{Self, Kiosk, PurchaseCap};
+    use sui::kiosk::{Kiosk};
     use sui::kiosk_extension::{Self as ke};
     use sui::coin::{Self, Coin, CoinMetadata};
     use sui::balance::{Self, Balance};
     use sui::sui::{SUI};
-    use sui::clock::{Self, Clock, timestamp_ms};
+    use sui::clock::{Clock, timestamp_ms};
 
     use std::vector;
     use std::string::{Self, String};
 
-    use notary::assets_type::{Self as at, NotaryKioskExtWitness, AdminCap, get_witness};
+    use notary::assets_type::{NotaryKioskExtWitness, AdminCap, get_witness};
 
     // =================== Errors ===================
 
@@ -48,8 +48,9 @@ module notary::assets_legacy {
 
     // =================== Functions ===================
 
-    public fun new_legacy(ctx: &mut TxContext, remaining: u64, clock: &Clock) {
-        let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
+    public fun new_legacy(remaining: u64, clock: &Clock, ctx: &mut TxContext) {
+        let remaining_ :u64 = 1 + timestamp_ms(clock);
+        //let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
         // share object
         transfer::share_object(
             Legacy {
@@ -182,7 +183,7 @@ module notary::assets_legacy {
             };       
     }
     // Heirs can withdraw funds
-    public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Balance<T> {
+    public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Coin<T> {
         let sender = sender(ctx);
         // firstly, check that  Is sender shareholder? 
         assert!(
@@ -192,8 +193,9 @@ module notary::assets_legacy {
         // let take heir's bag from table 
         let bag_ = table::borrow_mut<address, Bag>(&mut legacy.heirs_amount, sender);
         // calculate withdraw balance 
-        let coin_value = bag::remove<String, Balance<T>>( bag_, coin_name);
+        let balance_value = bag::remove<String, Balance<T>>( bag_, coin_name);
         // return the withdraw balance
+        let coin_value = coin::from_balance(balance_value, ctx);
         coin_value
     }
 

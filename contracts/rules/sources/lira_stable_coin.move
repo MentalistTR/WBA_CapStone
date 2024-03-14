@@ -1,4 +1,4 @@
-module notary::lira {
+module rules::lira {
   use std::option;
 
   use sui::transfer;
@@ -43,7 +43,7 @@ module notary::lira {
 
   // === Public-Friend Functions ===  
 
-  public(friend) fun mint(cap: &mut CapWrapper, value: u64, ctx: &mut TxContext): Coin<LIRA> {
+  public fun mint(cap: &mut CapWrapper, value: u64, ctx: &mut TxContext): Coin<LIRA> {
     coin::mint(&mut cap.cap, value, ctx)
   }
 

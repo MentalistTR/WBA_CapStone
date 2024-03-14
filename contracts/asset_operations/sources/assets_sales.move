@@ -21,7 +21,10 @@ module notary::assets_type {
     use sui::bag::{Self, Bag};
     use sui::balance::{Self, Balance};
 
-    use notary::assets::{Self, Asset, Wrapper};
+    use notary::assets::{Self, Asset};
+
+    use rules::lira::{LIRA};
+    use rules::royalty_rule::{Self as rr, NotaryFee};
 
     friend notary::assets_renting;
     friend notary::assets_legacy;
@@ -41,7 +44,8 @@ module notary::assets_type {
         id: UID,
         types: vector<String>,
         kiosk_caps: Table<address, KioskOwnerCap>,
-        purchase_cap: Table<ID, PurchaseCap<Asset>>
+        purchase_cap: Table<ID, PurchaseCap<Asset>>,
+        balance: Balance<LIRA>
     }
     
     // Only owner of this module can access it.
@@ -65,7 +69,8 @@ module notary::assets_type {
             id:object::new(ctx),
             types: vector::empty(),
             kiosk_caps: table::new<address, KioskOwnerCap>(ctx),
-            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx), 
+            purchase_cap: table::new<ID, PurchaseCap<Asset>>(ctx),
+            balance: balance::zero() 
         });
         // define the publisher
         let publisher_ = package::claim<ASSETS_TYPE>(otw, ctx);
@@ -81,7 +86,7 @@ module notary::assets_type {
 
     // create types for mint an nft 
     public fun create_type(_: &AdminCap, share: &mut ListedTypes, type: String) {
-        assert!(vector::contains(&share.types, &type) == false, ERROR_INVALID_TYPE);
+        assert!(!vector::contains(&share.types, &type), ERROR_INVALID_TYPE);
         vector::push_back(&mut share.types, type);
     }
     // admin can create new_policy for sales or renting operations. 
@@ -120,12 +125,12 @@ module notary::assets_type {
 
     // Users can create asset
     public fun create_asset(
-        shared: &mut ListedTypes,
+        shared: &ListedTypes,
         kiosk: &mut Kiosk,
         type: String,
         ctx :&mut TxContext,
         ) {
-            assert!(!vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
+            assert!(vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
 
             let asset = assets::create_asset(type, ctx);
             let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
@@ -198,9 +203,11 @@ module notary::assets_type {
         kiosk1: &mut Kiosk,
         kiosk2: &mut Kiosk,
         share: &mut ListedTypes,
+        notary: &mut NotaryFee,
         policy: &TransferPolicy<Asset>,
         asset_id: ID,
         payment: Coin<SUI>,
+        fee: Coin<LIRA>,
         ctx: &mut TxContext
         ) {
             // purchase the asset from kiosk
@@ -209,6 +216,7 @@ module notary::assets_type {
                 asset_id,
                 payment
                 );
+            rr::pay<Asset>(policy, &mut request, notary, fee, ctx);
             // confirm the request. Destroye the hot potato
             policy::confirm_request(policy, request);
             // be sure that sender is the owner of kiosk

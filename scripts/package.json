@@ -1,0 +1,58 @@
+{
+  "name": "notary",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "publish_notary": "bun ./src/publish_notary.ts",
+    "publish_rules": "bun ./src/publish_rules.ts",
+    "create_type": "bun ./src/assets_sales/create_type",
+    "create_policy": "bun ./src/assets_sales/create_policy",
+    "create_royalty": "bun ./src/assets_sales/royalty_rule",
+    "create_kiosk1": "bun ./src/assets_sales/create_kiosk1",
+    "create_kiosk2": "bun ./src/assets_sales/create_kiosk2",
+    "create_asset1": "bun ./src/assets_sales/create_asset1",
+    "create_asset2": "bun ./src/assets_sales/create_asset2",
+    "approve": "bun ./src/assets_sales/approve",
+    "new_property": "bun ./src/assets_sales/new_property",
+    "list": "bun ./src/assets_sales/list",
+    "mint_lira_sales" : "bun ./src/assets_sales/mint_lira_sales",
+    "purchase": "bun ./src/assets_sales/purchase",
+    "withdraw_profits": "bun ./src/assets_sales/withdraw_profits",
+    "policy_renting": "bun ./src/assets_renting/policy_renting",
+    "policy_rentingback": "bun ./src/assets_renting/policy_rentingback",
+    "royalty_rule_renting": "bun ./src/assets_renting/royalty_rule_renting",
+    "list_with_purchase": "bun ./src/assets_renting/list_with_purchase",
+    "create_rule_renting": "bun ./src/assets_renting/create_rule_renting",
+    "create_rule_rentingback": "bun ./src/assets_renting/create_rule_rentingback",
+    "rent": "bun ./src/assets_renting/rent",
+    "pay_monthly_rent": "bun ./src/assets_renting/pay_monthly_rent",
+    "get_asset": "bun ./src/assets_renting/get_asset",
+    "create_complain": "bun ./src/assets_renting/create_complain",
+    "provision": "bun ./src/assets_renting/provision",
+    "withdraw_fee": "bun ./src/assets_renting/withdraw_fee",
+    "create_legacy": "bun ./src/assets_legacy/create_legacy",
+    "set_heirs": "bun ./src/assets_legacy/set_heirs",
+    "mint_lira": "bun ./src/assets_legacy/mint_lira",
+    "deposit_legacy": "bun ./src/assets_legacy/deposit_legacy",
+    "distribute": "bun ./src/assets_legacy/distribute",
+    "withdraw_legacy": "bun ./src/assets_legacy/withdraw_legacy",
+    
+    "run_assets_sales": "npm-run-all -s publish_notary create_type create_policy create_royalty create_kiosk1 create_kiosk2 create_asset1 create_asset2 approve new_property approve mint_lira_sales list purchase withdraw_profits",
+    "run_assets_renting": " npm-run-all -s policy_renting policy_rentingback royalty_rule_renting  create_rule_renting create_rule_rentingback list_with_purchase rent pay_monthly_rent create_complain provision withdraw_fee",
+    "run_assets_legacy": "npm-run-all -s create_legacy set_heirs mint_lira deposit_legacy distribute withdraw_legacy"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.50.1",
+    "@polymedia/suits": "^0.0.34",
+    "dotenv": "^16.4.5"
+  }
+}

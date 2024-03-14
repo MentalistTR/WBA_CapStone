@@ -15,7 +15,7 @@ module notary::test_asset_legacy {
     use notary::assets::{Wrapper};
     use notary::helpers::{Self, init_test_helper, helper_new_policy};
     use notary::assets_type::{Self as at, AdminCap, ListedTypes};
-    use notary::lira::{LIRA};
+    use rules::lira::{LIRA};
     use notary::assets_legacy::{Self as al, Legacy};
     
     const ADMIN: address = @0xA;
@@ -53,7 +53,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -109,7 +109,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -187,7 +187,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -244,7 +244,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -300,7 +300,7 @@ module notary::test_asset_legacy {
             // set the legacy remaining 3 months
             let remaining: u64 = 3;
 
-            al::new_legacy(ts::ctx(scenario), remaining, &start_time);
+            al::new_legacy(remaining, &start_time, ts::ctx(scenario));
 
             clock::share_for_testing(start_time);
         };
@@ -430,9 +430,8 @@ module notary::test_asset_legacy {
             let coin_name = string::utf8(b"Tr Lira");
 
             let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
-            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
 
-            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+            transfer::public_transfer(amount, TEST_ADDRESS2);
 
             ts::return_shared(legacy);  
         };
@@ -452,9 +451,8 @@ module notary::test_asset_legacy {
             let coin_name = string::utf8(b"Tr Lira");
 
             let amount =  al::withdraw<LIRA>(&mut legacy, coin_name, ts::ctx(scenario));
-            let withdraw = from_balance<LIRA>(amount, ts::ctx(scenario));
 
-            transfer::public_transfer(withdraw, TEST_ADDRESS2);
+            transfer::public_transfer(amount, TEST_ADDRESS2);
 
             ts::return_shared(legacy);  
         };
