@@ -28,56 +28,25 @@ Notary allows people to verify their real-world assets within the system of a na
 ```bash
 sui move build
 ````
-## To Local Test 
+## To Test
  ```bash
 sui move test
 ````
-## To setup bun 
+## To setup bun
+ ```bash
+cd scripts
+````
  ```bash
 bun init
 ````
-## To publish
+## To publish and test all assets_sales
  ```bash
-bun run publish_legacy
+bun run publish_notary
 ````
-## To Create Legacy
- ```bash
-bun run create_legacy
-````
-## To Set Heirs
- ```bash
-bun run set_heirs
-````
-## To Mint usdc
- ```bash
-bun run mint_usdc
-````
-## To Mint usdt
- ```bash
-bun run mint_usdt
-````
-## To Local Test 
- ```bash
-bun run set_heirs
-````
-## To Deposit Legacy usdc
- ```bash
-bun run deposit_usdc_legacy
-````
-## To Deposit Legacy usdt
- ```bash
-bun run deposit_usdt_legacy
-````
-## To distribute_legacy
- ```bash
-bun run distribute_legacy
-````
-## To withdraw_legacy
- ```bash
-bun run withdraw_legacy
-````
-## To run all scripts
- ```bash
-bun run run_legacy
-````
- 
+To run renting scripts we must uncomment 1 line 
+https://hizliresim.com/7w4oq0v
+
+Change it to as the following like be this 
+
+https://hizliresim.com/1o6zxtx
+
