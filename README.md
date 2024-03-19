@@ -4,18 +4,25 @@
 Notary allows people to verify their real-world assets within the system of a nation-state and then use sales and renting operations. Additionally, by locking their funds, they can leave an heris to whomever they wish.
 
 ## Features
- # Assets Sales Module
-- The new_legacy function allows users to create a legacy share object. When creating their legacy, users need only enter when it will be distributed. Other parameters will be default.
-- The deposit_legacy function allows legacy owners to deposit any token into their legacy. These deposited tokens are stored within a bag as <string, vector<string>>.
-- The new_heirs function allows legacy owners to enter heirs and their percentages. The total of the percentages must equal 100, and at least one address must be entered.
-- The distribute function can only be called by one of the heirs. After the time for the legacy has arrived, the heirs can call this function to have the shares stored in the heirs_amount bag distributed to them according to their percentages.
-- The withdraw function allows heirs to withdraw a specific coin after the legacy has been distributed.
+ ### Assets Sales Module
+ - Users must first create their own kiosks. All transactions will take place in the kiosk.
+ - Admins can create asset types. You can think of them like enums.
+ - Different transfer policies for Sales and Renting are created here.
+ - The user creates their asset and waits for the admin to approve it. An approved asset can be used for sales and renting, but Houses and Shops can only be used for renting.
+ - The user can add or remove new properties as descriptions to their asset.
+ - Users can list their assets with a list. They can purchase with Purchase, and if a sales operation occurs, they can withdraw their funds.
+
+  ### Assets Renting Module
+  - In this module, we will store purchase capabilities in the Contracts share object in storage because the protocol must decide in case of a dispute between the leaser and the owner.
+  - For this module, we have two transfer policies: one for renting and the other for get_asset. Both have different rules, and you can look at these rules in the rules package.
+  - The user must make their monthly payment with the pay_monthly_rent function before one month is up; otherwise, the owner can call the get_asset function.
+  - With the new_complain method, either the leaser or the owner can file a complaint. The protocol decides who will make the decision, and the one who is found to be right is transferred a one-month deposit fee.
+  ### Assets Legacy Module
+  - In this module, users can store their funds in the bonds at their kiosk. When the time comes, and one of the heirs distributes the legacy, the funds from the user's kiosk are distributed to previously determined addresses and percentages.
 
   ## How to Use
-  Within the src/helpers.ts file of the script file, there are three key pairs: keyPair, keyPair1, and keyPair2. The private keys for keyPair1 and keyPair2 are already entered, so you don't need to modify them. However, you need to enter your own 
-  private key for keyPair. To do this, you should create a file named .env within the scripts folder and paste your private key into the designated spot.
+  The necessary explanations have been provided in the module and above. Scripts have been written to prove that each function works. Currently, local testing is operational. For the renting script process, you need to uncomment a parameter in the module below.
 
-  ![Ekran Görüntüsü (918)](https://github.com/MentalistTR/dacade-legacy/assets/100069341/e5e9c83a-1d44-4392-85c2-ae0591a37648)
 
 ## To build
 ```bash
