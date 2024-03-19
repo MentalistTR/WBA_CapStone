@@ -41,12 +41,27 @@ bun init
 ````
 ## To publish and test all assets_sales
  ```bash
-bun run publish_notary
+bun run run_assets_sales
 ````
-## To run renting scripts, go to contracts/asset_operations/assets_renting module and we must uncomment line 177
+## To run renting scripts, go to contracts/asset_operations/assets_renting module and we must comment line 177 and uncomment 179
 https://hizliresim.com/7w4oq0v
 
 ## After the changes are completed, it should be as follows on the right.
 
 https://hizliresim.com/1o6zxtx
 
+## To run legacy scripts, go to contracts/asset_operations/assets_legacy module and we must comment line 65
+https://hizliresim.com/186dsao
+
+## To run legacy scripts, go to contracts/asset_operations/assets_legacy module and we must uncomment line 64
+
+https://hizliresim.com/69bkaww
+
+## To test all assets_reting
+ ```bash
+bun run run_assets_renting
+````
+## To test all assets_legacy
+ ```bash
+bun run run_assets_legacy
+````

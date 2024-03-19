@@ -4,7 +4,7 @@ import data from '../../deployed_objects.json';
 
 const keypair1 = keyPair1();
 
-const packageId = data.packageId;
+const packageId = data.rules.package;
 const capwrapper = data.lira.CapWrapper;
 
 (async () => {
