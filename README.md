@@ -43,10 +43,10 @@ bun init
  ```bash
 bun run publish_notary
 ````
-To run renting scripts we must uncomment 1 line 
+To run renting scripts, go to contracts/asset_operations/assets_renting module and we must uncomment line 177
 https://hizliresim.com/7w4oq0v
 
-Change it to as the following like be this 
+After the changes are completed, it should be as follows on the right.
 
 https://hizliresim.com/1o6zxtx
 
