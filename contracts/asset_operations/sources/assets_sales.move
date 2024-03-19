@@ -159,10 +159,8 @@ module notary::assets_type {
         ctx :&mut TxContext,
         ) {
             assert!(vector::contains(&shared.types, &type), ERROR_INVALID_TYPE);
-
             let asset = assets::create_asset(type, ctx);
             let kiosk_cap = table::borrow(&shared.kiosk_caps, sender(ctx));
-
             kiosk::place(kiosk, kiosk_cap, asset);  
     }
     /// Users can create any property for the asset

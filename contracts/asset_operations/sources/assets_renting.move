@@ -199,8 +199,6 @@ module notary::assets_renting {
         bag::add<ID,Contract>( owner_bag, wrapper_id, contract);
         // be sure that sender is the owner of kiosk
         assert!(kiosk::owner(leaser_kiosk) == sender(ctx), ERROR_NOT_KIOSK_OWNER);
-        // // set the on_rent variable to true
-        // assets::active_rent(&mut asset);
         // place the asset into the kiosk
         let kiosk_cap = at::get_cap(listed_types, sender(ctx));
         // place the item into the leaser kiosk
@@ -282,10 +280,10 @@ module notary::assets_renting {
         }
         else { 
         // check the time
-        // assert!(timestamp_ms(clock) >= contract_end, ERROR_ASSET_IN_RENTING);
+        assert!(timestamp_ms(clock) >= contract_end, ERROR_ASSET_IN_RENTING);
         // get kioskcap
         let kiosk_cap = at::get_cap(listed, sender(ctx));
-
+        // purchase the wrapped asset
         let(wrapper, request) = kiosk::purchase_with_cap<Wrapper>(
             kiosk2,
             purch_cap,
@@ -301,7 +299,6 @@ module notary::assets_renting {
         // return the contract_balance as u64
         let contract_value = (balance::value(&contract.deposit));
         // take the all balance from contract_ deposit
-        //let contract_mut = bag::borrow_mut<ID, Contract>(owner_bag, item_id);
         let contract_balance = balance::split(&mut contract.deposit, contract_value);
         // change balance into the Coin
         let deposit = coin::from_balance(contract_balance, ctx);
