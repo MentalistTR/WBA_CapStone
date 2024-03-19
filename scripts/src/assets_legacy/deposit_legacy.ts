@@ -7,7 +7,7 @@ const keypair1 = keyPair1();
 
 const packageId = data.packageId;
 const kiosk = data.assets_sales.Kiosk1;
-const cointype= data.lira.liraCoinType;
+const cointype= data.lira.liraCoinType; 
 const coinmetadata = data.lira.coinmetadata;
 const owner_address = "0x863d379fac323bf4caf9b881711a0f41c8ec88db68226ab75287476aa5b4b920";
 

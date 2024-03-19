@@ -1,3 +1,4 @@
+/// LIRA Token is the stabil coin for turkish goverment lira
 module rules::lira {
   use std::option;
 
@@ -6,12 +7,12 @@ module rules::lira {
   use sui::tx_context::TxContext;
   use sui::coin::{Self, Coin, TreasuryCap};
 
-  // === Friends ===
-
   // === Structs ===  
 
+  // the stabil coin for turkish goverment lira
   struct LIRA has drop {}
 
+  // wrapped the TreasuryCap
   struct CapWrapper has key {
     id: UID,
     cap: TreasuryCap<LIRA>

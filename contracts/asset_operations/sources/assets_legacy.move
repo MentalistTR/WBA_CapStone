@@ -1,3 +1,12 @@
+/// Assets Legacy module is responsible for managing the Legacy
+/// 
+/// There are five main operations in this module:
+/// 
+/// 1. Users can create an legacy
+/// 2. Users can deposit any token
+/// 3. Users can set heirs and change any time
+/// 4. Admin can distribute the legacy
+/// 5. Users can withdraw the token from legacy
 module notary::assets_legacy {
     use sui::object::{Self, UID};
     use sui::table::{Self, Table};
@@ -24,10 +33,8 @@ module notary::assets_legacy {
     const ERROR_YOU_ARE_NOT_OWNER: u64 = 3;
     const ERROR_INVALID_TIME :u64 = 4;
 
-
     // =================== Structs ===================
 
-    
     /// We will keep the percentages and balances of Heirs here.
     /// 
     /// # Arguments
@@ -35,6 +42,7 @@ module notary::assets_legacy {
     /// * `heirs_percentage` - admin will decide heirs percantage here. 
     /// * `heirs_amount` -  We keep the heirs Balance here like Table<address, <String, Balance<T>>>
     /// * `old_heirs` - We keep the heirs address in a vector for using in while loop.
+    /// * `remaining` - The date the legacy will be made available for heirs
     struct Legacy has key {
         id: UID,
         owner: address,
@@ -44,10 +52,14 @@ module notary::assets_legacy {
         remaining: u64
     } 
 
-    // =================== Initializer ===================
-
     // =================== Functions ===================
 
+    /// Users can create any legacy
+    /// 
+    /// # Arguments
+    /// 
+    /// * `remaining` - The date the legacy will be made available for heirs. 
+    /// * `clock` -  The shareobject that we use for current time
     public fun new_legacy(remaining: u64, clock: &Clock, ctx: &mut TxContext) {
         let remaining_ :u64 = 1 + timestamp_ms(clock);
         //let remaining_ :u64 = ((remaining) * (86400 * 30)) + timestamp_ms(clock);
@@ -64,7 +76,13 @@ module notary::assets_legacy {
         );
     }
 
-    // Deposit any token for legacy
+    /// Legacy owner's can deposit any token
+    /// 
+    /// # Arguments
+    /// 
+    /// * `kiosk` - User's kiosk that we keep funds
+    /// * `coin` -  The amount of token
+    /// * `coin_metadata` - To get coin_name of token that We will keep tokens in hashmap as a <string, balance>.
     public fun deposit_legacy<T>(kiosk: &mut Kiosk, coin:Coin<T>, coin_metadata: &CoinMetadata<T>) {
         // set the witness
         let witness = get_witness();
@@ -96,7 +114,13 @@ module notary::assets_legacy {
              vector::push_back(coins, name);
         }
     }
-    // Users can set new heirs
+    /// Legacy owner's can set new heirs
+    /// 
+    /// # Arguments
+    /// 
+    /// * `legacy` - The user legacy share object 
+    /// * `heir_address` -  The heir's addresses
+    /// * `heir_percentage` - The heir's percentages
     public fun new_heirs(legacy: &mut Legacy, heir_address:vector<address>, heir_percentage:vector<u64>, ctx: &mut TxContext) {
         // check the shareobject owner
         assert!(legacy.owner == sender(ctx), ERROR_YOU_ARE_NOT_OWNER);
@@ -126,7 +150,13 @@ module notary::assets_legacy {
             // check percentage is equal to 100.
             assert!(percentage_sum == 10000, ERROR_INVALID_PERCENTAGE_SUM);
     }
-    // only admin can distribute the legacy if 1 month has passed
+    /// Admin can distribute the legacy
+    /// 
+    /// # Arguments
+    /// 
+    /// * `legacy` - The user legacy share object 
+    /// * `kiosk` -  The legacy owner's kiosk
+    /// * `clock` -  The shareobject that we use for current time
     public fun distribute<T>(
         _: &AdminCap,
         legacy: &mut Legacy,
@@ -182,7 +212,12 @@ module notary::assets_legacy {
                 j = j + 1;
             };       
     }
-    // Heirs can withdraw funds
+    /// Heirs can withdraw any tokens from legacy
+    /// 
+    /// # Arguments
+    /// 
+    /// * `legacy` - The user legacy share object 
+    /// * `coin_name` -  The distributed token's name 
     public fun withdraw<T>(legacy: &mut Legacy, coin_name: String, ctx: &mut TxContext) : Coin<T> {
         let sender = sender(ctx);
         // firstly, check that  Is sender shareholder? 
@@ -201,7 +236,7 @@ module notary::assets_legacy {
 
     // TEST ONLY
     #[test_only]
-    // It is the same function with deposit_to_bag but we cant read sui token metadata. So we have to split it. 
+    // We can't reach the sui coinmetadata so we will test the sui token in local test.
     public fun deposit_legacy_sui(kiosk: &mut Kiosk, coin:Coin<SUI>) {
         // set the witness
         let witness = get_witness();
